@@ -1,0 +1,19 @@
+PODS:
+  - Surge (0.3.0)
+
+DEPENDENCIES:
+  - Surge (from `https://github.com/aleph7/Surge.git`)
+
+EXTERNAL SOURCES:
+  Surge:
+    :git: https://github.com/aleph7/Surge.git
+
+CHECKOUT OPTIONS:
+  Surge:
+    :commit: cc81118aa6352e1b4e6fe96c3f0e76a163dea1f2
+    :git: https://github.com/aleph7/Surge.git
+
+SPEC CHECKSUMS:
+  Surge: 7a6e960aed366e89112f1c21e2020f3ea5e7316d
+
+COCOAPODS: 0.39.0
