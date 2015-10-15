@@ -10,7 +10,7 @@ EXTERNAL SOURCES:
 
 CHECKOUT OPTIONS:
   Surge:
-    :commit: cc81118aa6352e1b4e6fe96c3f0e76a163dea1f2
+    :commit: 3526d025034302d3a3be3c7c31d4734cc4649d9a
     :git: https://github.com/aleph7/Surge.git
 
 SPEC CHECKSUMS:

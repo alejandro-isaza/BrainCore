@@ -10,7 +10,7 @@
 		61689AE21BCDC27500127C8C /* Arithmetic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61689ADE1BCDC27500127C8C /* Arithmetic.swift */; };
 		61689AE81BCDC2A600127C8C /* Arithmetic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61689ADE1BCDC27500127C8C /* Arithmetic.swift */; };
 		61689AEB1BCDC2CE00127C8C /* BrainCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 618F53F81BCD96A300AEC2FE /* BrainCore.framework */; };
-		61689AF31BCDC64D00127C8C /* ForwardLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61689AF11BCDC64D00127C8C /* ForwardLayer.swift */; };
+		61689AF31BCDC64D00127C8C /* Layer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61689AF11BCDC64D00127C8C /* Layer.swift */; };
 		61689AF41BCDC64D00127C8C /* InnerProductLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61689AF21BCDC64D00127C8C /* InnerProductLayer.swift */; };
 		61689AF61BCDCC7000127C8C /* ReLULayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61689AF51BCDCC7000127C8C /* ReLULayer.swift */; };
 		61689AF71BCDCC7000127C8C /* ReLULayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61689AF51BCDCC7000127C8C /* ReLULayer.swift */; };
@@ -19,6 +19,10 @@
 		618F54211BCD96C900AEC2FE /* BrainCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 618F54171BCD96C900AEC2FE /* BrainCore.framework */; };
 		618F54361BCD97C800AEC2FE /* BrainCore.h in Headers */ = {isa = PBXBuildFile; fileRef = 618F542F1BCD97C800AEC2FE /* BrainCore.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		618F543C1BCD97D700AEC2FE /* BrainCore.h in Headers */ = {isa = PBXBuildFile; fileRef = 618F542F1BCD97C800AEC2FE /* BrainCore.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		61F131DC1BD0146A00B5601D /* Net.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61F131DB1BD0146A00B5601D /* Net.swift */; settings = {ASSET_TAGS = (); }; };
+		61F131DD1BD0146A00B5601D /* Net.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61F131DB1BD0146A00B5601D /* Net.swift */; settings = {ASSET_TAGS = (); }; };
+		61F131E01BD01BA900B5601D /* NetTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61F131DF1BD01BA900B5601D /* NetTests.swift */; settings = {ASSET_TAGS = (); }; };
+		61F131E11BD01BA900B5601D /* NetTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61F131DF1BD01BA900B5601D /* NetTests.swift */; settings = {ASSET_TAGS = (); }; };
 		6EBE4510477210336ADD519F /* Pods.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 933D8A4DFF4FCD30DFCBBC5E /* Pods.framework */; };
 /* End PBXBuildFile section */
 
@@ -42,7 +46,7 @@
 /* Begin PBXFileReference section */
 		263C5ADFD0D7E8A527355D89 /* Pods.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.release.xcconfig; path = "Pods/Target Support Files/Pods/Pods.release.xcconfig"; sourceTree = "<group>"; };
 		61689ADE1BCDC27500127C8C /* Arithmetic.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Arithmetic.swift; sourceTree = "<group>"; };
-		61689AF11BCDC64D00127C8C /* ForwardLayer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ForwardLayer.swift; sourceTree = "<group>"; };
+		61689AF11BCDC64D00127C8C /* Layer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Layer.swift; sourceTree = "<group>"; };
 		61689AF21BCDC64D00127C8C /* InnerProductLayer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InnerProductLayer.swift; sourceTree = "<group>"; };
 		61689AF51BCDCC7000127C8C /* ReLULayer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReLULayer.swift; sourceTree = "<group>"; };
 		618F53F81BCD96A300AEC2FE /* BrainCore.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = BrainCore.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -56,6 +60,8 @@
 		618F54351BCD97C800AEC2FE /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		618F54421BCD9A3200AEC2FE /* Surge.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Surge.framework; path = Carthage/Build/iOS/Surge.framework; sourceTree = "<group>"; };
 		618F54431BCD9A3200AEC2FE /* Surge.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Surge.framework; path = Carthage/Build/Mac/Surge.framework; sourceTree = "<group>"; };
+		61F131DB1BD0146A00B5601D /* Net.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Net.swift; sourceTree = "<group>"; };
+		61F131DF1BD01BA900B5601D /* NetTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NetTests.swift; sourceTree = "<group>"; };
 		6D1DA23DA94F0998528CF9F2 /* Pods.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.debug.xcconfig; path = "Pods/Target Support Files/Pods/Pods.debug.xcconfig"; sourceTree = "<group>"; };
 		933D8A4DFF4FCD30DFCBBC5E /* Pods.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -100,7 +106,7 @@
 		61689AF01BCDC64D00127C8C /* Layers */ = {
 			isa = PBXGroup;
 			children = (
-				61689AF11BCDC64D00127C8C /* ForwardLayer.swift */,
+				61689AF11BCDC64D00127C8C /* Layer.swift */,
 				61689AF21BCDC64D00127C8C /* InnerProductLayer.swift */,
 				61689AF51BCDCC7000127C8C /* ReLULayer.swift */,
 			);
@@ -138,6 +144,7 @@
 				618F54301BCD97C800AEC2FE /* Info.plist */,
 				618F542F1BCD97C800AEC2FE /* BrainCore.h */,
 				61689ADE1BCDC27500127C8C /* Arithmetic.swift */,
+				61F131DB1BD0146A00B5601D /* Net.swift */,
 				61689AF01BCDC64D00127C8C /* Layers */,
 			);
 			path = BrainCore;
@@ -147,6 +154,7 @@
 			isa = PBXGroup;
 			children = (
 				618F54331BCD97C800AEC2FE /* Info.plist */,
+				61F131DF1BD01BA900B5601D /* NetTests.swift */,
 			);
 			path = BrainCoreTests;
 			sourceTree = "<group>";
@@ -387,7 +395,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				61689AF41BCDC64D00127C8C /* InnerProductLayer.swift in Sources */,
-				61689AF31BCDC64D00127C8C /* ForwardLayer.swift in Sources */,
+				61F131DC1BD0146A00B5601D /* Net.swift in Sources */,
+				61689AF31BCDC64D00127C8C /* Layer.swift in Sources */,
 				61689AF61BCDCC7000127C8C /* ReLULayer.swift in Sources */,
 				61689AE21BCDC27500127C8C /* Arithmetic.swift in Sources */,
 			);
@@ -397,6 +406,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				61F131E01BD01BA900B5601D /* NetTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -405,6 +415,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				61689AE81BCDC2A600127C8C /* Arithmetic.swift in Sources */,
+				61F131DD1BD0146A00B5601D /* Net.swift in Sources */,
 				61689AF71BCDCC7000127C8C /* ReLULayer.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -413,6 +424,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				61F131E11BD01BA900B5601D /* NetTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -564,6 +576,7 @@
 		618F54101BCD96A300AEC2FE /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = BrainCoreTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
@@ -571,12 +584,14 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.venturemedia.BrainCoreTests;
 				PRODUCT_NAME = BrainCoreTests;
 				SDKROOT = macosx;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
 			name = Debug;
 		};
 		618F54111BCD96A300AEC2FE /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = BrainCoreTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
@@ -634,6 +649,7 @@
 		618F542C1BCD96C900AEC2FE /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				INFOPLIST_FILE = BrainCoreTests/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.4;
@@ -641,12 +657,14 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.venturemedia.BrainCoreTests;
 				PRODUCT_NAME = BrainCoreTests;
 				SDKROOT = iphoneos;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
 			name = Debug;
 		};
 		618F542D1BCD96C900AEC2FE /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				INFOPLIST_FILE = BrainCoreTests/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.4;

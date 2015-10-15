@@ -13,9 +13,9 @@ public class InnerProductLayer : ForwardLayer {
             assert(weights.rows == inputSize)
         }
     }
-    public var biases: Matrix<Double> {
+    public var biases: [Double] {
         willSet {
-            assert(newValue.columns == outputSize)
+            assert(newValue.count == outputSize)
         }
     }
 
@@ -23,16 +23,17 @@ public class InnerProductLayer : ForwardLayer {
         self.inputSize = inputSize
         self.outputSize = outputSize
         weights = Matrix<Double>(rows: inputSize, columns: outputSize, repeatedValue: 0.0)
-        biases = Matrix<Double>(rows: 1, columns: outputSize, repeatedValue: 0.0)
+        biases = [Double](count: outputSize, repeatedValue: 0.0)
     }
 
-    public func forward(input: Matrix<Double>, inout output: Matrix<Double>) {
-        assert(input.rows == 1 && input.columns == inputSize)
-        assert(output.rows == 1 && output.columns == outputSize)
+    public func forward(input: Blob, inout output: Blob) {
+        assert(input.count == inputSize)
+        assert(output.count == outputSize)
         mul(input, weights, result: &output)
+        add(output, biases, result: &output)
     }
 
-//    public func backward(inputDiff: Matrix<Double>, output: Matrix<Double>, inout outputDiff: Matrix<Double>) {
+//    public func backward(inputDiff: Blob, output: Blob, inout outputDiff: Blob) {
 //        // Gradient with respect to weight
 //        cblas_dgemm(CblasTrans, CblasNoTrans, outputSize, inputSize, 1, 1.0, inputDiff, output, 1.0, weightDiff)
 //
