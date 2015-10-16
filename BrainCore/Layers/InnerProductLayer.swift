@@ -26,6 +26,14 @@ public class InnerProductLayer : ForwardLayer {
         biases = [Double](count: outputSize, repeatedValue: 0.0)
     }
 
+    public init(weights: Matrix<Double>, biases: [Double]) {
+        assert(biases.count == weights.columns)
+        self.inputSize = weights.rows
+        self.outputSize = weights.columns
+        self.weights = weights
+        self.biases = biases
+    }
+
     public func forward(input: Blob, inout output: Blob) {
         assert(input.count == inputSize)
         assert(output.count == outputSize)
