@@ -58,9 +58,11 @@ public class Net {
     public func connectLayer(layer1: LayerRef, toLayer layer2: LayerRef) {
         guard let node1 = nodes[layer1] else {
             precondition(false, "Layer not found")
+            return
         }
         guard let node2 = nodes[layer2] else {
             precondition(false, "Layer not found")
+            return
         }
 
         node1.outputNodes.append(node2)
