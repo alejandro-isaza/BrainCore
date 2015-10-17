@@ -1,5 +1,5 @@
 import BrainCore
-import Surge
+import Upsurge
 
 //: ## Helper classes and functions
 

@@ -14,9 +14,9 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "618F53F71BCD96A300AEC2FE"
+               BlueprintIdentifier = "6159F85E1BD1F55D0010F83C"
                BuildableName = "BrainCore.framework"
-               BlueprintName = "BrainCore (OSX)"
+               BlueprintName = "BrainCore.OSX"
                ReferencedContainer = "container:BrainCore.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -32,9 +32,9 @@
             skipped = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "618F54011BCD96A300AEC2FE"
-               BuildableName = "BrainCoreTests.xctest"
-               BlueprintName = "BrainCoreTests (OSX)"
+               BlueprintIdentifier = "6159F8681BD1F55D0010F83C"
+               BuildableName = "BrainCoreTests.OSX.xctest"
+               BlueprintName = "BrainCoreTests.OSX"
                ReferencedContainer = "container:BrainCore.xcodeproj">
             </BuildableReference>
          </TestableReference>
@@ -42,9 +42,9 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "618F53F71BCD96A300AEC2FE"
+            BlueprintIdentifier = "6159F85E1BD1F55D0010F83C"
             BuildableName = "BrainCore.framework"
-            BlueprintName = "BrainCore (OSX)"
+            BlueprintName = "BrainCore.OSX"
             ReferencedContainer = "container:BrainCore.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
@@ -64,9 +64,9 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "618F53F71BCD96A300AEC2FE"
+            BlueprintIdentifier = "6159F85E1BD1F55D0010F83C"
             BuildableName = "BrainCore.framework"
-            BlueprintName = "BrainCore (OSX)"
+            BlueprintName = "BrainCore.OSX"
             ReferencedContainer = "container:BrainCore.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
@@ -82,9 +82,9 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "618F53F71BCD96A300AEC2FE"
+            BlueprintIdentifier = "6159F85E1BD1F55D0010F83C"
             BuildableName = "BrainCore.framework"
-            BlueprintName = "BrainCore (OSX)"
+            BlueprintName = "BrainCore.OSX"
             ReferencedContainer = "container:BrainCore.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
