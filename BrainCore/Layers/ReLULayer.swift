@@ -1,7 +1,7 @@
 //  Copyright © 2015 Venture Media Labs. All rights reserved.
 
 import Foundation
-import Surge
+import Upsurge
 
 public class ReLULayer : ForwardLayer {
     public var negativeSlope = 0.0

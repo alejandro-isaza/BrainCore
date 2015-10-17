@@ -2,7 +2,7 @@
 
 import XCTest
 import BrainCore
-import Surge
+import Upsurge
 
 class NetTests: XCTestCase {
     class Source : DataLayer {

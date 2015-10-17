@@ -1,6 +1,6 @@
 //  Copyright © 2015 Venture Media Labs. All rights reserved.
 
-import Surge
+import Upsurge
 
 public typealias Blob = [Double]
 

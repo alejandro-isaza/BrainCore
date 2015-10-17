@@ -2,7 +2,7 @@
 
 import Accelerate
 import Foundation
-import Surge
+import Upsurge
 
 /// Row-vector and matrix multiplication
 public func mul(lhs: [Double], _ rhs: Matrix<Double>, inout result: [Double]) {

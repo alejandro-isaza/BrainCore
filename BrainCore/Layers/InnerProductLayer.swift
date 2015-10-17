@@ -2,7 +2,7 @@
 
 import Accelerate
 import Foundation
-import Surge
+import Upsurge
 
 public class InnerProductLayer : ForwardLayer {
     public let inputSize: Int
