@@ -1,10 +1,20 @@
 PODS:
-  - Upsurge (0.4.0)
+  - Upsurge (0.4.1)
 
 DEPENDENCIES:
-  - Upsurge (~> 0.4)
+  - Upsurge (from `https://github.com/aleph7/Upsurge.git`, branch `master`)
+
+EXTERNAL SOURCES:
+  Upsurge:
+    :branch: master
+    :git: https://github.com/aleph7/Upsurge.git
+
+CHECKOUT OPTIONS:
+  Upsurge:
+    :commit: 62dd86508308f6187adc0d2dca02dc7b4323f87a
+    :git: https://github.com/aleph7/Upsurge.git
 
 SPEC CHECKSUMS:
-  Upsurge: dcff302f2bc17f8dca6050447a8318093cc062d8
+  Upsurge: fa5a7f52fad29b474383adbc110faa648c888086
 
 COCOAPODS: 0.39.0
