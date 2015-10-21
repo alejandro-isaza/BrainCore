@@ -5,24 +5,17 @@ import Foundation
 import Upsurge
 
 /// Row-vector and matrix multiplication
-public func mul(lhs: [Double], _ rhs: Matrix<Double>, inout result: [Double]) {
+public func mul(lhs: RealArray, _ rhs: RealMatrix, inout result: RealArray) {
     assert(lhs.count == rhs.rows, "Matrix inner dimensions should match")
-    assert(result.count == rhs.columns, "Invalid result vector")
+    assert(result.capacity == rhs.columns, "Invalid result vector")
 
-    cblas_dgemm(
-        CblasRowMajor, CblasNoTrans, CblasNoTrans,
-        Int32(1), Int32(rhs.columns), Int32(lhs.count),
-        1.0,
-        lhs, Int32(lhs.count),
-        rhs.elements, Int32(rhs.columns),
-        0.0,
-        &result, Int32(result.count))
+    vDSP_mmulD(lhs.pointer, 1, rhs.pointer, 1, result.pointer, 1, 1, vDSP_Length(rhs.columns), vDSP_Length(rhs.rows))
 }
 
 
 /// Vector addition with reusable result
-public func add(lhs: [Double], _ rhs: [Double], inout result: [Double]) {
+public func add(lhs: RealArray, _ rhs: RealArray, inout result: RealArray) {
     assert(lhs.count == rhs.count, "Vector sizes should match")
     assert(result.count == rhs.count, "Invalid result vector")
-    vDSP_vaddD(lhs, 1, rhs, 1, &result, 1, vDSP_Length(lhs.count))
+    vDSP_vaddD(lhs.pointer, 1, rhs.pointer, 1, result.pointer, 1, vDSP_Length(lhs.count))
 }
