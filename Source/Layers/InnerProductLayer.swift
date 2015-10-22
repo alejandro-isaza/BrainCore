@@ -7,13 +7,13 @@ import Upsurge
 public class InnerProductLayer : ForwardLayer {
     public let inputSize: Int
     public let outputSize: Int
-    public var weights: Matrix<Double> {
+    public var weights: RealMatrix {
         didSet {
             assert(weights.columns == outputSize)
             assert(weights.rows == inputSize)
         }
     }
-    public var biases: [Double] {
+    public var biases: RealArray {
         willSet {
             assert(newValue.count == outputSize)
         }
@@ -22,11 +22,11 @@ public class InnerProductLayer : ForwardLayer {
     public init(inputSize: Int, outputSize: Int) {
         self.inputSize = inputSize
         self.outputSize = outputSize
-        weights = Matrix<Double>(rows: inputSize, columns: outputSize, repeatedValue: 0.0)
-        biases = [Double](count: outputSize, repeatedValue: 0.0)
+        weights = RealMatrix(rows: inputSize, columns: outputSize)
+        biases = RealArray(count: outputSize, repeatedValue: 0.0)
     }
 
-    public init(weights: Matrix<Double>, biases: [Double]) {
+    public init(weights: RealMatrix, biases: RealArray) {
         assert(biases.count == weights.columns)
         self.inputSize = weights.rows
         self.outputSize = weights.columns

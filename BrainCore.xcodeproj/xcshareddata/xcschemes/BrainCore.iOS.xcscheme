@@ -20,6 +20,20 @@
                ReferencedContainer = "container:BrainCore.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "6159F8861BD1F59F0010F83C"
+               BuildableName = "BrainCoreTests.iOS.xctest"
+               BlueprintName = "BrainCoreTests.iOS"
+               ReferencedContainer = "container:BrainCore.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
       </BuildActionEntries>
    </BuildAction>
    <TestAction

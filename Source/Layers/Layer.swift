@@ -2,7 +2,7 @@
 
 import Upsurge
 
-public typealias Blob = [Double]
+public typealias Blob = RealArray
 
 public protocol Layer {
 }

@@ -7,22 +7,22 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		6159F86A1BD1F55D0010F83C /* BrainCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6159F85F1BD1F55D0010F83C /* BrainCore.framework */; settings = {ASSET_TAGS = (); }; };
-		6159F8881BD1F59F0010F83C /* BrainCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6159F87E1BD1F59F0010F83C /* BrainCore.framework */; settings = {ASSET_TAGS = (); }; };
 		6159F8A11BD1F5CE0010F83C /* Arithmetic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6159F8961BD1F5CE0010F83C /* Arithmetic.swift */; settings = {ASSET_TAGS = (); }; };
+		6159F86A1BD1F55D0010F83C /* BrainCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6159F85F1BD1F55D0010F83C /* BrainCore.framework */; };
+		6159F8881BD1F59F0010F83C /* BrainCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6159F87E1BD1F59F0010F83C /* BrainCore.framework */; };
 		6159F8A21BD1F5CE0010F83C /* BrainCore.h in Headers */ = {isa = PBXBuildFile; fileRef = 6159F8971BD1F5CE0010F83C /* BrainCore.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		6159F8A31BD1F5CE0010F83C /* InnerProductLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6159F8991BD1F5CE0010F83C /* InnerProductLayer.swift */; settings = {ASSET_TAGS = (); }; };
-		6159F8A41BD1F5CE0010F83C /* Layer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6159F89A1BD1F5CE0010F83C /* Layer.swift */; settings = {ASSET_TAGS = (); }; };
-		6159F8A51BD1F5CE0010F83C /* ReLULayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6159F89B1BD1F5CE0010F83C /* ReLULayer.swift */; settings = {ASSET_TAGS = (); }; };
-		6159F8A61BD1F5CE0010F83C /* Net.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6159F89C1BD1F5CE0010F83C /* Net.swift */; settings = {ASSET_TAGS = (); }; };
 		6159F8AA1BD1F5D40010F83C /* Arithmetic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6159F8961BD1F5CE0010F83C /* Arithmetic.swift */; settings = {ASSET_TAGS = (); }; };
+		6159F8A31BD1F5CE0010F83C /* InnerProductLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6159F8991BD1F5CE0010F83C /* InnerProductLayer.swift */; };
+		6159F8A41BD1F5CE0010F83C /* Layer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6159F89A1BD1F5CE0010F83C /* Layer.swift */; };
+		6159F8A51BD1F5CE0010F83C /* ReLULayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6159F89B1BD1F5CE0010F83C /* ReLULayer.swift */; };
+		6159F8A61BD1F5CE0010F83C /* Net.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6159F89C1BD1F5CE0010F83C /* Net.swift */; };
 		6159F8AB1BD1F5DB0010F83C /* BrainCore.h in Headers */ = {isa = PBXBuildFile; fileRef = 6159F8971BD1F5CE0010F83C /* BrainCore.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		6159F8AC1BD1F5E60010F83C /* Net.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6159F89C1BD1F5CE0010F83C /* Net.swift */; settings = {ASSET_TAGS = (); }; };
-		6159F8AD1BD1F5EB0010F83C /* InnerProductLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6159F8991BD1F5CE0010F83C /* InnerProductLayer.swift */; settings = {ASSET_TAGS = (); }; };
-		6159F8AE1BD1F5EB0010F83C /* Layer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6159F89A1BD1F5CE0010F83C /* Layer.swift */; settings = {ASSET_TAGS = (); }; };
-		6159F8AF1BD1F5EB0010F83C /* ReLULayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6159F89B1BD1F5CE0010F83C /* ReLULayer.swift */; settings = {ASSET_TAGS = (); }; };
-		6159F8B11BD1F73D0010F83C /* NetTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6159F89F1BD1F5CE0010F83C /* NetTests.swift */; settings = {ASSET_TAGS = (); }; };
-		6159F8B21BD1F73E0010F83C /* NetTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6159F89F1BD1F5CE0010F83C /* NetTests.swift */; settings = {ASSET_TAGS = (); }; };
+		6159F8AC1BD1F5E60010F83C /* Net.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6159F89C1BD1F5CE0010F83C /* Net.swift */; };
+		6159F8AD1BD1F5EB0010F83C /* InnerProductLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6159F8991BD1F5CE0010F83C /* InnerProductLayer.swift */; };
+		6159F8AE1BD1F5EB0010F83C /* Layer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6159F89A1BD1F5CE0010F83C /* Layer.swift */; };
+		6159F8AF1BD1F5EB0010F83C /* ReLULayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6159F89B1BD1F5CE0010F83C /* ReLULayer.swift */; };
+		6159F8B11BD1F73D0010F83C /* NetTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6159F89F1BD1F5CE0010F83C /* NetTests.swift */; };
+		6159F8B21BD1F73E0010F83C /* NetTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6159F89F1BD1F5CE0010F83C /* NetTests.swift */; };
 		6159F8B31BD1F7990010F83C /* Pods_OSX.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E2DCED6F9174988B589D17FE /* Pods_OSX.framework */; };
 		6159F8B51BD1F7A00010F83C /* Pods_iOS.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6159F8B41BD1F7A00010F83C /* Pods_iOS.framework */; };
 		A8C39BAE984013FB82FF221D /* Pods_iOS.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 50CE1DBC19DC03CE85CCE880 /* Pods_iOS.framework */; };

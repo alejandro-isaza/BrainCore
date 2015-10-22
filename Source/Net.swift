@@ -1,6 +1,6 @@
 //  Copyright © 2015 Venture Media Labs. All rights reserved.
 
-import Foundation
+import Upsurge
 
 public class Net {
     public typealias LayerRef = Int
@@ -10,8 +10,8 @@ public class Net {
         let layer: Layer
         var inputNodes = [Node]()
         var outputNodes = [Node]()
-        var input: [Double]?
-        var output: [Double]?
+        var input: RealArray?
+        var output: RealArray?
 
         init(layer: Layer, id: Int) {
             self.layer = layer
@@ -114,16 +114,16 @@ public class Net {
         return true
     }
 
-    private func collectDataForNode(node: Node) -> [Double] {
+    private func collectDataForNode(node: Node) -> RealArray {
         var size = 0
         for n in node.inputNodes {
             size += n.output?.count ?? 0
         }
 
         if node.input == nil {
-            node.input = [Double](count: size, repeatedValue: 0.0)
+            node.input = RealArray(count: size, repeatedValue: 0.0)
         } else if node.input!.count < size {
-            node.input!.appendContentsOf([Double](count: size - node.input!.count, repeatedValue: 0.0))
+            node.input!.appendContentsOf(RealArray(count: size - node.input!.count, repeatedValue: 0.0))
         }
 
         var i = 0
@@ -137,13 +137,11 @@ public class Net {
         return node.input!
     }
 
-    private func setupOutputData(node: Node, size: Int) -> [Double] {
-        if node.output == nil {
-            node.output = [Double](count: size, repeatedValue: 0.0)
-        } else if node.output!.count > size {
-            node.output!.removeRange(size..<node.output!.count)
-        } else if node.output!.count < size {
-            node.output!.appendContentsOf([Double](count: size - node.output!.count, repeatedValue: 0.0))
+    private func setupOutputData(node: Node, size: Int) -> RealArray {
+        if node.output == nil || node.output!.capacity < size {
+            node.output = RealArray(count: size)
+        } else {
+            node.output!.count = size
         }
         return node.output!
     }
