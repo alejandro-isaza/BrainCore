@@ -1,0 +1,4 @@
+language: objective-c
+xcode_workspace: BrainCore.xcworkspace
+xcode_scheme: BrainCore.OSX
+osx_image: xcode7
