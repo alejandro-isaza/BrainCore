@@ -13,42 +13,53 @@ public class InnerProductLayer : ForwardLayer {
             assert(weights.rows == inputSize)
         }
     }
-    public var biases: RealArray {
+    private var weightDiff: RealMatrix
+    public var biases: RealMatrix {
         willSet {
-            assert(newValue.count == outputSize)
+            assert(newValue.rows == outputSize)
         }
     }
+    private var biasDiff: RealMatrix
 
     public init(inputSize: Int, outputSize: Int) {
         self.inputSize = inputSize
         self.outputSize = outputSize
         weights = RealMatrix(rows: inputSize, columns: outputSize)
-        biases = RealArray(count: outputSize, repeatedValue: 0.0)
+        biases = RealMatrix(rows: outputSize, columns: 1, repeatedValue: 0.0)
+        weightDiff = RealMatrix(rows: inputSize, columns: outputSize)
+        biasDiff = RealMatrix(rows: outputSize, columns: 1, repeatedValue: 0.0)
     }
 
-    public init(weights: RealMatrix, biases: RealArray) {
-        assert(biases.count == weights.columns)
+    public init(weights: RealMatrix, biases: RealMatrix) {
+        assert(biases.rows == weights.columns)
         self.inputSize = weights.rows
         self.outputSize = weights.columns
         self.weights = weights
+        weightDiff = RealMatrix(rows: inputSize, columns: outputSize, repeatedValue: 0.0)
         self.biases = biases
+        biasDiff = RealMatrix(rows: outputSize, columns: 1, repeatedValue: 0.0)
     }
 
     public func forward(input: Blob, inout output: Blob) {
         assert(input.count == inputSize)
         assert(output.count == outputSize)
         mul(input, weights, result: &output)
-        add(output, biases, result: &output)
+        add(output, biases.elements, result: &output)
     }
 
-//    public func backward(inputDiff: Blob, output: Blob, inout outputDiff: Blob) {
-//        // Gradient with respect to weight
-//        cblas_dgemm(CblasTrans, CblasNoTrans, outputSize, inputSize, 1, 1.0, inputDiff, output, 1.0, weightDiff)
-//
-//        // Gradient with respect to bias
-//        cblas_dgemv(CblasTrans, 1, outputSize, 1.0, inputDiff, [1], 1.0, biasDiff)
-//
-//        // Gradient with respect to bottom data
-//        cblas_dgemm(CblasNoTrans, CblasNoTrans, 1, inputSize, outputSize, 1.0, inputDiff, weights, 0.0,outputDiff)
-//    }
+    public func backward(outputDiff: RealMatrix, input: RealMatrix, inout inputDiff: RealMatrix) {
+        // Gradient with respect to weight
+        weightDiff += outputDiff′ * input
+
+        // Gradient with respect to bias
+        biasDiff += outputDiff′
+
+        // Gradient with respect to bottom data
+        inputDiff = outputDiff * weights
+    }
+
+    public func update(solverUpdateFunction: (inout parameter: RealMatrix, inout parameterDiff: RealMatrix) -> ()) {
+        solverUpdateFunction(parameter: &weights, parameterDiff: &weightDiff)
+        solverUpdateFunction(parameter: &biases, parameterDiff: &biasDiff)
+    }
 }

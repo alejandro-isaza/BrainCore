@@ -10,7 +10,7 @@ public class ReLULayer : ForwardLayer {
     public init(size: Int) {
         self.outputSize = size
     }
-    
+
     public func forward(input: Blob, inout output: Blob) {
         assert(input.count == outputSize)
         assert(output.count == outputSize)
@@ -19,17 +19,11 @@ public class ReLULayer : ForwardLayer {
         }
     }
 
-//    public func backward(inputDiff: Blob, output: Blob, inout outputDiff: Blob) {
-//        assert(inputDiff.dimensions.count == 1)
-//        assert(output.dimensions.count == 1)
-//        assert(outputDiff.dimensions.count == 1)
-//        assert(inputDiff.width == output.width && inputDiff.width == output.width)
-//
-//        let N = inputDiff.width
-//        for i in 0..<N {
-//            let pos = output[i] > 0 ? 1.0 : 0.0
-//            let neg = output[i] <= 0 ? 1.0 : 0.0
-//            outputDiff[i] = inputDiff[i] * (pos + negativeSlope * neg)
-//        }
-//    }
+    public func backward(outputDiff: RealMatrix, input: RealMatrix, inout inputDiff: RealMatrix) {
+        let N = inputDiff.elements.count
+        for i in 0..<N {
+            let factor = input.elements[i] > 0 ? 1.0 : negativeSlope
+            inputDiff.elements[i] = outputDiff.elements[i] * factor
+        }
+    }
 }
