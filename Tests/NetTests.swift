@@ -25,7 +25,7 @@ class NetTests: XCTestCase {
         let source = Source(data: [1, 1])
         let ip = InnerProductLayer(inputSize: 2, outputSize: 1)
         ip.weights = RealMatrix(rows: 2, columns: 1, elements: [2, 4])
-        ip.biases = [1]
+        ip.biases = RealMatrix([[1]])
         let sink = Sink()
 
         let sourceRef = net.addLayer(source)
@@ -47,7 +47,7 @@ class NetTests: XCTestCase {
         let source = Source(data: [1, 1])
         let ip = InnerProductLayer(inputSize: 2, outputSize: 1)
         ip.weights = RealMatrix(rows: 2, columns: 1, elements: [2, -4])
-        ip.biases = [1]
+        ip.biases = RealMatrix([[1]])
         let sink = Sink()
 
         let sourceRef = net.addLayer(source)

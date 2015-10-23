@@ -13,7 +13,14 @@ public protocol DataLayer : Layer {
 
 public protocol ForwardLayer : Layer {
     var outputSize: Int { get }
+
+    /// Forward-propagate the input blob
     func forward(input: Blob, inout output: Blob)
+}
+
+public protocol BackwardLayer : Layer {
+    /// Backward-propagate the output differences
+    func backward(outputDiff: RealMatrix, input: RealMatrix, inout inputDiff: RealMatrix)
 }
 
 public protocol SinkLayer : Layer {

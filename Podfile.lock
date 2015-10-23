@@ -1,10 +1,10 @@
 PODS:
-  - Upsurge (0.4.2)
+  - Upsurge (0.4.3)
 
 DEPENDENCIES:
   - Upsurge (~> 0.4)
 
 SPEC CHECKSUMS:
-  Upsurge: 4b63d5c703172b00b1a184c91d012d4dfd5e7c93
+  Upsurge: 4229bd3c5dc278671c08ded72f68fe00457d1366
 
 COCOAPODS: 0.39.0
