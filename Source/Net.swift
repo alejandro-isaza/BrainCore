@@ -4,18 +4,21 @@ import Upsurge
 
 public class Net {
     public typealias LayerRef = Int
+    public var print = false
 
     class Node : Hashable {
         let id: Int
         let layer: Layer
+        let name: String
         var inputNodes = [Node]()
         var outputNodes = [Node]()
         var input: RealArray?
         var output: RealArray?
 
-        init(layer: Layer, id: Int) {
-            self.layer = layer
+        init(layer: Layer, name: String, id: Int) {
             self.id = id
+            self.layer = layer
+            self.name = name
         }
 
         var hashValue: Int {
@@ -33,9 +36,9 @@ public class Net {
     public init() {
     }
 
-    public func addLayer(layer: Layer) -> LayerRef {
+    public func addLayer(layer: Layer, name: String) -> LayerRef {
         validateLayer(layer)
-        let node = Node(layer: layer, id: nextID++)
+        let node = Node(layer: layer, name: name, id: nextID++)
 
         if layer is DataLayer {
             dataNodes.append(node)
@@ -87,6 +90,10 @@ public class Net {
             }
 
             let data = collectDataForNode(node)
+            if print {
+                Swift.print("Layer \(node.name) input data:\n\(data)\n")
+            }
+
             if let forwardLayer = node.layer as? ForwardLayer {
                 setupOutputData(node, size: forwardLayer.outputSize)
                 forwardLayer.forward(data, output: &node.output!)

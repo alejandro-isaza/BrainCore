@@ -44,7 +44,7 @@ public class InnerProductLayer : ForwardLayer, BackwardLayer {
         assert(input.count == inputSize)
         assert(output.count == outputSize)
         mul(input, weights, result: &output)
-        add(output, biases.elements, result: &output)
+        output += biases.elements
     }
 
     public func backward(outputDiff: RealMatrix, input: RealMatrix, inout inputDiff: RealMatrix) {
