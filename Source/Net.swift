@@ -4,7 +4,6 @@ import Upsurge
 
 public class Net {
     public typealias LayerRef = Int
-    public var print = false
 
     class Node : Hashable {
         let id: Int
@@ -58,6 +57,50 @@ public class Net {
         precondition(!dataLayer || !sinkLayer, "Layer can't be both a data layer and a sink layer")
     }
 
+    /// Find a layer by name
+    public func layerWithName(name: String) -> Layer? {
+        for (_, node) in nodes {
+            if node.name == name {
+                return node.layer
+            }
+        }
+        return nil
+    }
+
+    /// Get a layer reference by name
+    public func layerRefWithName(name: String) -> LayerRef? {
+        for (ref, node) in nodes {
+            if node.name == name {
+                return ref
+            }
+        }
+        return nil
+    }
+
+    /// Get a node by layer name
+    func nodeWithLayerName(name: String) -> Node? {
+        for (_, node) in nodes {
+            if node.name == name {
+                return node
+            }
+        }
+        return nil
+    }
+
+    /// Connect two layers given their names
+    public func connectLayer(layer1: String, toLayer layer2: String) {
+        guard let ref1 = layerRefWithName(layer1) else {
+            precondition(false, "Layer not found '\(layer1)'")
+            return
+        }
+        guard let ref2 = layerRefWithName(layer2) else {
+            precondition(false, "Layer not found '\(layer1)'")
+            return
+        }
+        connectLayer(ref1, toLayer: ref2)
+    }
+
+    /// Connect two layers
     public func connectLayer(layer1: LayerRef, toLayer layer2: LayerRef) {
         guard let node1 = nodes[layer1] else {
             precondition(false, "Layer not found")
@@ -72,6 +115,23 @@ public class Net {
         node2.inputNodes.append(node1)
     }
 
+    /// Get the input data that was used for a layer on the last forward pass
+    public func lastLayerInput(layerName: String) -> RealArray? {
+        guard let node = nodeWithLayerName(layerName) else {
+            return nil
+        }
+        return node.input
+    }
+
+    /// Get the output data of a layer on the last forward pass
+    public func lastLayerOutput(layerName: String) -> RealArray? {
+        guard let node = nodeWithLayerName(layerName) else {
+            return nil
+        }
+        return node.output
+    }
+
+    /// Perform a forward pass on the network
     public func forward() {
         openNodes.removeAll(keepCapacity: true)
         closedNodes.removeAll(keepCapacity: true)
@@ -90,10 +150,6 @@ public class Net {
             }
 
             let data = collectDataForNode(node)
-            if print {
-                Swift.print("Layer \(node.name) input data:\n\(data)\n")
-            }
-
             if let forwardLayer = node.layer as? ForwardLayer {
                 setupOutputData(node, size: forwardLayer.outputSize)
                 forwardLayer.forward(data, output: &node.output!)
