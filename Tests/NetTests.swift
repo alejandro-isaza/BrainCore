@@ -28,14 +28,14 @@ class NetTests: XCTestCase {
         ip.biases = RealMatrix([[1]])
         let sink = Sink()
 
-        let sourceRef = net.addLayer(source, name: "source")
-        let ipRef = net.addLayer(ip, name: "inner product")
-        let reluRef = net.addLayer(ReLULayer(size: 1), name: "ReLU")
-        let sinkRef = net.addLayer(sink, name: "sink")
+        net.addLayer(source, name: "source")
+        net.addLayer(ip, name: "inner product")
+        net.addLayer(ReLULayer(size: 1), name: "ReLU")
+        net.addLayer(sink, name: "sink")
 
-        net.connectLayer(sourceRef, toLayer: ipRef)
-        net.connectLayer(ipRef, toLayer: reluRef)
-        net.connectLayer(reluRef, toLayer: sinkRef)
+        net.connectLayer("source", toLayer: "inner product")
+        net.connectLayer("inner product", toLayer: "ReLU")
+        net.connectLayer("ReLU", toLayer: "sink")
         net.forward()
 
         XCTAssertEqual(sink.data[0], 7)
@@ -50,14 +50,14 @@ class NetTests: XCTestCase {
         ip.biases = RealMatrix([[1]])
         let sink = Sink()
 
-        let sourceRef = net.addLayer(source, name: "source")
-        let ipRef = net.addLayer(ip, name: "inner product")
-        let reluRef = net.addLayer(ReLULayer(size: 1), name: "ReLU")
-        let sinkRef = net.addLayer(sink, name: "sink")
+        net.addLayer(source, name: "source")
+        net.addLayer(ip, name: "inner product")
+        net.addLayer(ReLULayer(size: 1), name: "ReLU")
+        net.addLayer(sink, name: "sink")
 
-        net.connectLayer(sourceRef, toLayer: ipRef)
-        net.connectLayer(ipRef, toLayer: reluRef)
-        net.connectLayer(reluRef, toLayer: sinkRef)
+        net.connectLayer("source", toLayer: "inner product")
+        net.connectLayer("inner product", toLayer: "ReLU")
+        net.connectLayer("ReLU", toLayer: "sink")
         net.forward()
 
         XCTAssertEqual(sink.data[0], 0)
