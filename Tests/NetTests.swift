@@ -28,10 +28,10 @@ class NetTests: XCTestCase {
         ip.biases = RealMatrix([[1]])
         let sink = Sink()
 
-        let sourceRef = net.addLayer(source)
-        let ipRef = net.addLayer(ip)
-        let reluRef = net.addLayer(ReLULayer(size: 1))
-        let sinkRef = net.addLayer(sink)
+        let sourceRef = net.addLayer(source, name: "source")
+        let ipRef = net.addLayer(ip, name: "inner product")
+        let reluRef = net.addLayer(ReLULayer(size: 1), name: "ReLU")
+        let sinkRef = net.addLayer(sink, name: "sink")
 
         net.connectLayer(sourceRef, toLayer: ipRef)
         net.connectLayer(ipRef, toLayer: reluRef)
@@ -50,10 +50,10 @@ class NetTests: XCTestCase {
         ip.biases = RealMatrix([[1]])
         let sink = Sink()
 
-        let sourceRef = net.addLayer(source)
-        let ipRef = net.addLayer(ip)
-        let reluRef = net.addLayer(ReLULayer(size: 1))
-        let sinkRef = net.addLayer(sink)
+        let sourceRef = net.addLayer(source, name: "source")
+        let ipRef = net.addLayer(ip, name: "inner product")
+        let reluRef = net.addLayer(ReLULayer(size: 1), name: "ReLU")
+        let sinkRef = net.addLayer(sink, name: "sink")
 
         net.connectLayer(sourceRef, toLayer: ipRef)
         net.connectLayer(ipRef, toLayer: reluRef)
