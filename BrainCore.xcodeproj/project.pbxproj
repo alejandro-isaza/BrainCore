@@ -27,10 +27,7 @@
 		6159F8AF1BD1F5EB0010F83C /* ReLULayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6159F89B1BD1F5CE0010F83C /* ReLULayer.swift */; };
 		6159F8B11BD1F73D0010F83C /* NetTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6159F89F1BD1F5CE0010F83C /* NetTests.swift */; };
 		6159F8B21BD1F73E0010F83C /* NetTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6159F89F1BD1F5CE0010F83C /* NetTests.swift */; };
-		6159F8B31BD1F7990010F83C /* Pods_OSX.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E2DCED6F9174988B589D17FE /* Pods_OSX.framework */; };
-		6159F8B51BD1F7A00010F83C /* Pods_iOS.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6159F8B41BD1F7A00010F83C /* Pods_iOS.framework */; };
-		A8C39BAE984013FB82FF221D /* Pods_iOS.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 50CE1DBC19DC03CE85CCE880 /* Pods_iOS.framework */; };
-		EC17C91BA58385491E4BE1F8 /* Pods_OSX.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E2DCED6F9174988B589D17FE /* Pods_OSX.framework */; };
+		618ACBEA1BE04A3A008C23A8 /* Upsurge.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 618ACBE11BE04A24008C23A8 /* Upsurge.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -48,11 +45,51 @@
 			remoteGlobalIDString = 6159F87D1BD1F59F0010F83C;
 			remoteInfo = BrainCore.iOS;
 		};
+		618ACBE01BE04A24008C23A8 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 618ACBD91BE04A24008C23A8 /* Upsurge.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 614ACA701BD1CB7B00A1C13E;
+			remoteInfo = "Upsurge OSX";
+		};
+		618ACBE21BE04A24008C23A8 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 618ACBD91BE04A24008C23A8 /* Upsurge.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 614ACA7A1BD1CB7B00A1C13E;
+			remoteInfo = "UpsurgeTests OSX";
+		};
+		618ACBE41BE04A24008C23A8 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 618ACBD91BE04A24008C23A8 /* Upsurge.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 614ACACA1BD1CBF300A1C13E;
+			remoteInfo = "Upsurge iOS";
+		};
+		618ACBE61BE04A24008C23A8 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 618ACBD91BE04A24008C23A8 /* Upsurge.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 614ACAD31BD1CBF300A1C13E;
+			remoteInfo = "UpsurgeTests iOS";
+		};
+		618ACBE81BE04A32008C23A8 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 618ACBD91BE04A24008C23A8 /* Upsurge.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = 614ACA6F1BD1CB7B00A1C13E;
+			remoteInfo = "Upsurge OSX";
+		};
+		618ACBEB1BE04A44008C23A8 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 618ACBD91BE04A24008C23A8 /* Upsurge.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = 614ACAC91BD1CBF300A1C13E;
+			remoteInfo = "Upsurge iOS";
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		1296C6CE3C14E0F657B6AF57 /* Pods-iOS.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-iOS.debug.xcconfig"; path = "Pods/Target Support Files/Pods-iOS/Pods-iOS.debug.xcconfig"; sourceTree = "<group>"; };
-		50CE1DBC19DC03CE85CCE880 /* Pods_iOS.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_iOS.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		610AAB8A1BDAF766008CC910 /* InnerProductLayerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InnerProductLayerTests.swift; sourceTree = "<group>"; };
 		610AAB8D1BDAF776008CC910 /* ReLULayerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReLULayerTests.swift; sourceTree = "<group>"; };
 		6159F85F1BD1F55D0010F83C /* BrainCore.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = BrainCore.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -68,11 +105,7 @@
 		6159F89E1BD1F5CE0010F83C /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		6159F89F1BD1F5CE0010F83C /* NetTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NetTests.swift; sourceTree = "<group>"; };
 		6159F8A01BD1F5CE0010F83C /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		6159F8B41BD1F7A00010F83C /* Pods_iOS.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Pods_iOS.framework; path = "Pods/../build/Debug-iphoneos/Pods_iOS.framework"; sourceTree = "<group>"; };
-		A950360F4C2AC6E9D6DD8578 /* Pods-iOS.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-iOS.release.xcconfig"; path = "Pods/Target Support Files/Pods-iOS/Pods-iOS.release.xcconfig"; sourceTree = "<group>"; };
-		B7B9AE591C29A74BDBBCC430 /* Pods-OSX.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-OSX.debug.xcconfig"; path = "Pods/Target Support Files/Pods-OSX/Pods-OSX.debug.xcconfig"; sourceTree = "<group>"; };
-		B9A0F975867A827A82C3A9B6 /* Pods-OSX.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-OSX.release.xcconfig"; path = "Pods/Target Support Files/Pods-OSX/Pods-OSX.release.xcconfig"; sourceTree = "<group>"; };
-		E2DCED6F9174988B589D17FE /* Pods_OSX.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_OSX.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		618ACBD91BE04A24008C23A8 /* Upsurge.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = Upsurge.xcodeproj; path = Carthage/Checkouts/Upsurge/Upsurge.xcodeproj; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -80,7 +113,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				EC17C91BA58385491E4BE1F8 /* Pods_OSX.framework in Frameworks */,
+				618ACBEA1BE04A3A008C23A8 /* Upsurge.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -88,7 +121,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				6159F8B31BD1F7990010F83C /* Pods_OSX.framework in Frameworks */,
 				6159F86A1BD1F55D0010F83C /* BrainCore.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -97,7 +129,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				A8C39BAE984013FB82FF221D /* Pods_iOS.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -105,7 +136,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				6159F8B51BD1F7A00010F83C /* Pods_iOS.framework in Frameworks */,
 				6159F8881BD1F59F0010F83C /* BrainCore.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -120,8 +150,7 @@
 				6159F8951BD1F5CE0010F83C /* Source */,
 				6159F89D1BD1F5CE0010F83C /* Tests */,
 				6159F8601BD1F55D0010F83C /* Products */,
-				F4139AC97846693F58B21FD0 /* Pods */,
-				A057C4EEF91C48197033AA2E /* Frameworks */,
+				618ACBD91BE04A24008C23A8 /* Upsurge.xcodeproj */,
 			);
 			sourceTree = "<group>";
 		};
@@ -168,25 +197,15 @@
 			path = Tests;
 			sourceTree = "<group>";
 		};
-		A057C4EEF91C48197033AA2E /* Frameworks */ = {
+		618ACBDA1BE04A24008C23A8 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				6159F8B41BD1F7A00010F83C /* Pods_iOS.framework */,
-				E2DCED6F9174988B589D17FE /* Pods_OSX.framework */,
-				50CE1DBC19DC03CE85CCE880 /* Pods_iOS.framework */,
+				618ACBE11BE04A24008C23A8 /* Upsurge.framework */,
+				618ACBE31BE04A24008C23A8 /* UpsurgeTests OSX.xctest */,
+				618ACBE51BE04A24008C23A8 /* Upsurge.framework */,
+				618ACBE71BE04A24008C23A8 /* UpsurgeTests iOS.xctest */,
 			);
-			name = Frameworks;
-			sourceTree = "<group>";
-		};
-		F4139AC97846693F58B21FD0 /* Pods */ = {
-			isa = PBXGroup;
-			children = (
-				B7B9AE591C29A74BDBBCC430 /* Pods-OSX.debug.xcconfig */,
-				B9A0F975867A827A82C3A9B6 /* Pods-OSX.release.xcconfig */,
-				1296C6CE3C14E0F657B6AF57 /* Pods-iOS.debug.xcconfig */,
-				A950360F4C2AC6E9D6DD8578 /* Pods-iOS.release.xcconfig */,
-			);
-			name = Pods;
+			name = Products;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -215,16 +234,15 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 6159F8731BD1F55D0010F83C /* Build configuration list for PBXNativeTarget "BrainCore.OSX" */;
 			buildPhases = (
-				FDCBBA545A5156C45017CE5A /* Check Pods Manifest.lock */,
 				6159F85A1BD1F55D0010F83C /* Sources */,
 				6159F85B1BD1F55D0010F83C /* Frameworks */,
 				6159F85C1BD1F55D0010F83C /* Headers */,
 				6159F85D1BD1F55D0010F83C /* Resources */,
-				3E7335F7B371A4E4A64BD1B2 /* Copy Pods Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				618ACBE91BE04A32008C23A8 /* PBXTargetDependency */,
 			);
 			name = BrainCore.OSX;
 			productName = BrainCore;
@@ -238,7 +256,6 @@
 				6159F8651BD1F55D0010F83C /* Sources */,
 				6159F8661BD1F55D0010F83C /* Frameworks */,
 				6159F8671BD1F55D0010F83C /* Resources */,
-				2E13FC0FE7ACB642CBD37278 /* Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -254,16 +271,15 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 6159F88F1BD1F59F0010F83C /* Build configuration list for PBXNativeTarget "BrainCore.iOS" */;
 			buildPhases = (
-				021D295257A55CE03F375AE7 /* Check Pods Manifest.lock */,
 				6159F8791BD1F59F0010F83C /* Sources */,
 				6159F87A1BD1F59F0010F83C /* Frameworks */,
 				6159F87B1BD1F59F0010F83C /* Headers */,
 				6159F87C1BD1F59F0010F83C /* Resources */,
-				9C042B8712CDEA7612B59444 /* Copy Pods Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				618ACBEC1BE04A44008C23A8 /* PBXTargetDependency */,
 			);
 			name = BrainCore.iOS;
 			productName = BrainCore.iOS;
@@ -277,7 +293,6 @@
 				6159F8831BD1F59F0010F83C /* Sources */,
 				6159F8841BD1F59F0010F83C /* Frameworks */,
 				6159F8851BD1F59F0010F83C /* Resources */,
-				DCE68EFF0452C3746D39F1E1 /* Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -322,6 +337,12 @@
 			mainGroup = 6159F8551BD1F55D0010F83C;
 			productRefGroup = 6159F8601BD1F55D0010F83C /* Products */;
 			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = 618ACBDA1BE04A24008C23A8 /* Products */;
+					ProjectRef = 618ACBD91BE04A24008C23A8 /* Upsurge.xcodeproj */;
+				},
+			);
 			projectRoot = "";
 			targets = (
 				6159F85E1BD1F55D0010F83C /* BrainCore.OSX */,
@@ -331,6 +352,37 @@
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXReferenceProxy section */
+		618ACBE11BE04A24008C23A8 /* Upsurge.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = Upsurge.framework;
+			remoteRef = 618ACBE01BE04A24008C23A8 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		618ACBE31BE04A24008C23A8 /* UpsurgeTests OSX.xctest */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = "UpsurgeTests OSX.xctest";
+			remoteRef = 618ACBE21BE04A24008C23A8 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		618ACBE51BE04A24008C23A8 /* Upsurge.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = Upsurge.framework;
+			remoteRef = 618ACBE41BE04A24008C23A8 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		618ACBE71BE04A24008C23A8 /* UpsurgeTests iOS.xctest */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = "UpsurgeTests iOS.xctest";
+			remoteRef = 618ACBE61BE04A24008C23A8 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+/* End PBXReferenceProxy section */
 
 /* Begin PBXResourcesBuildPhase section */
 		6159F85D1BD1F55D0010F83C /* Resources */ = {
@@ -362,99 +414,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
-
-/* Begin PBXShellScriptBuildPhase section */
-		021D295257A55CE03F375AE7 /* Check Pods Manifest.lock */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			name = "Check Pods Manifest.lock";
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [[ $? != 0 ]] ; then\n    cat << EOM\nerror: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\nEOM\n    exit 1\nfi\n";
-			showEnvVarsInLog = 0;
-		};
-		2E13FC0FE7ACB642CBD37278 /* Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			name = "Embed Pods Frameworks";
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-OSX/Pods-OSX-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		3E7335F7B371A4E4A64BD1B2 /* Copy Pods Resources */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			name = "Copy Pods Resources";
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-OSX/Pods-OSX-resources.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		9C042B8712CDEA7612B59444 /* Copy Pods Resources */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			name = "Copy Pods Resources";
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-iOS/Pods-iOS-resources.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		DCE68EFF0452C3746D39F1E1 /* Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			name = "Embed Pods Frameworks";
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-iOS/Pods-iOS-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		FDCBBA545A5156C45017CE5A /* Check Pods Manifest.lock */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			name = "Check Pods Manifest.lock";
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [[ $? != 0 ]] ; then\n    cat << EOM\nerror: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\nEOM\n    exit 1\nfi\n";
-			showEnvVarsInLog = 0;
-		};
-/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		6159F85A1BD1F55D0010F83C /* Sources */ = {
@@ -514,6 +473,16 @@
 			target = 6159F87D1BD1F59F0010F83C /* BrainCore.iOS */;
 			targetProxy = 6159F8891BD1F59F0010F83C /* PBXContainerItemProxy */;
 		};
+		618ACBE91BE04A32008C23A8 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = "Upsurge OSX";
+			targetProxy = 618ACBE81BE04A32008C23A8 /* PBXContainerItemProxy */;
+		};
+		618ACBEC1BE04A44008C23A8 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = "Upsurge iOS";
+			targetProxy = 618ACBEB1BE04A44008C23A8 /* PBXContainerItemProxy */;
+		};
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
@@ -553,7 +522,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 8.4;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -594,7 +563,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 8.4;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = macosx;
@@ -605,7 +574,6 @@
 		};
 		6159F8741BD1F55D0010F83C /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = B7B9AE591C29A74BDBBCC430 /* Pods-OSX.debug.xcconfig */;
 			buildSettings = {
 				COMBINE_HIDPI_IMAGES = YES;
 				DEFINES_MODULE = YES;
@@ -624,7 +592,6 @@
 		};
 		6159F8751BD1F55D0010F83C /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = B9A0F975867A827A82C3A9B6 /* Pods-OSX.release.xcconfig */;
 			buildSettings = {
 				COMBINE_HIDPI_IMAGES = YES;
 				DEFINES_MODULE = YES;
@@ -643,31 +610,28 @@
 		};
 		6159F8771BD1F55D0010F83C /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = B7B9AE591C29A74BDBBCC430 /* Pods-OSX.debug.xcconfig */;
 			buildSettings = {
 				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = Tests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = com.venturemedia.BrainCoreTests;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.venturemedia.BrainCore-OSXTests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
 		};
 		6159F8781BD1F55D0010F83C /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = B9A0F975867A827A82C3A9B6 /* Pods-OSX.release.xcconfig */;
 			buildSettings = {
 				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = Tests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = com.venturemedia.BrainCoreTests;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.venturemedia.BrainCore-OSXTests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
 		};
 		6159F8901BD1F59F0010F83C /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 1296C6CE3C14E0F657B6AF57 /* Pods-iOS.debug.xcconfig */;
 			buildSettings = {
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				DEFINES_MODULE = YES;
@@ -678,7 +642,7 @@
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = "com.venturemedia.BrainCore-iOS";
+				PRODUCT_BUNDLE_IDENTIFIER = com.venturemedia.BrainCore;
 				PRODUCT_NAME = BrainCore;
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
@@ -688,7 +652,6 @@
 		};
 		6159F8911BD1F59F0010F83C /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = A950360F4C2AC6E9D6DD8578 /* Pods-iOS.release.xcconfig */;
 			buildSettings = {
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				DEFINES_MODULE = YES;
@@ -699,7 +662,7 @@
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = "com.venturemedia.BrainCore-iOS";
+				PRODUCT_BUNDLE_IDENTIFIER = com.venturemedia.BrainCore;
 				PRODUCT_NAME = BrainCore;
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
@@ -710,13 +673,8 @@
 		};
 		6159F8931BD1F59F0010F83C /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 1296C6CE3C14E0F657B6AF57 /* Pods-iOS.debug.xcconfig */;
 			buildSettings = {
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(PROJECT_DIR)/build/Debug-iphoneos",
-				);
 				INFOPLIST_FILE = Tests/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
@@ -728,13 +686,8 @@
 		};
 		6159F8941BD1F59F0010F83C /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = A950360F4C2AC6E9D6DD8578 /* Pods-iOS.release.xcconfig */;
 			buildSettings = {
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(PROJECT_DIR)/build/Debug-iphoneos",
-				);
 				INFOPLIST_FILE = Tests/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
