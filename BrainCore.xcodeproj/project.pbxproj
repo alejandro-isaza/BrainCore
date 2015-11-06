@@ -27,7 +27,10 @@
 		6159F8AF1BD1F5EB0010F83C /* ReLULayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6159F89B1BD1F5CE0010F83C /* ReLULayer.swift */; };
 		6159F8B11BD1F73D0010F83C /* NetTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6159F89F1BD1F5CE0010F83C /* NetTests.swift */; };
 		6159F8B21BD1F73E0010F83C /* NetTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6159F89F1BD1F5CE0010F83C /* NetTests.swift */; };
-		618ACBEA1BE04A3A008C23A8 /* Upsurge.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 618ACBE11BE04A24008C23A8 /* Upsurge.framework */; };
+		61CE4BCB1BED6F7F000E0D34 /* Upsurge.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 61CE4BC51BED6F7F000E0D34 /* Upsurge.framework */; };
+		61CE4BCE1BED6F90000E0D34 /* Upsurge.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 61CE4BC21BED6F7F000E0D34 /* Upsurge.framework */; };
+		61CE4BCF1BED703B000E0D34 /* Upsurge.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 61CE4BC21BED6F7F000E0D34 /* Upsurge.framework */; };
+		61CE4BD01BED703F000E0D34 /* Upsurge.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 61CE4BC51BED6F7F000E0D34 /* Upsurge.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -44,48 +47,6 @@
 			proxyType = 1;
 			remoteGlobalIDString = 6159F87D1BD1F59F0010F83C;
 			remoteInfo = BrainCore.iOS;
-		};
-		618ACBE01BE04A24008C23A8 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 618ACBD91BE04A24008C23A8 /* Upsurge.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 614ACA701BD1CB7B00A1C13E;
-			remoteInfo = "Upsurge OSX";
-		};
-		618ACBE21BE04A24008C23A8 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 618ACBD91BE04A24008C23A8 /* Upsurge.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 614ACA7A1BD1CB7B00A1C13E;
-			remoteInfo = "UpsurgeTests OSX";
-		};
-		618ACBE41BE04A24008C23A8 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 618ACBD91BE04A24008C23A8 /* Upsurge.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 614ACACA1BD1CBF300A1C13E;
-			remoteInfo = "Upsurge iOS";
-		};
-		618ACBE61BE04A24008C23A8 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 618ACBD91BE04A24008C23A8 /* Upsurge.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 614ACAD31BD1CBF300A1C13E;
-			remoteInfo = "UpsurgeTests iOS";
-		};
-		618ACBE81BE04A32008C23A8 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 618ACBD91BE04A24008C23A8 /* Upsurge.xcodeproj */;
-			proxyType = 1;
-			remoteGlobalIDString = 614ACA6F1BD1CB7B00A1C13E;
-			remoteInfo = "Upsurge OSX";
-		};
-		618ACBEB1BE04A44008C23A8 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 618ACBD91BE04A24008C23A8 /* Upsurge.xcodeproj */;
-			proxyType = 1;
-			remoteGlobalIDString = 614ACAC91BD1CBF300A1C13E;
-			remoteInfo = "Upsurge iOS";
 		};
 /* End PBXContainerItemProxy section */
 
@@ -105,7 +66,12 @@
 		6159F89E1BD1F5CE0010F83C /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		6159F89F1BD1F5CE0010F83C /* NetTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NetTests.swift; sourceTree = "<group>"; };
 		6159F8A01BD1F5CE0010F83C /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		618ACBD91BE04A24008C23A8 /* Upsurge.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = Upsurge.xcodeproj; path = Carthage/Checkouts/Upsurge/Upsurge.xcodeproj; sourceTree = "<group>"; };
+		61CE4BC01BED6F7F000E0D34 /* 11AA70B0-3DEA-33C8-B1E9-A828B5149329.bcsymbolmap */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "11AA70B0-3DEA-33C8-B1E9-A828B5149329.bcsymbolmap"; sourceTree = "<group>"; };
+		61CE4BC11BED6F7F000E0D34 /* 2039BC01-DE28-3F17-BE4C-12B4BC805F3E.bcsymbolmap */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "2039BC01-DE28-3F17-BE4C-12B4BC805F3E.bcsymbolmap"; sourceTree = "<group>"; };
+		61CE4BC21BED6F7F000E0D34 /* Upsurge.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Upsurge.framework; sourceTree = "<group>"; };
+		61CE4BC31BED6F7F000E0D34 /* Upsurge.framework.dSYM */ = {isa = PBXFileReference; lastKnownFileType = wrapper.dsym; path = Upsurge.framework.dSYM; sourceTree = "<group>"; };
+		61CE4BC51BED6F7F000E0D34 /* Upsurge.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Upsurge.framework; sourceTree = "<group>"; };
+		61CE4BC61BED6F7F000E0D34 /* Upsurge.framework.dSYM */ = {isa = PBXFileReference; lastKnownFileType = wrapper.dsym; path = Upsurge.framework.dSYM; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -113,7 +79,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				618ACBEA1BE04A3A008C23A8 /* Upsurge.framework in Frameworks */,
+				61CE4BCB1BED6F7F000E0D34 /* Upsurge.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -121,6 +87,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				61CE4BD01BED703F000E0D34 /* Upsurge.framework in Frameworks */,
 				6159F86A1BD1F55D0010F83C /* BrainCore.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -129,6 +96,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				61CE4BCE1BED6F90000E0D34 /* Upsurge.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -136,6 +104,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				61CE4BCF1BED703B000E0D34 /* Upsurge.framework in Frameworks */,
 				6159F8881BD1F59F0010F83C /* BrainCore.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -149,8 +118,8 @@
 				6159F8A01BD1F5CE0010F83C /* Info.plist */,
 				6159F8951BD1F5CE0010F83C /* Source */,
 				6159F89D1BD1F5CE0010F83C /* Tests */,
+				61CE4BCD1BED6F84000E0D34 /* Dependencies */,
 				6159F8601BD1F55D0010F83C /* Products */,
-				618ACBD91BE04A24008C23A8 /* Upsurge.xcodeproj */,
 			);
 			sourceTree = "<group>";
 		};
@@ -197,15 +166,35 @@
 			path = Tests;
 			sourceTree = "<group>";
 		};
-		618ACBDA1BE04A24008C23A8 /* Products */ = {
+		61CE4BBF1BED6F7F000E0D34 /* iOS */ = {
 			isa = PBXGroup;
 			children = (
-				618ACBE11BE04A24008C23A8 /* Upsurge.framework */,
-				618ACBE31BE04A24008C23A8 /* UpsurgeTests OSX.xctest */,
-				618ACBE51BE04A24008C23A8 /* Upsurge.framework */,
-				618ACBE71BE04A24008C23A8 /* UpsurgeTests iOS.xctest */,
+				61CE4BC01BED6F7F000E0D34 /* 11AA70B0-3DEA-33C8-B1E9-A828B5149329.bcsymbolmap */,
+				61CE4BC11BED6F7F000E0D34 /* 2039BC01-DE28-3F17-BE4C-12B4BC805F3E.bcsymbolmap */,
+				61CE4BC21BED6F7F000E0D34 /* Upsurge.framework */,
+				61CE4BC31BED6F7F000E0D34 /* Upsurge.framework.dSYM */,
 			);
-			name = Products;
+			name = iOS;
+			path = Carthage/Build/iOS;
+			sourceTree = "<group>";
+		};
+		61CE4BC41BED6F7F000E0D34 /* Mac */ = {
+			isa = PBXGroup;
+			children = (
+				61CE4BC51BED6F7F000E0D34 /* Upsurge.framework */,
+				61CE4BC61BED6F7F000E0D34 /* Upsurge.framework.dSYM */,
+			);
+			name = Mac;
+			path = Carthage/Build/Mac;
+			sourceTree = "<group>";
+		};
+		61CE4BCD1BED6F84000E0D34 /* Dependencies */ = {
+			isa = PBXGroup;
+			children = (
+				61CE4BBF1BED6F7F000E0D34 /* iOS */,
+				61CE4BC41BED6F7F000E0D34 /* Mac */,
+			);
+			name = Dependencies;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -242,7 +231,6 @@
 			buildRules = (
 			);
 			dependencies = (
-				618ACBE91BE04A32008C23A8 /* PBXTargetDependency */,
 			);
 			name = BrainCore.OSX;
 			productName = BrainCore;
@@ -279,7 +267,6 @@
 			buildRules = (
 			);
 			dependencies = (
-				618ACBEC1BE04A44008C23A8 /* PBXTargetDependency */,
 			);
 			name = BrainCore.iOS;
 			productName = BrainCore.iOS;
@@ -337,12 +324,6 @@
 			mainGroup = 6159F8551BD1F55D0010F83C;
 			productRefGroup = 6159F8601BD1F55D0010F83C /* Products */;
 			projectDirPath = "";
-			projectReferences = (
-				{
-					ProductGroup = 618ACBDA1BE04A24008C23A8 /* Products */;
-					ProjectRef = 618ACBD91BE04A24008C23A8 /* Upsurge.xcodeproj */;
-				},
-			);
 			projectRoot = "";
 			targets = (
 				6159F85E1BD1F55D0010F83C /* BrainCore.OSX */,
@@ -352,37 +333,6 @@
 			);
 		};
 /* End PBXProject section */
-
-/* Begin PBXReferenceProxy section */
-		618ACBE11BE04A24008C23A8 /* Upsurge.framework */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.framework;
-			path = Upsurge.framework;
-			remoteRef = 618ACBE01BE04A24008C23A8 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		618ACBE31BE04A24008C23A8 /* UpsurgeTests OSX.xctest */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.cfbundle;
-			path = "UpsurgeTests OSX.xctest";
-			remoteRef = 618ACBE21BE04A24008C23A8 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		618ACBE51BE04A24008C23A8 /* Upsurge.framework */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.framework;
-			path = Upsurge.framework;
-			remoteRef = 618ACBE41BE04A24008C23A8 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		618ACBE71BE04A24008C23A8 /* UpsurgeTests iOS.xctest */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.cfbundle;
-			path = "UpsurgeTests iOS.xctest";
-			remoteRef = 618ACBE61BE04A24008C23A8 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-/* End PBXReferenceProxy section */
 
 /* Begin PBXResourcesBuildPhase section */
 		6159F85D1BD1F55D0010F83C /* Resources */ = {
@@ -473,16 +423,6 @@
 			target = 6159F87D1BD1F59F0010F83C /* BrainCore.iOS */;
 			targetProxy = 6159F8891BD1F59F0010F83C /* PBXContainerItemProxy */;
 		};
-		618ACBE91BE04A32008C23A8 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = "Upsurge OSX";
-			targetProxy = 618ACBE81BE04A32008C23A8 /* PBXContainerItemProxy */;
-		};
-		618ACBEC1BE04A44008C23A8 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = "Upsurge iOS";
-			targetProxy = 618ACBEB1BE04A44008C23A8 /* PBXContainerItemProxy */;
-		};
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
@@ -522,7 +462,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.4;
 				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -563,7 +503,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.4;
 				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = macosx;
@@ -580,6 +520,10 @@
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Carthage/Build/Mac",
+				);
 				FRAMEWORK_VERSION = A;
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
@@ -598,6 +542,10 @@
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Carthage/Build/Mac",
+				);
 				FRAMEWORK_VERSION = A;
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
@@ -612,6 +560,10 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COMBINE_HIDPI_IMAGES = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Carthage/Build/Mac",
+				);
 				INFOPLIST_FILE = Tests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.venturemedia.BrainCore-OSXTests";
@@ -623,6 +575,10 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COMBINE_HIDPI_IMAGES = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Carthage/Build/Mac",
+				);
 				INFOPLIST_FILE = Tests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.venturemedia.BrainCore-OSXTests";
@@ -638,9 +594,12 @@
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Carthage/Build/iOS",
+				);
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.venturemedia.BrainCore;
 				PRODUCT_NAME = BrainCore;
@@ -658,9 +617,12 @@
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Carthage/Build/iOS",
+				);
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.venturemedia.BrainCore;
 				PRODUCT_NAME = BrainCore;
@@ -675,8 +637,11 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Carthage/Build/iOS",
+				);
 				INFOPLIST_FILE = Tests/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.venturemedia.BrainCore-iOSTests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -688,8 +653,11 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Carthage/Build/iOS",
+				);
 				INFOPLIST_FILE = Tests/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.venturemedia.BrainCore-iOSTests";
 				PRODUCT_NAME = "$(TARGET_NAME)";

@@ -7,4 +7,7 @@
    <FileRef
       location = "group:BrainCore.xcodeproj">
    </FileRef>
+   <FileRef
+      location = "group:Carthage/Checkouts/Upsurge/Upsurge.xcodeproj">
+   </FileRef>
 </Workspace>

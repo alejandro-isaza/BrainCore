@@ -6,6 +6,7 @@
 xcuserdata/
 *.xccheckout
 *.xctimeline
+*.xcscmblueprint
 
 # build output
 build/
