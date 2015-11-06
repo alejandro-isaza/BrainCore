@@ -21,7 +21,7 @@ public func mul(lhs: RealArray, _ rhs: RealMatrix, inout result: RealArray) {
         lhs.pointer, Int32(lhs.count),
         rhs.pointer, Int32(rhs.columns),
         0.0,
-        result.pointer, Int32(result.count))
+        result.mutablePointer, Int32(result.count))
 }
 
 
@@ -29,5 +29,9 @@ public func mul(lhs: RealArray, _ rhs: RealMatrix, inout result: RealArray) {
 public func add(lhs: RealArray, _ rhs: RealArray, inout result: RealArray) {
     assert(lhs.count == rhs.count, "Vector sizes should match")
     assert(result.count == rhs.count, "Invalid result vector")
-    vDSP_vaddD(lhs.pointer, 1, rhs.pointer, 1, result.pointer, 1, vDSP_Length(lhs.count))
+    vDSP_vaddD(
+        lhs.pointer, lhs.step,
+        rhs.pointer, rhs.step,
+        result.mutablePointer, result.step,
+        vDSP_Length(lhs.count))
 }

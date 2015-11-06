@@ -19,7 +19,7 @@ class ReLULayerTests: XCTestCase {
         let relu = ReLULayer(size: 3)
         relu.backward(outputDiff, input: input, inputDiff: &inputDiff)
 
-        XCTAssertEqual(inputDiff, outputDiff)
+        XCTAssertTrue(inputDiff == outputDiff)
     }
 
 }

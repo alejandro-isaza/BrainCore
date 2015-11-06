@@ -37,9 +37,9 @@ class InnerProductLayerTests: XCTestCase {
         let expectedBiases = RealMatrix([[-4.9, 9.9, 2.2]])
         let expectedInputDiff = RealMatrix([[3.7, 3.6, 5.3]])
 
-        XCTAssertEqual(expectedWeights, ip.weights)
-        XCTAssertEqual(expectedBiases, ip.biases)
-        XCTAssertEqual(expectedInputDiff, inputDiff)
+        XCTAssertTrue(expectedWeights == ip.weights)
+        XCTAssertTrue(expectedBiases == ip.biases)
+        XCTAssertTrue(expectedInputDiff == inputDiff)
     }
 
 }
