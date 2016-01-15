@@ -11,6 +11,8 @@ xcuserdata/
 # build output
 build/
 
-# Dependecy management
-Pods
-Carthage
+# Swift Package Manager
+.build/
+
+# Carthage
+Carthage/Build

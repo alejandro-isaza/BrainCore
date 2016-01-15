@@ -1,0 +1,3 @@
+[submodule "Carthage/Checkouts/Upsurge"]
+	url = https://github.com/aleph7/Upsurge.git
+	path = Carthage/Checkouts/Upsurge
