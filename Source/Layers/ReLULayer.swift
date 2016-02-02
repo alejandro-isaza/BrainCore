@@ -6,29 +6,57 @@
 // tree.
 
 import Foundation
-import Upsurge
+import Metal
 
-public class ReLULayer : ForwardLayer, BackwardLayer {
-    public var negativeSlope = 0.0
-    public let outputSize: Int
+public class ReLULayer: ForwardLayer, BackwardLayer {
+    public let size: Int
+    public var forwardState: MTLComputePipelineState!
+    public var backwardState: MTLComputePipelineState!
 
-    public init(size: Int) {
-        self.outputSize = size
+    public var outputSize: Int {
+        return size
     }
 
-    public func forward(input: Blob, inout output: Blob) {
-        assert(input.count == outputSize)
-        assert(output.count == outputSize)
-        for i in 0..<input.count {
-            output[i] = max(input[i], 0.0) + negativeSlope * min(input[i], 0.0)
-        }
+    public var inputSize: Int {
+        return size
     }
 
-    public func backward(outputDiff: RealMatrix, input: RealMatrix, inout inputDiff: RealMatrix) {
-        let N = inputDiff.elements.count
-        for i in 0..<N {
-            let factor = input.elements[i] > 0 ? 1.0 : negativeSlope
-            inputDiff.elements[i] = outputDiff.elements[i] * factor
-        }
+    public init(library: MTLLibrary, size: Int) throws {
+        self.size = size
+
+        let forwardFunction = library.newFunctionWithName("linear_rectify_forward")!
+        forwardState = try library.device.newComputePipelineStateWithFunction(forwardFunction)
+
+        let backwardFunction = library.newFunctionWithName("linear_rectify_backward")!
+        backwardState = try library.device.newComputePipelineStateWithFunction(backwardFunction)
+    }
+
+    public func encodeForwardInBuffer(buffer: MTLCommandBuffer, input: MTLBuffer, output: MTLBuffer) {
+        let encoder = buffer.computeCommandEncoder()
+        encoder.setComputePipelineState(forwardState)
+        encoder.setBuffer(input, offset: 0, atIndex: 0)
+        encoder.setBuffer(output, offset: 0, atIndex: 1)
+
+        let count = input.length / sizeof(Float)
+        let threadsPerGroup = MTLSize(width: forwardState.threadExecutionWidth, height: 1, depth: 1)
+        let numThreadgroups = MTLSize(width: (count - 1) / forwardState.threadExecutionWidth + 1, height:1, depth:1)
+        encoder.dispatchThreadgroups(numThreadgroups, threadsPerThreadgroup: threadsPerGroup)
+
+        encoder.endEncoding()
+    }
+
+    public func encodeBackwardInBuffer(buffer: MTLCommandBuffer, outputDiff: MTLBuffer, input: MTLBuffer, inputDiff: MTLBuffer) {
+        let encoder = buffer.computeCommandEncoder()
+        encoder.setComputePipelineState(backwardState)
+        encoder.setBuffer(outputDiff, offset: 0, atIndex: 0)
+        encoder.setBuffer(input, offset: 0, atIndex: 1)
+        encoder.setBuffer(inputDiff, offset: 0, atIndex: 2)
+
+        let count = outputDiff.length / sizeof(Float)
+        let threadsPerGroup = MTLSize(width: backwardState.threadExecutionWidth, height: 1, depth: 1)
+        let numThreadgroups = MTLSize(width: (count - 1) / backwardState.threadExecutionWidth + 1, height:1, depth:1)
+        encoder.dispatchThreadgroups(numThreadgroups, threadsPerThreadgroup: threadsPerGroup)
+
+        encoder.endEncoding()
     }
 }

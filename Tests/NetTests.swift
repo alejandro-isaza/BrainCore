@@ -24,48 +24,76 @@ class NetTests: XCTestCase {
         }
     }
 
+    var device: MTLDevice!
+    var library: MTLLibrary!
+
+    override func setUp() {
+        let bundle = NSBundle(forClass: self.dynamicType)
+        let path = bundle.pathForResource("default", ofType: "metallib")!
+        device = MTLCreateSystemDefaultDevice()!
+        library = try! device.newLibraryWithFile(path)
+    }
+
     func testTwoInputOneOutputActivation() {
-        let net = Net()
+        let net = Net(device: device, library: library)
 
         let source = Source(data: [1, 1])
-        let ip = InnerProductLayer(inputSize: 2, outputSize: 1)
-        ip.weights = RealMatrix(rows: 2, columns: 1, elements: [2, 4])
-        ip.biases = RealMatrix([[1]])
+        let weights = Matrix<Float>(rows: 2, columns: 1, elements: [2, 4])
+        let biases = Array<Float>([1])
+
+        let ip = try! InnerProductLayer(library: library, weights: weights, biases: biases)
         let sink = Sink()
 
         net.addLayer(source, name: "source")
         net.addLayer(ip, name: "inner product")
-        net.addLayer(ReLULayer(size: 1), name: "ReLU")
+        net.addLayer(try! ReLULayer(library: library, size: 1), name: "ReLU")
         net.addLayer(sink, name: "sink")
 
         net.connectLayer("source", toLayer: "inner product")
         net.connectLayer("inner product", toLayer: "ReLU")
         net.connectLayer("ReLU", toLayer: "sink")
-        net.forward()
 
-        XCTAssertEqual(sink.data[0], 7)
+        let expecation = expectationWithDescription("Net forward pass")
+        net.forward(completion: {
+            expecation.fulfill()
+        })
+        waitForExpectationsWithTimeout(2) { error in
+            if let error = error {
+                XCTFail("Net.forward() failed: \(error)")
+            }
+            XCTAssertEqual(sink.data[0], 7)
+        }
     }
 
     func testTwoInputOneOutputNoActivation() {
-        let net = Net()
+        let net = Net(device: device, library: library)
 
         let source = Source(data: [1, 1])
-        let ip = InnerProductLayer(inputSize: 2, outputSize: 1)
-        ip.weights = RealMatrix(rows: 2, columns: 1, elements: [2, -4])
-        ip.biases = RealMatrix([[1]])
+        let weights = Matrix<Float>(rows: 2, columns: 1, elements: [2, -4])
+        let biases = Array<Float>([1])
+
+        let ip = try! InnerProductLayer(library: library, weights: weights, biases: biases)
         let sink = Sink()
 
         net.addLayer(source, name: "source")
         net.addLayer(ip, name: "inner product")
-        net.addLayer(ReLULayer(size: 1), name: "ReLU")
+        net.addLayer(try! ReLULayer(library: library, size: 1), name: "ReLU")
         net.addLayer(sink, name: "sink")
 
         net.connectLayer("source", toLayer: "inner product")
         net.connectLayer("inner product", toLayer: "ReLU")
         net.connectLayer("ReLU", toLayer: "sink")
-        net.forward()
 
-        XCTAssertEqual(sink.data[0], 0)
+        let expecation = expectationWithDescription("Net forward pass")
+        net.forward(completion: {
+            expecation.fulfill()
+        })
+        waitForExpectationsWithTimeout(2) { error in
+            if let error = error {
+                XCTFail("Net.forward() failed: \(error)")
+            }
+            XCTAssertEqual(sink.data[0], 0)
+        }
     }
 
 }

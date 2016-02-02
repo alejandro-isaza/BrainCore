@@ -5,7 +5,7 @@
 // contained in the file LICENSE at the root of the source code distribution
 // tree.
 
-import Upsurge
+import Metal
 
 public class Net {
     public typealias LayerRef = Int
@@ -16,8 +16,8 @@ public class Net {
         let name: String
         var inputNodes = [Node]()
         var outputNodes = [Node]()
-        var input: RealArray?
-        var output: RealArray?
+        var input: MTLBuffer?
+        var output: MTLBuffer?
 
         init(layer: Layer, name: String, id: Int) {
             self.id = id
@@ -37,7 +37,18 @@ public class Net {
     var openNodes = [Node]()
     var closedNodes = Set<Node>()
 
-    public init() {
+    var device: MTLDevice
+    var library: MTLLibrary
+    var commandQueue: MTLCommandQueue
+
+    var queue: dispatch_queue_t
+    var activeThreads = 0
+
+    public init(device: MTLDevice, library: MTLLibrary) {
+        self.device = device
+        self.library = library
+        commandQueue = device.newCommandQueue()
+        queue = dispatch_queue_create("Net", DISPATCH_QUEUE_SERIAL)
     }
 
     public func addLayer(layer: Layer, name: String) -> LayerRef {
@@ -121,33 +132,51 @@ public class Net {
     }
 
     /// Get the input data that was used for a layer on the last forward pass
-    public func lastLayerInput(layerName: String) -> RealArray? {
+    public func lastLayerInput(layerName: String) -> Array<Float>? {
         guard let node = nodeWithLayerName(layerName) else {
             return nil
         }
-        return node.input
+        guard let input = node.input else {
+            return nil
+        }
+        return arrayFromBuffer(input)
     }
 
     /// Get the output data of a layer on the last forward pass
-    public func lastLayerOutput(layerName: String) -> RealArray? {
+    public func lastLayerOutput(layerName: String) -> Array<Float>? {
         guard let node = nodeWithLayerName(layerName) else {
             return nil
         }
-        return node.output
+        guard let output = node.output else {
+            return nil
+        }
+        return arrayFromBuffer(output)
     }
 
     /// Perform a forward pass on the network
-    public func forward() {
+    public func forward(completion completion: (() -> Void)?) {
         openNodes.removeAll(keepCapacity: true)
         closedNodes.removeAll(keepCapacity: true)
 
         // Collect all data
         for n in dataNodes {
             let dataLayer = n.layer as! DataLayer
-            n.output = dataLayer.data
+            if let buffer = n.output where buffer.length / sizeof(Float) == dataLayer.data.count {
+                fillBuffer(buffer, withElements: dataLayer.data)
+            } else {
+                let buffer = device.newBufferWithBytes(dataLayer.data.pointer, length: dataLayer.data.count * sizeof(Float), options: .CPUCacheModeWriteCombined)
+                fillBuffer(buffer, withElements: dataLayer.data)
+                n.output = buffer
+            }
             closeNode(n)
         }
 
+        dispatch_async(queue) {
+            self.processNodes(completion)
+        }
+    }
+
+    private func processNodes(completion: (() -> Void)?) {
         while !openNodes.isEmpty {
             let node = openNodes.popLast()!
             if closedNodes.contains(node) {
@@ -156,14 +185,26 @@ public class Net {
 
             let data = collectDataForNode(node)
             if let forwardLayer = node.layer as? ForwardLayer {
-                setupOutputData(node, size: forwardLayer.outputSize)
-                forwardLayer.forward(data, output: &node.output!)
-                assert(node.output!.count == forwardLayer.outputSize)
-            } else if let sinkLayer = node.layer as? SinkLayer {
-                sinkLayer.consume(data)
-            }
+                let outputBuffer = setupOutputData(node, size: forwardLayer.outputSize)
 
-            closeNode(node)
+                let commandBuffer = commandQueue.commandBuffer()
+                forwardLayer.encodeForwardInBuffer(commandBuffer, input: data, output: outputBuffer)
+                commandBuffer.addCompletedHandler() { commandBuffer in
+                    dispatch_async(self.queue) {
+                        self.activeThreads -= 1
+                        self.closeNode(node)
+                        self.processNodes(completion)
+                    }
+                }
+                commandBuffer.commit()
+                activeThreads += 1
+            } else if let sinkLayer = node.layer as? SinkLayer {
+                sinkLayer.consume(valueArrayFromBuffer(data))
+            }
+        }
+
+        if activeThreads == 0 {
+            completion?()
         }
     }
 
@@ -182,36 +223,42 @@ public class Net {
         return true
     }
 
-    private func collectDataForNode(node: Node) -> RealArray {
+    private func collectDataForNode(node: Node) -> MTLBuffer {
         var size = 0
         for n in node.inputNodes {
-            size += n.output?.count ?? 0
+            size += n.output?.length ?? 0
         }
 
-        if node.input == nil {
-            node.input = RealArray(count: size, repeatedValue: 0.0)
-        } else if node.input!.count < size {
-            node.input!.appendContentsOf(RealArray(count: size - node.input!.count, repeatedValue: 0.0))
+        let data: MTLBuffer
+        if let input = node.input where input.length >= size {
+            data = input
+        } else {
+            data = device.newBufferWithLength(size , options: .CPUCacheModeWriteCombined)
+            node.input = data
         }
 
+        let pointer = UnsafeMutablePointer<Float>(data.contents())
         var i = 0
         for n in node.inputNodes {
             if let output = n.output {
-                node.input!.replaceRange(i..<i+output.count, with: output)
-                i += output.count
+                let outputBuffer = unsafeBufferPointerFromBuffer(output)
+                (pointer + i).assignFrom(outputBuffer.baseAddress, count: outputBuffer.count)
+                i += outputBuffer.count
             }
         }
 
-        return node.input!
+        return data
     }
 
-    private func setupOutputData(node: Node, size: Int) -> RealArray {
-        if node.output == nil || node.output!.capacity < size {
-            node.output = RealArray(count: size)
+    private func setupOutputData(node: Node, size: Int) -> MTLBuffer {
+        let data: MTLBuffer
+        if let output = node.output where output.length >= size * sizeof(Float) {
+            data = output
         } else {
-            node.output!.count = size
+            data = device.newBufferWithLength(size * sizeof(Float), options: .CPUCacheModeDefaultCache)
+            node.output = data
         }
-        return node.output!
+        return data
     }
 }
 

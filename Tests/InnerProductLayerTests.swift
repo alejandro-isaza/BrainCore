@@ -6,40 +6,62 @@
 // tree.
 
 import XCTest
+import Accelerate
 import BrainCore
 import Upsurge
 
 class InnerProductLayerTests: XCTestCase {
+    var device: MTLDevice!
+    var library: MTLLibrary!
 
-    func testBackwards() {
-        let outputDiff = RealMatrix([[0.1, 0.9, 0.2]])
-        let input = RealMatrix([[0.1, 0.7, 0.2]])
-        var inputDiff = RealMatrix(rows: 1, columns: 3)
+    override func setUp() {
+        let bundle = NSBundle(forClass: self.dynamicType)
+        let path = bundle.pathForResource("default", ofType: "metallib")!
+        device = MTLCreateSystemDefaultDevice()!
+        library = try! device.newLibraryWithFile(path)
+    }
 
-        let weights = RealMatrix([
-            [1, 5, 6],
-            [2, 3, 5],
-            [9, 2, 1]
-            ])
-        let biases = RealArray([-5, 9, 2]).toColumnMatrix()
+    func testForward() {
+        let inputSize = 1024
+        let outputSize = 1024
 
-        let ip = InnerProductLayer(weights: weights, biases: biases)
-        ip.backward(outputDiff, input: input, inputDiff: &inputDiff)
-        ip.update{ (inout param: RealMatrix, inout paramDiff: RealMatrix) in
-            param += paramDiff
+        let input = Matrix<Float>(rows: 1, columns: inputSize)
+        for i in 0..<inputSize {
+            input[0, i] = 2 * Float(arc4random()) / Float(UINT32_MAX) - 1.0
         }
 
-        let expectedWeights = RealMatrix([
-            [1.01, 5.07, 6.02],
-            [2.09, 3.63, 5.18],
-            [9.02, 2.14, 1.04]
-            ])
-        let expectedBiases = RealMatrix([[-4.9, 9.9, 2.2]])
-        let expectedInputDiff = RealMatrix([[3.7, 3.6, 5.3]])
+        let weights = Matrix<Float>(rows: inputSize, columns: outputSize)
+        for r in 0..<inputSize {
+            for c in 0..<outputSize {
+                weights[r, c] = 2 * Float(arc4random()) / Float(UINT32_MAX) - 1.0
+            }
+        }
 
-        XCTAssertTrue(expectedWeights == ip.weights)
-        XCTAssertTrue(expectedBiases == ip.biases)
-        XCTAssertTrue(expectedInputDiff == inputDiff)
+        let biases = Matrix<Float>(rows: 1, columns: outputSize)
+        for i in 0..<outputSize {
+            biases[0, i] = 2 * Float(arc4random()) / Float(UINT32_MAX) - 1.0
+        }
+
+        let layer = try! InnerProductLayer(library: library, weights: weights, biases: biases.row(0))
+
+        let queue = device.newCommandQueue()
+
+        let inputBuffer = device.newBufferWithBytes(input.pointer, length: inputSize * sizeof(Float), options: .CPUCacheModeDefaultCache)
+        let outputBuffer = device.newBufferWithLength(outputSize * sizeof(Float), options: .CPUCacheModeDefaultCache)
+        measureBlock {
+            let commandBuffer = queue.commandBuffer()
+            layer.encodeForwardInBuffer(commandBuffer, input: inputBuffer, output: outputBuffer)
+            commandBuffer.commit()
+            commandBuffer.waitUntilCompleted()
+        }
+
+        let expectedResult = Matrix<Float>(biases)
+        cblas_sgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, Int32(1), Int32(outputSize), Int32(inputSize), 1, input.pointer, Int32(inputSize), weights.pointer, Int32(outputSize), 1, expectedResult.mutablePointer, Int32(inputSize))
+
+        let result = UnsafeMutablePointer<Float>(outputBuffer.contents())
+        for i in 0..<outputSize {
+            XCTAssertEqualWithAccuracy(result[i], expectedResult[0, i], accuracy: 0.0001)
+        }
     }
 
 }

@@ -5,9 +5,10 @@
 // contained in the file LICENSE at the root of the source code distribution
 // tree.
 
+import Metal
 import Upsurge
 
-public typealias Blob = RealArray
+public typealias Blob = ValueArray<Float>
 
 public protocol Layer {
 }
@@ -19,13 +20,13 @@ public protocol DataLayer : Layer {
 public protocol ForwardLayer : Layer {
     var outputSize: Int { get }
 
-    /// Forward-propagate the input blob
-    func forward(input: Blob, inout output: Blob)
+    /// Forward-propagate the input
+    func encodeForwardInBuffer(buffer: MTLCommandBuffer, input: MTLBuffer, output: MTLBuffer)
 }
 
 public protocol BackwardLayer : Layer {
     /// Backward-propagate the output differences
-    func backward(outputDiff: RealMatrix, input: RealMatrix, inout inputDiff: RealMatrix)
+    func encodeBackwardInBuffer(buffer: MTLCommandBuffer, outputDiff: MTLBuffer, input: MTLBuffer, inputDiff: MTLBuffer)
 }
 
 public protocol SinkLayer : Layer {
