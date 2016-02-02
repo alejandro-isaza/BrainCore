@@ -9,7 +9,7 @@ import XCTest
 import BrainCore
 import Upsurge
 
-class NetTests: XCTestCase {
+class NetTests: MetalTestCase {
     class Source : DataLayer {
         var data: Blob
         init(data: Blob) {
@@ -24,18 +24,9 @@ class NetTests: XCTestCase {
         }
     }
 
-    var device: MTLDevice!
-    var library: MTLLibrary!
-
-    override func setUp() {
-        let bundle = NSBundle(forClass: self.dynamicType)
-        let path = bundle.pathForResource("default", ofType: "metallib")!
-        device = MTLCreateSystemDefaultDevice()!
-        library = try! device.newLibraryWithFile(path)
-    }
-
     func testTwoInputOneOutputActivation() {
-        let net = Net(device: device, library: library)
+        let library = metalLibrary
+        let net = Net(device: library.device, library: library)
 
         let source = Source(data: [1, 1])
         let weights = Matrix<Float>(rows: 2, columns: 1, elements: [2, 4])
@@ -66,6 +57,8 @@ class NetTests: XCTestCase {
     }
 
     func testTwoInputOneOutputNoActivation() {
+        let library = metalLibrary
+        let device = library.device
         let net = Net(device: device, library: library)
 
         let source = Source(data: [1, 1])

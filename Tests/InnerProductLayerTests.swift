@@ -10,17 +10,7 @@ import Accelerate
 import BrainCore
 import Upsurge
 
-class InnerProductLayerTests: XCTestCase {
-    var device: MTLDevice!
-    var library: MTLLibrary!
-
-    override func setUp() {
-        let bundle = NSBundle(forClass: self.dynamicType)
-        let path = bundle.pathForResource("default", ofType: "metallib")!
-        device = MTLCreateSystemDefaultDevice()!
-        library = try! device.newLibraryWithFile(path)
-    }
-
+class InnerProductLayerTests: MetalTestCase {
     func testForward() {
         let inputSize = 1024
         let outputSize = 1024
@@ -42,6 +32,8 @@ class InnerProductLayerTests: XCTestCase {
             biases[0, i] = 2 * Float(arc4random()) / Float(UINT32_MAX) - 1.0
         }
 
+        let library = metalLibrary
+        let device = library.device
         let layer = try! InnerProductLayer(library: library, weights: weights, biases: biases.row(0))
 
         let queue = device.newCommandQueue()

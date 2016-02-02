@@ -155,6 +155,8 @@ public class Net {
 
     /// Perform a forward pass on the network
     public func forward(completion completion: (() -> Void)?) {
+        precondition(activeThreads == 0, "You can only run one forward pass at a time")
+
         openNodes.removeAll(keepCapacity: true)
         closedNodes.removeAll(keepCapacity: true)
 

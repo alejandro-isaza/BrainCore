@@ -10,15 +10,12 @@ import BrainCore
 import Metal
 import Upsurge
 
-class ReLULayerTests: XCTestCase {
+class ReLULayerTests: MetalTestCase {
 
     func testForward() {
         let dataSize = 1024 * 1024
-        let device = MTLCreateSystemDefaultDevice()!
-
-        let bundle = NSBundle(forClass: ReLULayerTests.self)
-        let path = bundle.pathForResource("default", ofType: "metallib")!
-        let library = try! device.newLibraryWithFile(path)
+        let library = metalLibrary
+        let device = library.device
         let layer = try! ReLULayer(library: library, size: dataSize)
 
         var data = [Float](count: dataSize, repeatedValue: 0.0)
@@ -50,11 +47,8 @@ class ReLULayerTests: XCTestCase {
 
     func testBackward() {
         let dataSize = 1024 * 1024
-        let device = MTLCreateSystemDefaultDevice()!
-
-        let bundle = NSBundle(forClass: ReLULayerTests.self)
-        let path = bundle.pathForResource("default", ofType: "metallib")!
-        let library = try! device.newLibraryWithFile(path)
+        let library = metalLibrary
+        let device = library.device
         let layer = try! ReLULayer(library: library, size: dataSize)
 
         var input = [Float](count: dataSize, repeatedValue: 0.0)
