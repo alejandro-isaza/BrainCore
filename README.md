@@ -10,7 +10,7 @@ BrainCore is a simple but fast neural network framework written in Swift. It use
 
 - [x] Inner product layers
 - [x] Linear rectifier (ReLU) layers 
-- [ ] LSTM layers
+- [x] LSTM layers
 
 
 ## Requirements

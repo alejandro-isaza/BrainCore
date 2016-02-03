@@ -15,6 +15,14 @@
 		6119AC2B1C6041D20020E0E6 /* Utilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6119AC291C6041D20020E0E6 /* Utilities.swift */; };
 		6119AC2D1C61266B0020E0E6 /* MetalTestCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6119AC2C1C61266B0020E0E6 /* MetalTestCase.swift */; };
 		6119AC2E1C61266B0020E0E6 /* MetalTestCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6119AC2C1C61266B0020E0E6 /* MetalTestCase.swift */; };
+		6119AC301C6139900020E0E6 /* LSTMLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6119AC2F1C6139900020E0E6 /* LSTMLayer.swift */; };
+		6119AC311C6139900020E0E6 /* LSTMLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6119AC2F1C6139900020E0E6 /* LSTMLayer.swift */; };
+		6119AC331C61486D0020E0E6 /* LSTM.metal in Sources */ = {isa = PBXBuildFile; fileRef = 6119AC321C61486D0020E0E6 /* LSTM.metal */; };
+		6119AC341C61486D0020E0E6 /* LSTM.metal in Sources */ = {isa = PBXBuildFile; fileRef = 6119AC321C61486D0020E0E6 /* LSTM.metal */; };
+		6119AC351C61486D0020E0E6 /* LSTM.metal in Sources */ = {isa = PBXBuildFile; fileRef = 6119AC321C61486D0020E0E6 /* LSTM.metal */; };
+		6119AC361C61486D0020E0E6 /* LSTM.metal in Sources */ = {isa = PBXBuildFile; fileRef = 6119AC321C61486D0020E0E6 /* LSTM.metal */; };
+		6119AC381C616F4F0020E0E6 /* LSTMLayerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6119AC371C616F4F0020E0E6 /* LSTMLayerTests.swift */; };
+		6119AC391C616F4F0020E0E6 /* LSTMLayerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6119AC371C616F4F0020E0E6 /* LSTMLayerTests.swift */; };
 		614198001C5FEFB700FB6770 /* InnerProduct.metal in Sources */ = {isa = PBXBuildFile; fileRef = 614197FF1C5FEFB700FB6770 /* InnerProduct.metal */; };
 		614198011C5FEFB700FB6770 /* InnerProduct.metal in Sources */ = {isa = PBXBuildFile; fileRef = 614197FF1C5FEFB700FB6770 /* InnerProduct.metal */; };
 		614198021C600BA600FB6770 /* ReLU.metal in Sources */ = {isa = PBXBuildFile; fileRef = 615C96251C5BF91500A1CFD4 /* ReLU.metal */; };
@@ -65,6 +73,9 @@
 		610AAB8D1BDAF776008CC910 /* ReLULayerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReLULayerTests.swift; sourceTree = "<group>"; };
 		6119AC291C6041D20020E0E6 /* Utilities.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Utilities.swift; sourceTree = "<group>"; };
 		6119AC2C1C61266B0020E0E6 /* MetalTestCase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MetalTestCase.swift; sourceTree = "<group>"; };
+		6119AC2F1C6139900020E0E6 /* LSTMLayer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LSTMLayer.swift; sourceTree = "<group>"; };
+		6119AC321C61486D0020E0E6 /* LSTM.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = LSTM.metal; sourceTree = "<group>"; };
+		6119AC371C616F4F0020E0E6 /* LSTMLayerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LSTMLayerTests.swift; sourceTree = "<group>"; };
 		614197FF1C5FEFB700FB6770 /* InnerProduct.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = InnerProduct.metal; sourceTree = "<group>"; };
 		6159F85F1BD1F55D0010F83C /* BrainCore.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = BrainCore.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		6159F8691BD1F55D0010F83C /* BrainCoreTests.OSX.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BrainCoreTests.OSX.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -160,8 +171,9 @@
 		6159F8981BD1F5CE0010F83C /* Layers */ = {
 			isa = PBXGroup;
 			children = (
-				6159F8991BD1F5CE0010F83C /* InnerProductLayer.swift */,
 				6159F89A1BD1F5CE0010F83C /* Layer.swift */,
+				6159F8991BD1F5CE0010F83C /* InnerProductLayer.swift */,
+				6119AC2F1C6139900020E0E6 /* LSTMLayer.swift */,
 				6159F89B1BD1F5CE0010F83C /* ReLULayer.swift */,
 			);
 			path = Layers;
@@ -175,6 +187,7 @@
 				6159F89F1BD1F5CE0010F83C /* NetTests.swift */,
 				610AAB8A1BDAF766008CC910 /* InnerProductLayerTests.swift */,
 				610AAB8D1BDAF776008CC910 /* ReLULayerTests.swift */,
+				6119AC371C616F4F0020E0E6 /* LSTMLayerTests.swift */,
 			);
 			path = Tests;
 			sourceTree = "<group>";
@@ -182,8 +195,9 @@
 		615C96241C5BF8F700A1CFD4 /* Metal */ = {
 			isa = PBXGroup;
 			children = (
-				615C96251C5BF91500A1CFD4 /* ReLU.metal */,
 				614197FF1C5FEFB700FB6770 /* InnerProduct.metal */,
+				6119AC321C61486D0020E0E6 /* LSTM.metal */,
+				615C96251C5BF91500A1CFD4 /* ReLU.metal */,
 			);
 			path = Metal;
 			sourceTree = "<group>";
@@ -392,11 +406,13 @@
 			files = (
 				614198001C5FEFB700FB6770 /* InnerProduct.metal in Sources */,
 				6159F8A41BD1F5CE0010F83C /* Layer.swift in Sources */,
+				6119AC331C61486D0020E0E6 /* LSTM.metal in Sources */,
 				615C96261C5BF91500A1CFD4 /* ReLU.metal in Sources */,
 				6159F8A61BD1F5CE0010F83C /* Net.swift in Sources */,
 				6159F8A31BD1F5CE0010F83C /* InnerProductLayer.swift in Sources */,
 				6119AC2A1C6041D20020E0E6 /* Utilities.swift in Sources */,
 				6159F8A51BD1F5CE0010F83C /* ReLULayer.swift in Sources */,
+				6119AC301C6139900020E0E6 /* LSTMLayer.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -410,6 +426,8 @@
 				6159F8B11BD1F73D0010F83C /* NetTests.swift in Sources */,
 				610AAB8E1BDAF776008CC910 /* ReLULayerTests.swift in Sources */,
 				6119AC2D1C61266B0020E0E6 /* MetalTestCase.swift in Sources */,
+				6119AC341C61486D0020E0E6 /* LSTM.metal in Sources */,
+				6119AC381C616F4F0020E0E6 /* LSTMLayerTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -419,11 +437,13 @@
 			files = (
 				614198011C5FEFB700FB6770 /* InnerProduct.metal in Sources */,
 				615C96271C5BF91500A1CFD4 /* ReLU.metal in Sources */,
+				6119AC351C61486D0020E0E6 /* LSTM.metal in Sources */,
 				6159F8AD1BD1F5EB0010F83C /* InnerProductLayer.swift in Sources */,
 				6159F8AF1BD1F5EB0010F83C /* ReLULayer.swift in Sources */,
 				6119AC2B1C6041D20020E0E6 /* Utilities.swift in Sources */,
 				6159F8AC1BD1F5E60010F83C /* Net.swift in Sources */,
 				6159F8AE1BD1F5EB0010F83C /* Layer.swift in Sources */,
+				6119AC311C6139900020E0E6 /* LSTMLayer.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -437,6 +457,8 @@
 				610AAB8F1BDAF776008CC910 /* ReLULayerTests.swift in Sources */,
 				614198021C600BA600FB6770 /* ReLU.metal in Sources */,
 				6119AC2E1C61266B0020E0E6 /* MetalTestCase.swift in Sources */,
+				6119AC361C61486D0020E0E6 /* LSTM.metal in Sources */,
+				6119AC391C616F4F0020E0E6 /* LSTMLayerTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
