@@ -47,9 +47,7 @@ class InnerProductLayerTests: MetalTestCase {
             commandBuffer.waitUntilCompleted()
         }
 
-        let expectedResult = Matrix<Float>(biases)
-        cblas_sgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, Int32(1), Int32(outputSize), Int32(inputSize), 1, input.pointer, Int32(inputSize), weights.pointer, Int32(outputSize), 1, expectedResult.mutablePointer, Int32(inputSize))
-
+        let expectedResult = input * weights + biases
         let result = UnsafeMutablePointer<Float>(outputBuffer.contents())
         for i in 0..<outputSize {
             XCTAssertEqualWithAccuracy(result[i], expectedResult[0, i], accuracy: 0.0001)
