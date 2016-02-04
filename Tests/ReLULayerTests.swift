@@ -14,9 +14,10 @@ class ReLULayerTests: MetalTestCase {
 
     func testForward() {
         let dataSize = 1024 * 1024
-        let library = metalLibrary
-        let device = library.device
-        let layer = try! ReLULayer(library: library, size: dataSize)
+
+        let device = self.device
+        let net = try! Net(device: device)
+        let layer = try! ReLULayer(net: net, size: dataSize)
 
         var data = [Float](count: dataSize, repeatedValue: 0.0)
         for i in 0..<dataSize {
@@ -47,9 +48,10 @@ class ReLULayerTests: MetalTestCase {
 
     func testBackward() {
         let dataSize = 1024 * 1024
-        let library = metalLibrary
-        let device = library.device
-        let layer = try! ReLULayer(library: library, size: dataSize)
+
+        let device = self.device
+        let net = try! Net(device: device)
+        let layer = try! ReLULayer(net: net, size: dataSize)
 
         var input = [Float](count: dataSize, repeatedValue: 0.0)
         var outputDiff = [Float](count: dataSize, repeatedValue: 0.0)

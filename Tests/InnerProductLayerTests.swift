@@ -32,9 +32,9 @@ class InnerProductLayerTests: MetalTestCase {
             biases[0, i] = 2 * Float(arc4random()) / Float(UINT32_MAX) - 1.0
         }
 
-        let library = metalLibrary
-        let device = library.device
-        let layer = try! InnerProductLayer(library: library, weights: weights, biases: biases.row(0))
+        let device = self.device
+        let net = try! Net(device: device)
+        let layer = try! InnerProductLayer(net: net, weights: weights, biases: biases.row(0))
 
         let queue = device.newCommandQueue()
 

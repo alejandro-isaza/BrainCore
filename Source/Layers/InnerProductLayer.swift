@@ -29,11 +29,12 @@ public class InnerProductLayer: ForwardLayer, BackwardLayer {
         let outputSize: UInt16
     }
 
-    public init<M: QuadraticType, A: LinearType where M.Element == Float, A.Element == Float>(library: MTLLibrary, weights: M, biases: A) throws {
+    public init<M: QuadraticType, A: LinearType where M.Element == Float, A.Element == Float>(net: Net, weights: M, biases: A) throws {
         inputSize = weights.rows
         outputSize = weights.columns
         precondition(biases.count == outputSize)
 
+        let library = net.library
         let forwardFunction = library.newFunctionWithName("inner_product_forward")!
         forwardState = try library.device.newComputePipelineStateWithFunction(forwardFunction)
 
@@ -43,11 +44,11 @@ public class InnerProductLayer: ForwardLayer, BackwardLayer {
         let backwardInputFunction = library.newFunctionWithName("inner_product_backward_input")!
         backwardInputState = try library.device.newComputePipelineStateWithFunction(backwardInputFunction)
 
-        self.weights = library.device.newBufferWithBytes(weights.pointer, length: weights.count * sizeof(Float), options: .StorageModePrivate)
-        self.biases = library.device.newBufferWithBytes(biases.pointer, length: biases.count * sizeof(Float), options: .StorageModePrivate)
+        self.weights = library.device.newBufferWithBytes(weights.pointer, length: weights.count * sizeof(Float), options: .CPUCacheModeDefaultCache)
+        self.biases = library.device.newBufferWithBytes(biases.pointer, length: biases.count * sizeof(Float), options: .CPUCacheModeDefaultCache)
 
         var dimensions = InnerProductDimensions(inputSize: UInt16(inputSize), outputSize: UInt16(outputSize))
-        self.dimensions = library.device.newBufferWithBytes(&dimensions, length: sizeof(InnerProductDimensions), options: .StorageModePrivate)
+        self.dimensions = library.device.newBufferWithBytes(&dimensions, length: sizeof(InnerProductDimensions), options: .CPUCacheModeDefaultCache)
     }
 
     public func encodeForwardInBuffer(buffer: MTLCommandBuffer, input: MTLBuffer, output: MTLBuffer) {

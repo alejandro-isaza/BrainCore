@@ -14,11 +14,11 @@ struct InnerProductDimensions {
     ushort output_size;
 };
 
-kernel void inner_product_forward(const device float* input,
-                                  const device float* weights,
-                                  const device float* biases,
-                                  device float* output,
-                                  constant InnerProductDimensions& dims,
+kernel void inner_product_forward(const device float* input [[ buffer(0) ]],
+                                  const device float* weights [[ buffer(1) ]],
+                                  const device float* biases [[ buffer(2) ]],
+                                  device float* output [[ buffer(3) ]],
+                                  constant InnerProductDimensions& dims [[ buffer(4) ]],
                                   uint id [[ thread_position_in_grid ]])
 {
     if (id >= dims.output_size)
@@ -30,11 +30,11 @@ kernel void inner_product_forward(const device float* input,
     }
 }
 
-kernel void inner_product_backward_params(const device float* outputDiff,
-                                          const device float* input,
-                                          device float* weightDiff,
-                                          device float* biasDiff,
-                                          constant InnerProductDimensions& dims,
+kernel void inner_product_backward_params(const device float* outputDiff [[ buffer(0) ]],
+                                          const device float* input [[ buffer(1) ]],
+                                          device float* weightDiff [[ buffer(2) ]],
+                                          device float* biasDiff [[ buffer(3) ]],
+                                          constant InnerProductDimensions& dims [[ buffer(4) ]],
                                           uint id [[ thread_position_in_grid ]])
 {
     if (id >= dims.output_size)
@@ -47,10 +47,10 @@ kernel void inner_product_backward_params(const device float* outputDiff,
     biasDiff[id] += outputDiff[id];
 }
 
-kernel void inner_product_backward_input(const device float* outputDiff,
-                                         const device float* weights,
-                                         device float* inputDiff,
-                                         constant InnerProductDimensions& dims,
+kernel void inner_product_backward_input(const device float* outputDiff [[ buffer(0) ]],
+                                         const device float* weights [[ buffer(1) ]],
+                                         device float* inputDiff [[ buffer(2) ]],
+                                         constant InnerProductDimensions& dims [[ buffer(3) ]],
                                          uint id [[ thread_position_in_grid ]])
 {
     if (id >= dims.input_size)

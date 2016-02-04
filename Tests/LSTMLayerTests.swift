@@ -16,6 +16,8 @@ func sigmoid(x: Float) -> Float {
 
 class LSTMLayerTests: MetalTestCase {
     func testForward() {
+        let device = self.device
+        
         let inputSize = 1
         let unitCount = 1
 
@@ -36,9 +38,8 @@ class LSTMLayerTests: MetalTestCase {
 
         let biases = ValueArray<Float>(count: 4 * unitCount, repeatedValue: 0.0)
 
-        let library = metalLibrary
-        let device = library.device
-        let layer = try! LSTMLayer(library: library, weights: weights, biases: biases)
+        let net = try! Net(device: device)
+        let layer = try! LSTMLayer(net: net, weights: weights, biases: biases)
 
         let queue = device.newCommandQueue()
 

@@ -19,12 +19,12 @@ inline float sigmoid(const float x) {
     return 1.0 / (1.0 + exp(-x));
 }
 
-kernel void lstm_forward(const device float* input,
-                         const device float* weights,
-                         const device float* biases,
-                         device float* output,
-                         device float* state,
-                         constant LSTMParameters& params,
+kernel void lstm_forward(const device float* input [[ buffer(0) ]],
+                         const device float* weights [[ buffer(1) ]],
+                         const device float* biases [[ buffer(2) ]],
+                         device float* output [[ buffer(3) ]],
+                         device float* state [[ buffer(4) ]],
+                         constant LSTMParameters& params [[ buffer(5) ]],
                          uint unit [[ thread_position_in_grid ]])
 {
     if (unit >= params.unitCount)

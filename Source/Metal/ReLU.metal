@@ -10,16 +10,16 @@
 
 using namespace metal;
 
-kernel void linear_rectify_forward(const device float* input,
-                                   device float* output,
+kernel void linear_rectify_forward(const device float* input [[ buffer(0) ]],
+                                   device float* output [[ buffer(1) ]],
                                    uint id [[ thread_position_in_grid ]])
 {
     output[id] = fmax(0.0, input[id]);
 }
 
-kernel void linear_rectify_backward(const device float* outputDiff,
-                                    const device float* input,
-                                    device float* inputDiff,
+kernel void linear_rectify_backward(const device float* outputDiff [[ buffer(0) ]],
+                                    const device float* input [[ buffer(1) ]],
+                                    device float* inputDiff [[ buffer(2) ]],
                                     uint id [[ thread_position_in_grid ]])
 {
     if (input[id] > 0) {

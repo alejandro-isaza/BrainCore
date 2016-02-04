@@ -37,18 +37,23 @@ public class Net {
     var openNodes = [Node]()
     var closedNodes = Set<Node>()
 
-    var device: MTLDevice
-    var library: MTLLibrary
+    let device: MTLDevice
+    var library: MTLLibrary!
     var commandQueue: MTLCommandQueue
 
     var queue: dispatch_queue_t
     var activeThreads = 0
 
-    public init(device: MTLDevice, library: MTLLibrary) {
+    public init(device: MTLDevice) throws {
         self.device = device
-        self.library = library
+
         commandQueue = device.newCommandQueue()
         queue = dispatch_queue_create("Net", DISPATCH_QUEUE_SERIAL)
+
+        guard let path = NSBundle(forClass: self.dynamicType).pathForResource("default", ofType: "metallib") else {
+            fatalError("Metal library not found")
+        }
+        library = try device.newLibraryWithFile(path)
     }
 
     public func addLayer(layer: Layer, name: String) -> LayerRef {

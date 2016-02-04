@@ -25,19 +25,18 @@ class NetTests: MetalTestCase {
     }
 
     func testTwoInputOneOutputActivation() {
-        let library = metalLibrary
-        let net = Net(device: library.device, library: library)
+        let net = try! Net(device: device)
 
         let source = Source(data: [1, 1])
         let weights = Matrix<Float>(rows: 2, columns: 1, elements: [2, 4])
         let biases = Array<Float>([1])
 
-        let ip = try! InnerProductLayer(library: library, weights: weights, biases: biases)
+        let ip = try! InnerProductLayer(net: net, weights: weights, biases: biases)
         let sink = Sink()
 
         net.addLayer(source, name: "source")
         net.addLayer(ip, name: "inner product")
-        net.addLayer(try! ReLULayer(library: library, size: 1), name: "ReLU")
+        net.addLayer(try! ReLULayer(net: net, size: 1), name: "ReLU")
         net.addLayer(sink, name: "sink")
 
         net.connectLayer("source", toLayer: "inner product")
@@ -57,20 +56,19 @@ class NetTests: MetalTestCase {
     }
 
     func testTwoInputOneOutputNoActivation() {
-        let library = metalLibrary
-        let device = library.device
-        let net = Net(device: device, library: library)
+        let device = self.device
+        let net = try! Net(device: device)
 
         let source = Source(data: [1, 1])
         let weights = Matrix<Float>(rows: 2, columns: 1, elements: [2, -4])
         let biases = Array<Float>([1])
 
-        let ip = try! InnerProductLayer(library: library, weights: weights, biases: biases)
+        let ip = try! InnerProductLayer(net: net, weights: weights, biases: biases)
         let sink = Sink()
 
         net.addLayer(source, name: "source")
         net.addLayer(ip, name: "inner product")
-        net.addLayer(try! ReLULayer(library: library, size: 1), name: "ReLU")
+        net.addLayer(try! ReLULayer(net: net, size: 1), name: "ReLU")
         net.addLayer(sink, name: "sink")
 
         net.connectLayer("source", toLayer: "inner product")

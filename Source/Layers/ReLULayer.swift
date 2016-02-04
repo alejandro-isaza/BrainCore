@@ -21,9 +21,10 @@ public class ReLULayer: ForwardLayer, BackwardLayer {
         return size
     }
 
-    public init(library: MTLLibrary, size: Int) throws {
+    public init(net: Net, size: Int) throws {
         self.size = size
 
+        let library = net.library
         let forwardFunction = library.newFunctionWithName("linear_rectify_forward")!
         forwardState = try library.device.newComputePipelineStateWithFunction(forwardFunction)
 

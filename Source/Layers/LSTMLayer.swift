@@ -49,7 +49,7 @@ public class LSTMLayer: ForwardLayer {
         return 2 * Int(parameters.unitCount)
     }
 
-    public init<M: QuadraticType, A: LinearType where M.Element == Float, A.Element == Float>(library: MTLLibrary, weights: M, biases: A, clipTo: Float? = nil) throws {
+    public init<M: QuadraticType, A: LinearType where M.Element == Float, A.Element == Float>(net: Net, weights: M, biases: A, clipTo: Float? = nil) throws {
         let unitCount = biases.count / 4
         parameters = Parameters(unitCount: unitCount, inputSize: weights.rows - unitCount, clipTo: clipTo)
 
@@ -57,17 +57,18 @@ public class LSTMLayer: ForwardLayer {
         precondition(weights.columns == 4 * unitCount)
         precondition(biases.count == 4 * unitCount)
 
+        let library = net.library
         let forwardFunction = library.newFunctionWithName("lstm_forward")!
         forwardState = try library.device.newComputePipelineStateWithFunction(forwardFunction)
 
-        self.weights = library.device.newBufferWithBytes(weights.pointer, length: weights.count * sizeof(Float), options: .StorageModePrivate)
-        self.biases = library.device.newBufferWithBytes(biases.pointer, length: biases.count * sizeof(Float), options: .StorageModePrivate)
+        self.weights = library.device.newBufferWithBytes(weights.pointer, length: weights.count * sizeof(Float), options: .CPUCacheModeDefaultCache)
+        self.biases = library.device.newBufferWithBytes(biases.pointer, length: biases.count * sizeof(Float), options: .CPUCacheModeDefaultCache)
 
         let state = ValueArray<Float>(count: stateSize, repeatedValue: 0.0)
         self.state = library.device.newBufferWithBytes(state.pointer, length: stateSize * sizeof(Float), options: .CPUCacheModeDefaultCache)
 
         var params = parameters
-        self.parametersBuffer = library.device.newBufferWithBytes(&params, length: sizeof(Parameters), options: .StorageModePrivate)
+        self.parametersBuffer = library.device.newBufferWithBytes(&params, length: sizeof(Parameters), options: .CPUCacheModeDefaultCache)
     }
 
     /// Run one step of LSTM.
