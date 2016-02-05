@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name         = "BrainCore"
-  s.version      = "0.1.2"
+  s.version      = "0.1.3"
   s.summary      = "The iOS and OS X neural network framework"
   s.homepage     = "https://github.com/aleph7/BrainCore"
   s.license      = "MIT"
