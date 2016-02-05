@@ -42,6 +42,7 @@ public class Net {
     var commandQueue: MTLCommandQueue
 
     var queue: dispatch_queue_t
+    var running = false
     var activeThreads = 0
 
     public init(device: MTLDevice) throws {
@@ -160,7 +161,8 @@ public class Net {
 
     /// Perform a forward pass on the network
     public func forward(completion completion: (() -> Void)?) {
-        precondition(activeThreads == 0, "You can only run one forward pass at a time")
+        precondition(!running, "You can only run one forward pass at a time")
+        running = true
 
         openNodes.removeAll(keepCapacity: true)
         closedNodes.removeAll(keepCapacity: true)
@@ -211,7 +213,10 @@ public class Net {
         }
 
         if activeThreads == 0 {
-            completion?()
+            running = false
+            dispatch_sync(dispatch_get_main_queue()) {
+                completion?()
+            }
         }
     }
 
