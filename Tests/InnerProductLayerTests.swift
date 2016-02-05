@@ -38,7 +38,9 @@ class InnerProductLayerTests: MetalTestCase {
 
         let queue = device.newCommandQueue()
 
-        let inputBuffer = device.newBufferWithBytes(input.pointer, length: inputSize * sizeof(Float), options: .CPUCacheModeDefaultCache)
+        let inputBuffer = withPointer(input) { pointer in
+            return device.newBufferWithBytes(pointer, length: inputSize * sizeof(Float), options: .CPUCacheModeDefaultCache)
+        }
         let outputBuffer = device.newBufferWithLength(outputSize * sizeof(Float), options: .CPUCacheModeDefaultCache)
         measureBlock {
             let commandBuffer = queue.commandBuffer()

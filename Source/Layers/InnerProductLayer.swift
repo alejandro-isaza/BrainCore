@@ -44,8 +44,12 @@ public class InnerProductLayer: ForwardLayer, BackwardLayer {
         let backwardInputFunction = library.newFunctionWithName("inner_product_backward_input")!
         backwardInputState = try library.device.newComputePipelineStateWithFunction(backwardInputFunction)
 
-        self.weights = library.device.newBufferWithBytes(weights.pointer, length: weights.count * sizeof(Float), options: .CPUCacheModeDefaultCache)
-        self.biases = library.device.newBufferWithBytes(biases.pointer, length: biases.count * sizeof(Float), options: .CPUCacheModeDefaultCache)
+        withPointer(weights) { pointer in
+            self.weights = library.device.newBufferWithBytes(pointer, length: weights.count * sizeof(Float), options: .CPUCacheModeWriteCombined)
+        }
+        withPointer(biases) { pointer in
+            self.biases = library.device.newBufferWithBytes(pointer, length: biases.count * sizeof(Float), options: .CPUCacheModeWriteCombined)
+        }
 
         var dimensions = InnerProductDimensions(inputSize: UInt16(inputSize), outputSize: UInt16(outputSize))
         self.dimensions = library.device.newBufferWithBytes(&dimensions, length: sizeof(InnerProductDimensions), options: .CPUCacheModeDefaultCache)

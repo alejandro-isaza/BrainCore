@@ -61,8 +61,12 @@ public class LSTMLayer: ForwardLayer {
         let forwardFunction = library.newFunctionWithName("lstm_forward")!
         forwardState = try library.device.newComputePipelineStateWithFunction(forwardFunction)
 
-        self.weights = library.device.newBufferWithBytes(weights.pointer, length: weights.count * sizeof(Float), options: .CPUCacheModeDefaultCache)
-        self.biases = library.device.newBufferWithBytes(biases.pointer, length: biases.count * sizeof(Float), options: .CPUCacheModeDefaultCache)
+        withPointer(weights) { pointer in
+            self.weights = library.device.newBufferWithBytes(pointer, length: weights.count * sizeof(Float), options: .CPUCacheModeDefaultCache)
+        }
+        withPointer(biases) { pointer in
+            self.biases = library.device.newBufferWithBytes(pointer, length: biases.count * sizeof(Float), options: .CPUCacheModeDefaultCache)
+        }
 
         let state = ValueArray<Float>(count: stateSize, repeatedValue: 0.0)
         self.state = library.device.newBufferWithBytes(state.pointer, length: stateSize * sizeof(Float), options: .CPUCacheModeDefaultCache)
