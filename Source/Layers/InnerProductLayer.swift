@@ -10,16 +10,24 @@ import Metal
 import Upsurge
 
 public class InnerProductLayer: ForwardLayer, BackwardLayer {
-    public let inputSize: Int
-    public let outputSize: Int
+    public let weights: Matrix<Float>
+    public let biases: ValueArray<Float>
+
+    public var inputSize: Int {
+        return weights.rows
+    }
+
+    public var outputSize: Int {
+        return weights.columns
+    }
 
     public var forwardState: MTLComputePipelineState!
     public var backwardParamsState: MTLComputePipelineState!
     public var backwardInputState: MTLComputePipelineState!
 
-    public var weights: MTLBuffer!
-    public var biases: MTLBuffer!
-    public var dimensions: MTLBuffer!
+    public var weightsBuffer: MTLBuffer!
+    public var biasesBuffer: MTLBuffer!
+    public var dimensionsBuffer: MTLBuffer!
 
     public var weightDiff: MTLBuffer?
     public var biasDiff: MTLBuffer?
@@ -29,12 +37,13 @@ public class InnerProductLayer: ForwardLayer, BackwardLayer {
         let outputSize: UInt16
     }
 
-    public init<M: QuadraticType, A: LinearType where M.Element == Float, A.Element == Float>(net: Net, weights: M, biases: A) throws {
-        inputSize = weights.rows
-        outputSize = weights.columns
+    public init(weights: Matrix<Float>, biases: ValueArray<Float>) throws {
+        self.weights = weights
+        self.biases = biases
         precondition(biases.count == outputSize)
+    }
 
-        let library = net.library
+    public func setupInLibrary(library: MTLLibrary) throws {
         let forwardFunction = library.newFunctionWithName("inner_product_forward")!
         forwardState = try library.device.newComputePipelineStateWithFunction(forwardFunction)
 
@@ -45,29 +54,29 @@ public class InnerProductLayer: ForwardLayer, BackwardLayer {
         backwardInputState = try library.device.newComputePipelineStateWithFunction(backwardInputFunction)
 
         withPointer(weights) { pointer in
-            self.weights = library.device.newBufferWithBytes(pointer, length: weights.count * sizeof(Float), options: .CPUCacheModeWriteCombined)
+            weightsBuffer = library.device.newBufferWithBytes(pointer, length: inputSize * outputSize * sizeof(Float), options: .CPUCacheModeWriteCombined)
         }
-        self.weights.label = "InnerProductWeights"
+        weightsBuffer.label = "InnerProductWeights"
 
         withPointer(biases) { pointer in
-            self.biases = library.device.newBufferWithBytes(pointer, length: biases.count * sizeof(Float), options: .CPUCacheModeWriteCombined)
+            biasesBuffer = library.device.newBufferWithBytes(pointer, length: outputSize * sizeof(Float), options: .CPUCacheModeWriteCombined)
         }
-        self.biases.label = "InnerProductBiases"
+        biasesBuffer.label = "InnerProductBiases"
 
         var dimensions = InnerProductDimensions(inputSize: UInt16(inputSize), outputSize: UInt16(outputSize))
-        self.dimensions = library.device.newBufferWithBytes(&dimensions, length: sizeof(InnerProductDimensions), options: .CPUCacheModeWriteCombined)
-        self.dimensions.label = "InnerProductDimensions"
+        dimensionsBuffer = library.device.newBufferWithBytes(&dimensions, length: sizeof(InnerProductDimensions), options: .CPUCacheModeWriteCombined)
+        dimensionsBuffer.label = "InnerProductDimensions"
     }
 
-    public func encodeForwardInBuffer(buffer: MTLCommandBuffer, input: MTLBuffer, output: MTLBuffer) {
+    public func encodeForwardInBuffer(buffer: MTLCommandBuffer, input: MTLBuffer, offset inputOffset: Int, output: MTLBuffer, offset outputOffset: Int) {
         let encoder = buffer.computeCommandEncoder()
         encoder.label = "InnerProductForward"
         encoder.setComputePipelineState(forwardState)
-        encoder.setBuffer(input, offset: 0, atIndex: 0)
-        encoder.setBuffer(weights, offset: 0, atIndex: 1)
-        encoder.setBuffer(biases, offset: 0, atIndex: 2)
-        encoder.setBuffer(output, offset: 0, atIndex: 3)
-        encoder.setBuffer(dimensions, offset: 0, atIndex: 4)
+        encoder.setBuffer(input, offset: inputOffset * sizeof(Float), atIndex: 0)
+        encoder.setBuffer(weightsBuffer, offset: 0, atIndex: 1)
+        encoder.setBuffer(biasesBuffer, offset: 0, atIndex: 2)
+        encoder.setBuffer(output, offset: outputOffset * sizeof(Float), atIndex: 3)
+        encoder.setBuffer(dimensionsBuffer, offset: 0, atIndex: 4)
         
         let count = outputSize
         let threadsPerGroup = MTLSize(width: forwardState.threadExecutionWidth, height: 1, depth: 1)
@@ -95,7 +104,7 @@ public class InnerProductLayer: ForwardLayer, BackwardLayer {
             encoder.setBuffer(input, offset: 0, atIndex: 1)
             encoder.setBuffer(weightDiff, offset: 0, atIndex: 2)
             encoder.setBuffer(biasDiff, offset: 0, atIndex: 3)
-            encoder.setBuffer(dimensions, offset: 0, atIndex: 4)
+            encoder.setBuffer(dimensionsBuffer, offset: 0, atIndex: 4)
 
             let count = outputSize
             let threadsPerGroup = MTLSize(width: forwardState.threadExecutionWidth, height: 1, depth: 1)
@@ -110,9 +119,9 @@ public class InnerProductLayer: ForwardLayer, BackwardLayer {
             encoder.label = "InnerProductBackwardState"
             encoder.setComputePipelineState(backwardInputState)
             encoder.setBuffer(outputDiff, offset: 0, atIndex: 0)
-            encoder.setBuffer(weights, offset: 0, atIndex: 1)
+            encoder.setBuffer(weightsBuffer, offset: 0, atIndex: 1)
             encoder.setBuffer(inputDiff, offset: 0, atIndex: 2)
-            encoder.setBuffer(dimensions, offset: 0, atIndex: 3)
+            encoder.setBuffer(dimensionsBuffer, offset: 0, atIndex: 3)
 
             let count = inputSize
             let threadsPerGroup = MTLSize(width: forwardState.threadExecutionWidth, height: 1, depth: 1)

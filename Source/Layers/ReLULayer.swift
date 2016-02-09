@@ -21,10 +21,11 @@ public class ReLULayer: ForwardLayer, BackwardLayer {
         return size
     }
 
-    public init(net: Net, size: Int) throws {
+    public init(size: Int) {
         self.size = size
+    }
 
-        let library = net.library
+    public func setupInLibrary(library: MTLLibrary) throws {
         let forwardFunction = library.newFunctionWithName("linear_rectify_forward")!
         forwardState = try library.device.newComputePipelineStateWithFunction(forwardFunction)
 
@@ -32,12 +33,12 @@ public class ReLULayer: ForwardLayer, BackwardLayer {
         backwardState = try library.device.newComputePipelineStateWithFunction(backwardFunction)
     }
 
-    public func encodeForwardInBuffer(buffer: MTLCommandBuffer, input: MTLBuffer, output: MTLBuffer) {
+    public func encodeForwardInBuffer(buffer: MTLCommandBuffer, input: MTLBuffer, offset inputOffset: Int, output: MTLBuffer, offset outputOffset: Int) {
         let encoder = buffer.computeCommandEncoder()
         encoder.label = "ReLUForward"
         encoder.setComputePipelineState(forwardState)
-        encoder.setBuffer(input, offset: 0, atIndex: 0)
-        encoder.setBuffer(output, offset: 0, atIndex: 1)
+        encoder.setBuffer(input, offset: inputOffset * sizeof(Float), atIndex: 0)
+        encoder.setBuffer(output, offset: outputOffset * sizeof(Float), atIndex: 1)
 
         let count = input.length / sizeof(Float)
         let threadsPerGroup = MTLSize(width: forwardState.threadExecutionWidth, height: 1, depth: 1)

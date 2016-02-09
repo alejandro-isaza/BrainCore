@@ -14,22 +14,22 @@ public func unsafeBufferPointerFromBuffer(buffer: MTLBuffer) -> UnsafeMutableBuf
     return UnsafeMutableBufferPointer(start: pointer, count: count)
 }
 
-public func arrayFromBuffer(buffer: MTLBuffer) -> Array<Float> {
-    let pointer = UnsafePointer<Float>(buffer.contents())
-    let count = buffer.length / sizeof(Float)
+public func arrayFromBuffer(buffer: MTLBuffer, start: Int = 0) -> Array<Float> {
+    let pointer = UnsafePointer<Float>(buffer.contents()) + start
+    let count = buffer.length / sizeof(Float) - start
     return Array<Float>(UnsafeBufferPointer(start: pointer, count: count))
 }
 
-public func valueArrayFromBuffer(buffer: MTLBuffer) -> ValueArray<Float> {
-    let pointer = UnsafeMutablePointer<Float>(buffer.contents())
-    let count = buffer.length / sizeof(Float)
+public func valueArrayFromBuffer(buffer: MTLBuffer, start: Int = 0) -> ValueArray<Float> {
+    let pointer = UnsafeMutablePointer<Float>(buffer.contents()) + start
+    let count = buffer.length / sizeof(Float) - start
     var array = ValueArray<Float>(count: count)
     withPointer(&array) { $0.assignFrom(pointer, count: count) }
     return array
 }
 
-public func fillBuffer<Collection: CollectionType where Collection.Generator.Element == Float>(buffer: MTLBuffer, withElements elements: Collection) {
-    let pointer = UnsafeMutablePointer<Float>(buffer.contents())
+public func fillBuffer<Collection: CollectionType where Collection.Generator.Element == Float>(buffer: MTLBuffer, start: Int, withElements elements: Collection) {
+    let pointer = UnsafeMutablePointer<Float>(buffer.contents()) + start
     for (i, v) in elements.enumerate() {
         pointer[i] = v
     }

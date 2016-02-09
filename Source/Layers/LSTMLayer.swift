@@ -28,12 +28,14 @@ public class LSTMLayer: ForwardLayer {
         }
     }
 
+    public let weights: Matrix<Float>
+    public let biases: ValueArray<Float>
     public let parameters: Parameters
 
     public var forwardState: MTLComputePipelineState!
     
-    public var weights: MTLBuffer!
-    public var biases: MTLBuffer!
+    public var weightsBuffer: MTLBuffer!
+    public var biasesBuffer: MTLBuffer!
     public var state: MTLBuffer!
     public var parametersBuffer: MTLBuffer!
 
@@ -49,27 +51,31 @@ public class LSTMLayer: ForwardLayer {
         return 2 * Int(parameters.unitCount)
     }
 
-    public init<M: QuadraticType, A: LinearType where M.Element == Float, A.Element == Float>(net: Net, weights: M, biases: A, clipTo: Float? = nil) throws {
+    public init(weights: Matrix<Float>, biases: ValueArray<Float>, clipTo: Float? = nil) throws {
+        self.weights = weights
+        self.biases = biases
+
         let unitCount = biases.count / 4
         parameters = Parameters(unitCount: unitCount, inputSize: weights.rows - unitCount, clipTo: clipTo)
 
         precondition(weights.rows == inputSize + unitCount)
         precondition(weights.columns == 4 * unitCount)
         precondition(biases.count == 4 * unitCount)
+    }
 
-        let library = net.library
+    public func setupInLibrary(library: MTLLibrary) throws {
         let forwardFunction = library.newFunctionWithName("lstm_forward")!
         forwardState = try library.device.newComputePipelineStateWithFunction(forwardFunction)
 
         withPointer(weights) { pointer in
-            self.weights = library.device.newBufferWithBytes(pointer, length: weights.count * sizeof(Float), options: .CPUCacheModeDefaultCache)
+            weightsBuffer = library.device.newBufferWithBytes(pointer, length: weights.count * sizeof(Float), options: .CPUCacheModeDefaultCache)
         }
-        self.weights.label = "LSTMWeights"
+        weightsBuffer.label = "LSTMWeights"
 
         withPointer(biases) { pointer in
-            self.biases = library.device.newBufferWithBytes(pointer, length: biases.count * sizeof(Float), options: .CPUCacheModeDefaultCache)
+            biasesBuffer = library.device.newBufferWithBytes(pointer, length: biases.count * sizeof(Float), options: .CPUCacheModeDefaultCache)
         }
-        self.biases.label = "LSTMBiases"
+        biasesBuffer.label = "LSTMBiases"
 
         let state = ValueArray<Float>(count: stateSize, repeatedValue: 0.0)
         self.state = library.device.newBufferWithBytes(state.pointer, length: stateSize * sizeof(Float), options: .CPUCacheModeDefaultCache)
@@ -81,14 +87,14 @@ public class LSTMLayer: ForwardLayer {
     }
 
     /// Run one step of LSTM.
-    public func encodeForwardInBuffer(buffer: MTLCommandBuffer, input: MTLBuffer, output: MTLBuffer) {
+    public func encodeForwardInBuffer(buffer: MTLCommandBuffer, input: MTLBuffer, offset inputOffset: Int, output: MTLBuffer, offset outputOffset: Int) {
         let encoder = buffer.computeCommandEncoder()
         encoder.label = "LSTMForward"
         encoder.setComputePipelineState(forwardState)
-        encoder.setBuffer(input, offset: 0, atIndex: 0)
-        encoder.setBuffer(weights, offset: 0, atIndex: 1)
-        encoder.setBuffer(biases, offset: 0, atIndex: 2)
-        encoder.setBuffer(output, offset: 0, atIndex: 3)
+        encoder.setBuffer(input, offset: inputOffset * sizeof(Float), atIndex: 0)
+        encoder.setBuffer(weightsBuffer, offset: 0, atIndex: 1)
+        encoder.setBuffer(biasesBuffer, offset: 0, atIndex: 2)
+        encoder.setBuffer(output, offset: outputOffset * sizeof(Float), atIndex: 3)
         encoder.setBuffer(state, offset: 0, atIndex: 4)
         encoder.setBuffer(parametersBuffer, offset: 0, atIndex: 5)
 

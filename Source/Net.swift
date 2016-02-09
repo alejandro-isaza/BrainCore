@@ -8,64 +8,33 @@
 import Metal
 
 public class Net {
+    public typealias BufferRef = Int
     public typealias LayerRef = Int
 
-    class Node : Hashable {
-        let id: Int
-        let layer: Layer
-        let name: String
-        var inputNodes = [Node]()
-        var outputNodes = [Node]()
-        var input: MTLBuffer?
-        var output: MTLBuffer?
+    var buffers = [NetBuffer]()
+    var dataNodes = [NetNode]()
+    var sinkNodes = [NetNode]()
+    var nodes = [NetNode]()
 
-        init(layer: Layer, name: String, id: Int) {
-            self.id = id
-            self.layer = layer
-            self.name = name
-        }
-
-        var hashValue: Int {
-            return id
-        }
+    public init() {
     }
 
-    var nextID = 0
-    var dataNodes = [Node]()
-    var nodes = [LayerRef: Node]()
-
-    var openNodes = [Node]()
-    var closedNodes = Set<Node>()
-
-    let device: MTLDevice
-    var library: MTLLibrary!
-    var commandQueue: MTLCommandQueue
-
-    var queue: dispatch_queue_t
-    var running = false
-    var activeThreads = 0
-
-    public init(device: MTLDevice) throws {
-        self.device = device
-
-        commandQueue = device.newCommandQueue()
-        commandQueue.label = "BrainCoreNet"
-        queue = dispatch_queue_create("Net", DISPATCH_QUEUE_SERIAL)
-
-        guard let path = NSBundle(forClass: self.dynamicType).pathForResource("default", ofType: "metallib") else {
-            fatalError("Metal library not found")
-        }
-        library = try device.newLibraryWithFile(path)
+    public func addBufferWithName(name: String, size: Int) -> BufferRef {
+        let buffer = NetBuffer(id: buffers.count, name: name, size: size)
+        buffers.append(buffer)
+        return buffer.id
     }
 
     public func addLayer(layer: Layer, name: String) -> LayerRef {
         validateLayer(layer)
-        let node = Node(layer: layer, name: name, id: nextID++)
+        let node = NetNode(id: nodes.count, name: name, layer: layer)
 
         if layer is DataLayer {
             dataNodes.append(node)
+        } else if layer is SinkLayer {
+            sinkNodes.append(node)
         }
-        nodes[node.id] = node
+        nodes.append(node)
 
         return node.id
     }
@@ -82,7 +51,7 @@ public class Net {
 
     /// Find a layer by name
     public func layerWithName(name: String) -> Layer? {
-        for (_, node) in nodes {
+        for node in nodes {
             if node.name == name {
                 return node.layer
             }
@@ -92,7 +61,7 @@ public class Net {
 
     /// Get a layer reference by name
     public func layerRefWithName(name: String) -> LayerRef? {
-        for (ref, node) in nodes {
+        for (ref, node) in nodes.enumerate() {
             if node.name == name {
                 return ref
             }
@@ -101,8 +70,8 @@ public class Net {
     }
 
     /// Get a node by layer name
-    func nodeWithLayerName(name: String) -> Node? {
-        for (_, node) in nodes {
+    func nodeWithLayerName(name: String) -> NetNode? {
+        for node in nodes {
             if node.name == name {
                 return node
             }
@@ -110,174 +79,64 @@ public class Net {
         return nil
     }
 
-    /// Connect two layers given their names
-    public func connectLayer(layer1: String, toLayer layer2: String) {
-        guard let ref1 = layerRefWithName(layer1) else {
-            precondition(false, "Layer not found '\(layer1)'")
-            return
+    /// Get a buffer by name
+    func bufferWithName(name: String) -> NetBuffer? {
+        for buffer in buffers {
+            if buffer.name == name {
+                return buffer
+            }
         }
-        guard let ref2 = layerRefWithName(layer2) else {
-            precondition(false, "Layer not found '\(layer1)'")
-            return
-        }
-        connectLayer(ref1, toLayer: ref2)
+        return nil
     }
 
-    /// Connect two layers
-    public func connectLayer(layer1: LayerRef, toLayer layer2: LayerRef) {
-        guard let node1 = nodes[layer1] else {
-            precondition(false, "Layer not found")
-            return
-        }
-        guard let node2 = nodes[layer2] else {
-            precondition(false, "Layer not found")
-            return
-        }
-
-        node1.outputNodes.append(node2)
-        node2.inputNodes.append(node1)
-    }
-
-    /// Get the input data that was used for a layer on the last forward pass
-    public func lastLayerInput(layerName: String) -> Array<Float>? {
+    /// Send the output of a layer to the given buffer with an optional offset
+    public func connectLayer(layerName: String, toBuffer bufferName: String, atOffset offset: Int = 0) {
         guard let node = nodeWithLayerName(layerName) else {
-            return nil
+            preconditionFailure("Layer not found '\(layerName)'")
         }
-        guard let input = node.input else {
-            return nil
+
+        guard let buffer = bufferWithName(bufferName) else {
+            preconditionFailure("Buffer not found '\(bufferName)'")
         }
-        return arrayFromBuffer(input)
+
+        node.outputBuffer = buffer
+        node.outputOffset = offset
+        buffer.inputNodes.append(node)
     }
 
-    /// Get the output data of a layer on the last forward pass
-    public func lastLayerOutput(layerName: String) -> Array<Float>? {
+    /// Send the output of a layer to the given buffer with an optional offset
+    public func connectLayer(layerID: LayerRef, toBuffer bufferID: BufferRef, atOffset offset: Int = 0) {
+        let node = nodes[layerID]
+        let buffer = buffers[bufferID]
+
+        node.outputBuffer = buffer
+        node.outputOffset = offset
+        buffer.inputNodes.append(node)
+    }
+
+
+    /// Get the input of a layer from the given buffer with an optional offset
+    public func connectBuffer(bufferName: String, atOffset offset: Int = 0, toLayer layerName: String) {
         guard let node = nodeWithLayerName(layerName) else {
-            return nil
+            preconditionFailure("Layer not found '\(layerName)'")
         }
-        guard let output = node.output else {
-            return nil
+
+        guard let buffer = bufferWithName(bufferName) else {
+            preconditionFailure("Buffer not found '\(bufferName)'")
         }
-        return arrayFromBuffer(output)
+
+        node.inputBuffer = buffer
+        node.inputOffset = offset
+        buffer.outputNodes.append(node)
     }
 
-    /// Perform a forward pass on the network
-    public func forward(completion completion: (() -> Void)?) {
-        precondition(!running, "You can only run one forward pass at a time")
-        running = true
+    /// Get the input of a layer from the given buffer with an optional offset
+    public func connectBuffer(bufferID: BufferRef, atOffset offset: Int = 0, toLayer layerID: LayerRef) {
+        let node = nodes[layerID]
+        let buffer = buffers[bufferID]
 
-        openNodes.removeAll(keepCapacity: true)
-        closedNodes.removeAll(keepCapacity: true)
-
-        // Collect all data
-        for n in dataNodes {
-            let dataLayer = n.layer as! DataLayer
-            if let buffer = n.output where buffer.length / sizeof(Float) == dataLayer.data.count {
-                fillBuffer(buffer, withElements: dataLayer.data)
-            } else {
-                let buffer = device.newBufferWithBytes(dataLayer.data.pointer, length: dataLayer.data.count * sizeof(Float), options: .CPUCacheModeWriteCombined)
-                buffer.label = "NetInput"
-                fillBuffer(buffer, withElements: dataLayer.data)
-                n.output = buffer
-            }
-            closeNode(n)
-        }
-
-        dispatch_async(queue) {
-            self.processNodes(completion)
-        }
+        node.inputBuffer = buffer
+        node.inputOffset = offset
+        buffer.outputNodes.append(node)
     }
-
-    private func processNodes(completion: (() -> Void)?) {
-        while !openNodes.isEmpty {
-            let node = openNodes.popLast()!
-            if closedNodes.contains(node) {
-                continue
-            }
-
-            let data = collectDataForNode(node)
-            if let forwardLayer = node.layer as? ForwardLayer {
-                let outputBuffer = setupOutputData(node, size: forwardLayer.outputSize)
-
-                let commandBuffer = commandQueue.commandBuffer()
-                forwardLayer.encodeForwardInBuffer(commandBuffer, input: data, output: outputBuffer)
-                commandBuffer.addCompletedHandler() { commandBuffer in
-                    dispatch_async(self.queue) {
-                        self.activeThreads -= 1
-                        self.closeNode(node)
-                        self.processNodes(completion)
-                    }
-                }
-                commandBuffer.commit()
-                activeThreads += 1
-            } else if let sinkLayer = node.layer as? SinkLayer {
-                sinkLayer.consume(valueArrayFromBuffer(data))
-            }
-        }
-
-        if activeThreads == 0 {
-            running = false
-            dispatch_sync(dispatch_get_main_queue()) {
-                completion?()
-            }
-        }
-    }
-
-    private func closeNode(node: Node) {
-        closedNodes.insert(node)
-        let newOpenNodes = node.outputNodes.filter{ isNodeReady($0) }
-        openNodes.appendContentsOf(newOpenNodes)
-    }
-
-    private func isNodeReady(node: Node) -> Bool {
-        for n in node.inputNodes {
-            if !closedNodes.contains(n) {
-                return false
-            }
-        }
-        return true
-    }
-
-    private func collectDataForNode(node: Node) -> MTLBuffer {
-        var size = 0
-        for n in node.inputNodes {
-            size += n.output?.length ?? 0
-        }
-
-        let data: MTLBuffer
-        if let input = node.input where input.length >= size {
-            data = input
-        } else {
-            data = device.newBufferWithLength(size , options: .CPUCacheModeWriteCombined)
-            data.label = "\(node.name)InputData"
-            node.input = data
-        }
-
-        let pointer = UnsafeMutablePointer<Float>(data.contents())
-        var i = 0
-        for n in node.inputNodes {
-            if let output = n.output {
-                let outputBuffer = unsafeBufferPointerFromBuffer(output)
-                (pointer + i).assignFrom(outputBuffer.baseAddress, count: outputBuffer.count)
-                i += outputBuffer.count
-            }
-        }
-
-        return data
-    }
-
-    private func setupOutputData(node: Node, size: Int) -> MTLBuffer {
-        let data: MTLBuffer
-        if let output = node.output where output.length >= size * sizeof(Float) {
-            data = output
-        } else {
-            data = device.newBufferWithLength(size * sizeof(Float), options: .CPUCacheModeWriteCombined)
-            data.label = "\(node.name)OutputData"
-            node.output = data
-        }
-        return data
-    }
-}
-
-func == (lhs: Net.Node, rhs: Net.Node) -> Bool {
-    return lhs.id == rhs.id
 }
