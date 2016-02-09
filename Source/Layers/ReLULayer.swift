@@ -34,6 +34,7 @@ public class ReLULayer: ForwardLayer, BackwardLayer {
 
     public func encodeForwardInBuffer(buffer: MTLCommandBuffer, input: MTLBuffer, output: MTLBuffer) {
         let encoder = buffer.computeCommandEncoder()
+        encoder.label = "ReLUForward"
         encoder.setComputePipelineState(forwardState)
         encoder.setBuffer(input, offset: 0, atIndex: 0)
         encoder.setBuffer(output, offset: 0, atIndex: 1)
@@ -48,6 +49,7 @@ public class ReLULayer: ForwardLayer, BackwardLayer {
 
     public func encodeBackwardInBuffer(buffer: MTLCommandBuffer, outputDiff: MTLBuffer, input: MTLBuffer, inputDiff: MTLBuffer) {
         let encoder = buffer.computeCommandEncoder()
+        encoder.label = "ReLUBackward"
         encoder.setComputePipelineState(backwardState)
         encoder.setBuffer(outputDiff, offset: 0, atIndex: 0)
         encoder.setBuffer(input, offset: 0, atIndex: 1)

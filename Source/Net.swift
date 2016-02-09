@@ -49,6 +49,7 @@ public class Net {
         self.device = device
 
         commandQueue = device.newCommandQueue()
+        commandQueue.label = "BrainCoreNet"
         queue = dispatch_queue_create("Net", DISPATCH_QUEUE_SERIAL)
 
         guard let path = NSBundle(forClass: self.dynamicType).pathForResource("default", ofType: "metallib") else {
@@ -174,6 +175,7 @@ public class Net {
                 fillBuffer(buffer, withElements: dataLayer.data)
             } else {
                 let buffer = device.newBufferWithBytes(dataLayer.data.pointer, length: dataLayer.data.count * sizeof(Float), options: .CPUCacheModeWriteCombined)
+                buffer.label = "NetInput"
                 fillBuffer(buffer, withElements: dataLayer.data)
                 n.output = buffer
             }
@@ -246,6 +248,7 @@ public class Net {
             data = input
         } else {
             data = device.newBufferWithLength(size , options: .CPUCacheModeWriteCombined)
+            data.label = "\(node.name)InputData"
             node.input = data
         }
 
@@ -267,7 +270,8 @@ public class Net {
         if let output = node.output where output.length >= size * sizeof(Float) {
             data = output
         } else {
-            data = device.newBufferWithLength(size * sizeof(Float), options: .CPUCacheModeDefaultCache)
+            data = device.newBufferWithLength(size * sizeof(Float), options: .CPUCacheModeWriteCombined)
+            data.label = "\(node.name)OutputData"
             node.output = data
         }
         return data

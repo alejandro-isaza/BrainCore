@@ -47,16 +47,21 @@ public class InnerProductLayer: ForwardLayer, BackwardLayer {
         withPointer(weights) { pointer in
             self.weights = library.device.newBufferWithBytes(pointer, length: weights.count * sizeof(Float), options: .CPUCacheModeWriteCombined)
         }
+        self.weights.label = "InnerProductWeights"
+
         withPointer(biases) { pointer in
             self.biases = library.device.newBufferWithBytes(pointer, length: biases.count * sizeof(Float), options: .CPUCacheModeWriteCombined)
         }
+        self.biases.label = "InnerProductBiases"
 
         var dimensions = InnerProductDimensions(inputSize: UInt16(inputSize), outputSize: UInt16(outputSize))
-        self.dimensions = library.device.newBufferWithBytes(&dimensions, length: sizeof(InnerProductDimensions), options: .CPUCacheModeDefaultCache)
+        self.dimensions = library.device.newBufferWithBytes(&dimensions, length: sizeof(InnerProductDimensions), options: .CPUCacheModeWriteCombined)
+        self.dimensions.label = "InnerProductDimensions"
     }
 
     public func encodeForwardInBuffer(buffer: MTLCommandBuffer, input: MTLBuffer, output: MTLBuffer) {
         let encoder = buffer.computeCommandEncoder()
+        encoder.label = "InnerProductForward"
         encoder.setComputePipelineState(forwardState)
         encoder.setBuffer(input, offset: 0, atIndex: 0)
         encoder.setBuffer(weights, offset: 0, atIndex: 1)
@@ -75,13 +80,16 @@ public class InnerProductLayer: ForwardLayer, BackwardLayer {
     public func encodeBackwardInBuffer(buffer: MTLCommandBuffer, outputDiff: MTLBuffer, input: MTLBuffer, inputDiff: MTLBuffer) {
         if weightDiff == nil {
             weightDiff = buffer.device.newBufferWithLength(inputSize * outputSize, options: .CPUCacheModeDefaultCache)
+            weightDiff!.label = "InnerProductWeightDiffs"
         }
         if biasDiff == nil {
             biasDiff = buffer.device.newBufferWithLength(outputSize, options: .CPUCacheModeDefaultCache)
+            biasDiff!.label = "InnerProductBiasDiffs"
         }
 
         do {
             let encoder = buffer.computeCommandEncoder()
+            encoder.label = "InnerProductBackwardParams"
             encoder.setComputePipelineState(backwardParamsState)
             encoder.setBuffer(outputDiff, offset: 0, atIndex: 0)
             encoder.setBuffer(input, offset: 0, atIndex: 1)
@@ -99,6 +107,7 @@ public class InnerProductLayer: ForwardLayer, BackwardLayer {
 
         do {
             let encoder = buffer.computeCommandEncoder()
+            encoder.label = "InnerProductBackwardState"
             encoder.setComputePipelineState(backwardInputState)
             encoder.setBuffer(outputDiff, offset: 0, atIndex: 0)
             encoder.setBuffer(weights, offset: 0, atIndex: 1)
