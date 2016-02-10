@@ -56,6 +56,6 @@ class RunnerInstance {
     }
 
     func isFinished() -> Bool {
-        return closedNodes == finishedNodes
+        return openNodes.isEmpty && closedNodes == finishedNodes
     }
 }

@@ -37,7 +37,7 @@ public class InnerProductLayer: ForwardLayer, BackwardLayer {
         let outputSize: UInt16
     }
 
-    public init(weights: Matrix<Float>, biases: ValueArray<Float>) throws {
+    public init(weights: Matrix<Float>, biases: ValueArray<Float>) {
         self.weights = weights
         self.biases = biases
         precondition(biases.count == outputSize)

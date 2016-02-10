@@ -17,4 +17,11 @@ class MetalTestCase: XCTestCase {
 
         return d
     }
+
+    var library: MTLLibrary {
+        guard let path = NSBundle(forClass: self.dynamicType).pathForResource("default", ofType: "metallib") else {
+            fatalError("Metal library not found")
+        }
+        return try! device.newLibraryWithFile(path)
+    }
 }

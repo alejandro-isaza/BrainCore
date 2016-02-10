@@ -71,7 +71,13 @@ public class Runner {
             instance.closeNode(n)
             instance.finishNode(n)
         }
-        
+
+        dispatch_async(queue) {
+            self.processNodesOfInstance(instance)
+        }
+    }
+
+    func processNodesOfInstance(instance: RunnerInstance) {
         while !instance.openNodes.isEmpty {
             let node = instance.openNodes.popLast()!
             if instance.closedNodes.contains(node) {

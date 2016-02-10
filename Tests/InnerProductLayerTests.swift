@@ -27,14 +27,13 @@ class InnerProductLayerTests: MetalTestCase {
             }
         }
 
-        let biases = Matrix<Float>(rows: 1, columns: outputSize)
+        let biases = ValueArray<Float>(count: outputSize)
         for i in 0..<outputSize {
-            biases[0, i] = 2 * Float(arc4random()) / Float(UINT32_MAX) - 1.0
+            biases[i] = 2 * Float(arc4random()) / Float(UINT32_MAX) - 1.0
         }
 
-        let device = self.device
-        let net = try! Net(device: device)
-        let layer = try! InnerProductLayer(net: net, weights: weights, biases: biases.row(0))
+        let layer = InnerProductLayer(weights: weights, biases: biases)
+        try! layer.setupInLibrary(library)
 
         let queue = device.newCommandQueue()
 
@@ -44,12 +43,12 @@ class InnerProductLayerTests: MetalTestCase {
         let outputBuffer = device.newBufferWithLength(outputSize * sizeof(Float), options: .CPUCacheModeDefaultCache)
         measureBlock {
             let commandBuffer = queue.commandBuffer()
-            layer.encodeForwardInBuffer(commandBuffer, input: inputBuffer, output: outputBuffer)
+            layer.encodeForwardInBuffer(commandBuffer, input: inputBuffer, offset: 0, output: outputBuffer, offset: 0)
             commandBuffer.commit()
             commandBuffer.waitUntilCompleted()
         }
 
-        let expectedResult = input * weights + biases
+        let expectedResult = input * weights + biases.toRowMatrix()
         let result = UnsafeMutablePointer<Float>(outputBuffer.contents())
         for i in 0..<outputSize {
             XCTAssertEqualWithAccuracy(result[i], expectedResult[0, i], accuracy: 0.0001)

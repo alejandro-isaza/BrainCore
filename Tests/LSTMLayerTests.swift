@@ -38,8 +38,8 @@ class LSTMLayerTests: MetalTestCase {
 
         let biases = ValueArray<Float>(count: 4 * unitCount, repeatedValue: 0.0)
 
-        let net = try! Net(device: device)
-        let layer = try! LSTMLayer(net: net, weights: weights, biases: biases)
+        let layer = try! LSTMLayer(weights: weights, biases: biases)
+        try! layer.setupInLibrary(library)
 
         let queue = device.newCommandQueue()
 
@@ -51,7 +51,7 @@ class LSTMLayerTests: MetalTestCase {
             layer.reset()
             
             let commandBuffer = queue.commandBuffer()
-            layer.encodeForwardInBuffer(commandBuffer, input: inputBuffer, output: outputBuffer)
+            layer.encodeForwardInBuffer(commandBuffer, input: inputBuffer, offset: 0, output: outputBuffer, offset: 0)
             commandBuffer.commit()
             commandBuffer.waitUntilCompleted()
         }

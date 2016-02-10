@@ -16,8 +16,8 @@ class ReLULayerTests: MetalTestCase {
         let dataSize = 1024 * 1024
 
         let device = self.device
-        let net = try! Net(device: device)
-        let layer = try! ReLULayer(net: net, size: dataSize)
+        let layer = ReLULayer(size: dataSize)
+        try! layer.setupInLibrary(library)
 
         var data = [Float](count: dataSize, repeatedValue: 0.0)
         for i in 0..<dataSize {
@@ -31,7 +31,7 @@ class ReLULayerTests: MetalTestCase {
 
         measureBlock {
             let commandBuffer = queue.commandBuffer()
-            layer.encodeForwardInBuffer(commandBuffer, input: buffer, output: buffer)
+            layer.encodeForwardInBuffer(commandBuffer, input: buffer, offset: 0, output: buffer, offset: 0)
             commandBuffer.commit()
             commandBuffer.waitUntilCompleted()
         }
@@ -50,8 +50,8 @@ class ReLULayerTests: MetalTestCase {
         let dataSize = 1024 * 1024
 
         let device = self.device
-        let net = try! Net(device: device)
-        let layer = try! ReLULayer(net: net, size: dataSize)
+        let layer = ReLULayer(size: dataSize)
+        try! layer.setupInLibrary(library)
 
         var input = [Float](count: dataSize, repeatedValue: 0.0)
         var outputDiff = [Float](count: dataSize, repeatedValue: 0.0)
