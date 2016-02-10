@@ -28,6 +28,10 @@
 		614198021C600BA600FB6770 /* ReLU.metal in Sources */ = {isa = PBXBuildFile; fileRef = 615C96251C5BF91500A1CFD4 /* ReLU.metal */; };
 		614198031C600BA800FB6770 /* InnerProduct.metal in Sources */ = {isa = PBXBuildFile; fileRef = 614197FF1C5FEFB700FB6770 /* InnerProduct.metal */; };
 		614198041C600BA900FB6770 /* InnerProduct.metal in Sources */ = {isa = PBXBuildFile; fileRef = 614197FF1C5FEFB700FB6770 /* InnerProduct.metal */; };
+		6141B1AD1C6BFEBE0074BD8C /* NetBuffer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6141B1A91C6BFEBE0074BD8C /* NetBuffer.swift */; };
+		6141B1AE1C6BFEBE0074BD8C /* NetNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6141B1AA1C6BFEBE0074BD8C /* NetNode.swift */; };
+		6141B1AF1C6BFEBE0074BD8C /* Runner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6141B1AB1C6BFEBE0074BD8C /* Runner.swift */; };
+		6141B1B01C6BFEBE0074BD8C /* RunnerInstance.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6141B1AC1C6BFEBE0074BD8C /* RunnerInstance.swift */; };
 		6159F86A1BD1F55D0010F83C /* BrainCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6159F85F1BD1F55D0010F83C /* BrainCore.framework */; };
 		6159F8881BD1F59F0010F83C /* BrainCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6159F87E1BD1F59F0010F83C /* BrainCore.framework */; };
 		6159F8A21BD1F5CE0010F83C /* BrainCore.h in Headers */ = {isa = PBXBuildFile; fileRef = 6159F8971BD1F5CE0010F83C /* BrainCore.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -77,6 +81,10 @@
 		6119AC321C61486D0020E0E6 /* LSTM.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = LSTM.metal; sourceTree = "<group>"; };
 		6119AC371C616F4F0020E0E6 /* LSTMLayerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LSTMLayerTests.swift; sourceTree = "<group>"; };
 		614197FF1C5FEFB700FB6770 /* InnerProduct.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = InnerProduct.metal; sourceTree = "<group>"; };
+		6141B1A91C6BFEBE0074BD8C /* NetBuffer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NetBuffer.swift; sourceTree = "<group>"; };
+		6141B1AA1C6BFEBE0074BD8C /* NetNode.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NetNode.swift; sourceTree = "<group>"; };
+		6141B1AB1C6BFEBE0074BD8C /* Runner.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Runner.swift; sourceTree = "<group>"; };
+		6141B1AC1C6BFEBE0074BD8C /* RunnerInstance.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RunnerInstance.swift; sourceTree = "<group>"; };
 		6159F85F1BD1F55D0010F83C /* BrainCore.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = BrainCore.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		6159F8691BD1F55D0010F83C /* BrainCoreTests.OSX.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BrainCoreTests.OSX.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		6159F87E1BD1F59F0010F83C /* BrainCore.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = BrainCore.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -161,6 +169,10 @@
 			children = (
 				6159F8971BD1F5CE0010F83C /* BrainCore.h */,
 				6159F89C1BD1F5CE0010F83C /* Net.swift */,
+				6141B1A91C6BFEBE0074BD8C /* NetBuffer.swift */,
+				6141B1AA1C6BFEBE0074BD8C /* NetNode.swift */,
+				6141B1AB1C6BFEBE0074BD8C /* Runner.swift */,
+				6141B1AC1C6BFEBE0074BD8C /* RunnerInstance.swift */,
 				6119AC291C6041D20020E0E6 /* Utilities.swift */,
 				6159F8981BD1F5CE0010F83C /* Layers */,
 				615C96241C5BF8F700A1CFD4 /* Metal */,
@@ -409,8 +421,12 @@
 				6119AC331C61486D0020E0E6 /* LSTM.metal in Sources */,
 				615C96261C5BF91500A1CFD4 /* ReLU.metal in Sources */,
 				6159F8A61BD1F5CE0010F83C /* Net.swift in Sources */,
+				6141B1AD1C6BFEBE0074BD8C /* NetBuffer.swift in Sources */,
 				6159F8A31BD1F5CE0010F83C /* InnerProductLayer.swift in Sources */,
 				6119AC2A1C6041D20020E0E6 /* Utilities.swift in Sources */,
+				6141B1AE1C6BFEBE0074BD8C /* NetNode.swift in Sources */,
+				6141B1B01C6BFEBE0074BD8C /* RunnerInstance.swift in Sources */,
+				6141B1AF1C6BFEBE0074BD8C /* Runner.swift in Sources */,
 				6159F8A51BD1F5CE0010F83C /* ReLULayer.swift in Sources */,
 				6119AC301C6139900020E0E6 /* LSTMLayer.swift in Sources */,
 			);
