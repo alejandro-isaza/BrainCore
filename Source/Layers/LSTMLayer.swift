@@ -51,7 +51,7 @@ public class LSTMLayer: ForwardLayer {
         return 2 * Int(parameters.unitCount)
     }
 
-    public init(weights: Matrix<Float>, biases: ValueArray<Float>, clipTo: Float? = nil) throws {
+    public init(weights: Matrix<Float>, biases: ValueArray<Float>, clipTo: Float? = nil) {
         self.weights = weights
         self.biases = biases
 

@@ -125,9 +125,7 @@ public class Runner {
             }
         }
 
+        self.forwardPassAction?()
         dispatch_semaphore_signal(inflightSemaphore);
-        dispatch_sync(dispatch_get_main_queue()) {
-            self.forwardPassAction?()
-        }
     }
 }
