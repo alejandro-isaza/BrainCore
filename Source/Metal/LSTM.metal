@@ -30,9 +30,6 @@ kernel void lstm_forward(const device float* input [[ buffer(0) ]],
     if (unit >= params.unitCount)
         return;
 
-    const auto previousActivation = state[unit];
-    const auto previousOutput = state + unit + params.unitCount;
-
     const auto inputGateIndex  = 0 * params.unitCount + unit;
     const auto newInputIndex   = 1 * params.unitCount + unit;
     const auto forgetGateIndex = 2 * params.unitCount + unit;
@@ -51,12 +48,13 @@ kernel void lstm_forward(const device float* input [[ buffer(0) ]],
     }
     for (uint i = 0; i < params.unitCount; i += 1) {
         const auto j = i + params.inputSize;
-        inputGate  += weights[inputGateIndex  + j * 4 * params.unitCount] * previousOutput[i];
-        newInput   += weights[newInputIndex   + j * 4 * params.unitCount] * previousOutput[i];
-        forgetGate += weights[forgetGateIndex + j * 4 * params.unitCount] * previousOutput[i];
-        outputGate += weights[outputGateIndex + j * 4 * params.unitCount] * previousOutput[i];
+        inputGate  += weights[inputGateIndex  + j * 4 * params.unitCount] * state[params.unitCount + i];
+        newInput   += weights[newInputIndex   + j * 4 * params.unitCount] * state[params.unitCount + i];
+        forgetGate += weights[forgetGateIndex + j * 4 * params.unitCount] * state[params.unitCount + i];
+        outputGate += weights[outputGateIndex + j * 4 * params.unitCount] * state[params.unitCount + i];
     }
 
+    const auto previousActivation = state[unit];
     auto activation = sigmoid(forgetGate + 1) * previousActivation + sigmoid(inputGate) * tanh(newInput);
     if (params.clipTo > 0) {
         activation = clamp(activation, -params.clipTo, params.clipTo);
