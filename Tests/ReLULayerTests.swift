@@ -31,7 +31,7 @@ class ReLULayerTests: MetalTestCase {
 
         measureBlock {
             let commandBuffer = queue.commandBuffer()
-            layer.encodeForwardInBuffer(commandBuffer, input: buffer, offset: 0, output: buffer, offset: 0)
+            layer.encodeForwardInBuffer(commandBuffer, batchSize: 1, input: buffer, offset: 0, output: buffer, offset: 0)
             commandBuffer.commit()
             commandBuffer.waitUntilCompleted()
         }
@@ -74,7 +74,7 @@ class ReLULayerTests: MetalTestCase {
 
         measureBlock {
             let commandBuffer = queue.commandBuffer()
-            layer.encodeBackwardInBuffer(commandBuffer, outputDiff: outputDiffBuffer, input: inputBuffer, inputDiff: inputDiffBuffer)
+            layer.encodeBackwardInBuffer(commandBuffer, batchSize: 1, outputDiff: outputDiffBuffer, input: inputBuffer, inputDiff: inputDiffBuffer)
             commandBuffer.commit()
             commandBuffer.waitUntilCompleted()
         }
