@@ -43,7 +43,7 @@ class InnerProductLayerTests: MetalTestCase {
         let outputBuffer = device.newBufferWithLength(outputSize * sizeof(Float), options: .CPUCacheModeDefaultCache)
         measureBlock {
             let commandBuffer = queue.commandBuffer()
-            layer.encodeForwardInBuffer(commandBuffer, input: inputBuffer, offset: 0, output: outputBuffer, offset: 0)
+            layer.encodeForwardInBuffer(commandBuffer, batchSize: 1, input: inputBuffer, offset: 0, output: outputBuffer, offset: 0)
             commandBuffer.commit()
             commandBuffer.waitUntilCompleted()
         }

@@ -33,6 +33,7 @@ public class InnerProductLayer: ForwardLayer, BackwardLayer {
     public var biasDiff: MTLBuffer?
 
     struct InnerProductDimensions {
+        let batchSize: UInt16
         let inputSize: UInt16
         let outputSize: UInt16
     }
@@ -62,13 +63,14 @@ public class InnerProductLayer: ForwardLayer, BackwardLayer {
             biasesBuffer = library.device.newBufferWithBytes(pointer, length: outputSize * sizeof(Float), options: .CPUCacheModeWriteCombined)
         }
         biasesBuffer.label = "InnerProductBiases"
-
-        var dimensions = InnerProductDimensions(inputSize: UInt16(inputSize), outputSize: UInt16(outputSize))
-        dimensionsBuffer = library.device.newBufferWithBytes(&dimensions, length: sizeof(InnerProductDimensions), options: .CPUCacheModeWriteCombined)
-        dimensionsBuffer.label = "InnerProductDimensions"
     }
 
-    public func encodeForwardInBuffer(buffer: MTLCommandBuffer, input: MTLBuffer, offset inputOffset: Int, output: MTLBuffer, offset outputOffset: Int) {
+    public func encodeForwardInBuffer(buffer: MTLCommandBuffer, batchSize: Int, input: MTLBuffer, offset inputOffset: Int, output: MTLBuffer, offset outputOffset: Int) {
+        var dimensions = InnerProductDimensions(batchSize: UInt16(batchSize), inputSize: UInt16(inputSize), outputSize: UInt16(outputSize))
+        dimensionsBuffer = buffer.device.newBufferWithBytes(&dimensions, length: sizeof(InnerProductDimensions), options: .CPUCacheModeWriteCombined)
+        dimensionsBuffer.label = "InnerProductDimensions"
+
+        
         let encoder = buffer.computeCommandEncoder()
         encoder.label = "InnerProductForward"
         encoder.setComputePipelineState(forwardState)
@@ -80,13 +82,18 @@ public class InnerProductLayer: ForwardLayer, BackwardLayer {
         
         let count = outputSize
         let threadsPerGroup = MTLSize(width: forwardState.threadExecutionWidth, height: 1, depth: 1)
-        let numThreadgroups = MTLSize(width: (count - 1) / forwardState.threadExecutionWidth + 1, height:1, depth:1)
+        let numThreadgroups = MTLSize(width: (count - 1) / forwardState.threadExecutionWidth + 1, height: batchSize, depth:1)
         encoder.dispatchThreadgroups(numThreadgroups, threadsPerThreadgroup: threadsPerGroup)
 
         encoder.endEncoding()
     }
 
-    public func encodeBackwardInBuffer(buffer: MTLCommandBuffer, outputDiff: MTLBuffer, input: MTLBuffer, inputDiff: MTLBuffer) {
+    public func encodeBackwardInBuffer(buffer: MTLCommandBuffer, batchSize: Int, outputDiff: MTLBuffer, input: MTLBuffer, inputDiff: MTLBuffer) {
+        var dimensions = InnerProductDimensions(batchSize: UInt16(batchSize), inputSize: UInt16(inputSize), outputSize: UInt16(outputSize))
+        dimensionsBuffer = buffer.device.newBufferWithBytes(&dimensions, length: sizeof(InnerProductDimensions), options: .CPUCacheModeWriteCombined)
+        dimensionsBuffer.label = "InnerProductDimensions"
+
+        
         if weightDiff == nil {
             weightDiff = buffer.device.newBufferWithLength(inputSize * outputSize, options: .CPUCacheModeDefaultCache)
             weightDiff!.label = "InnerProductWeightDiffs"
@@ -108,7 +115,7 @@ public class InnerProductLayer: ForwardLayer, BackwardLayer {
 
             let count = outputSize
             let threadsPerGroup = MTLSize(width: forwardState.threadExecutionWidth, height: 1, depth: 1)
-            let numThreadgroups = MTLSize(width: (count - 1) / forwardState.threadExecutionWidth + 1, height:1, depth:1)
+            let numThreadgroups = MTLSize(width: (count - 1) / forwardState.threadExecutionWidth + 1, height: 1, depth:1)
             encoder.dispatchThreadgroups(numThreadgroups, threadsPerThreadgroup: threadsPerGroup)
 
             encoder.endEncoding()
@@ -125,7 +132,7 @@ public class InnerProductLayer: ForwardLayer, BackwardLayer {
 
             let count = inputSize
             let threadsPerGroup = MTLSize(width: forwardState.threadExecutionWidth, height: 1, depth: 1)
-            let numThreadgroups = MTLSize(width: (count - 1) / forwardState.threadExecutionWidth + 1, height:1, depth:1)
+            let numThreadgroups = MTLSize(width: (count - 1) / forwardState.threadExecutionWidth + 1, height: batchSize, depth:1)
             encoder.dispatchThreadgroups(numThreadgroups, threadsPerThreadgroup: threadsPerGroup)
 
             encoder.endEncoding()

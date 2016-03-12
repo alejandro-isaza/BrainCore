@@ -10,6 +10,7 @@
 using namespace metal;
 
 struct InnerProductDimensions {
+    ushort batch_size;
     ushort input_size;
     ushort output_size;
 };
@@ -19,14 +20,14 @@ kernel void inner_product_forward(const device float* input [[ buffer(0) ]],
                                   const device float* biases [[ buffer(2) ]],
                                   device float* output [[ buffer(3) ]],
                                   constant InnerProductDimensions& dims [[ buffer(4) ]],
-                                  uint id [[ thread_position_in_grid ]])
+                                  uint2 id [[ thread_position_in_grid ]])
 {
-    if (id >= dims.output_size)
+    if (id.x >= dims.output_size || id.y >= dims.batch_size)
         return;
     
-    output[id] = biases[id];
+    output[id.x + id.y * dims.output_size] = biases[id.x];
     for (uint i = 0; i < dims.input_size; i += 1) {
-        output[id] += weights[id + i * dims.output_size] * input[i];
+        output[id.x + id.y * dims.output_size] += weights[id.x + i * dims.output_size] * input[i + id.y * dims.input_size];
     }
 }
 
@@ -39,24 +40,24 @@ kernel void inner_product_backward_params(const device float* outputDiff [[ buff
 {
     if (id >= dims.output_size)
         return;
-
-    for (uint i = 0; i < dims.input_size; i += 1) {
-        weightDiff[id + i * dims.output_size] = outputDiff[id] * input[i];
+    for (uint i = 0; i < dims.batch_size; i += 1) {
+        for (uint j = 0; j < dims.input_size; j += 1) {
+            weightDiff[id +  j * dims.output_size] += outputDiff[id + i * dims.output_size] * input[j + i * dims.input_size];
+        }
+        biasDiff[id] += outputDiff[id + i * dims.output_size];
     }
-
-    biasDiff[id] += outputDiff[id];
 }
 
 kernel void inner_product_backward_input(const device float* outputDiff [[ buffer(0) ]],
                                          const device float* weights [[ buffer(1) ]],
                                          device float* inputDiff [[ buffer(2) ]],
                                          constant InnerProductDimensions& dims [[ buffer(3) ]],
-                                         uint id [[ thread_position_in_grid ]])
+                                         uint2 id [[ thread_position_in_grid ]])
 {
-    if (id >= dims.input_size)
+    if (id.x >= dims.input_size || id.y >= dims.batch_size)
         return;
 
     for (uint i = 0; i < dims.output_size; i += 1) {
-        inputDiff[id] = weights[i + id * dims.output_size] * outputDiff[i];
+        inputDiff[id.x + id.y * dims.input_size] = weights[i + id.x * dims.output_size] * outputDiff[i + id.y * dims.output_size];
     }
 }
