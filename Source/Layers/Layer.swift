@@ -34,12 +34,12 @@ public protocol ForwardLayer: Layer {
     var outputSize: Int { get }
 
     /// Forward-propagate the input
-    func encodeForwardInBuffer(buffer: MTLCommandBuffer, input: MTLBuffer, offset inputOffset: Int, output: MTLBuffer, offset outputOffset: Int)
+    func encodeForwardInBuffer(buffer: MTLCommandBuffer, batchSize: Int, input: MTLBuffer, offset inputOffset: Int, output: MTLBuffer, offset outputOffset: Int)
 }
 
 public protocol BackwardLayer: ForwardLayer {
     /// Backward-propagate the output differences
-    func encodeBackwardInBuffer(buffer: MTLCommandBuffer, outputDiff: MTLBuffer, input: MTLBuffer, inputDiff: MTLBuffer)
+    func encodeBackwardInBuffer(buffer: MTLCommandBuffer, batchSize: Int, outputDiff: MTLBuffer, input: MTLBuffer, inputDiff: MTLBuffer)
 }
 
 public protocol SinkLayer: Layer {

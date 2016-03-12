@@ -31,7 +31,7 @@ class ReLULayerTests: MetalTestCase {
 
         measureBlock {
             let commandBuffer = queue.commandBuffer()
-            layer.encodeForwardInBuffer(commandBuffer, input: buffer, offset: 0, output: buffer, offset: 0)
+            layer.encodeForwardInBuffer(commandBuffer, batchSize: 1, input: buffer, offset: 0, output: buffer, offset: 0)
             commandBuffer.commit()
             commandBuffer.waitUntilCompleted()
         }
@@ -74,7 +74,7 @@ class ReLULayerTests: MetalTestCase {
 
         measureBlock {
             let commandBuffer = queue.commandBuffer()
-            layer.encodeBackwardInBuffer(commandBuffer, outputDiff: outputDiffBuffer, input: inputBuffer, inputDiff: inputDiffBuffer)
+            layer.encodeBackwardInBuffer(commandBuffer, batchSize: 1, outputDiff: outputDiffBuffer, input: inputBuffer, inputDiff: inputDiffBuffer)
             commandBuffer.commit()
             commandBuffer.waitUntilCompleted()
         }
@@ -88,4 +88,40 @@ class ReLULayerTests: MetalTestCase {
             }
         }
     }
+    
+    func testForwardLargeBatchSize() {
+        let batchSize = 64
+        let dataSize = 16 * 1024
+        
+        let device = self.device
+        let layer = ReLULayer(size: dataSize)
+        try! layer.setupInLibrary(library)
+        
+        var data = [Float](count: batchSize * dataSize, repeatedValue: 0.0)
+        for i in 0..<batchSize * dataSize {
+            data[i] = 2 * Float(arc4random()) / Float(UINT32_MAX) - 1.0
+        }
+        let buffer = data.withUnsafeBufferPointer { pointer in
+            return device.newBufferWithBytes(pointer.baseAddress, length: batchSize * dataSize * sizeof(Float), options: .CPUCacheModeDefaultCache)
+        }
+        
+        let queue = device.newCommandQueue()
+        
+        measureBlock {
+            let commandBuffer = queue.commandBuffer()
+            layer.encodeForwardInBuffer(commandBuffer, batchSize: batchSize, input: buffer, offset: 0, output: buffer, offset: 0)
+            commandBuffer.commit()
+            commandBuffer.waitUntilCompleted()
+        }
+        
+        let result = UnsafeBufferPointer<Float>(start: UnsafeMutablePointer(buffer.contents()), count: batchSize * dataSize)
+        for i in 0..<batchSize * dataSize {
+            if data[i] >= 0 {
+                XCTAssertEqualWithAccuracy(result[i], data[i], accuracy: 0.001)
+            } else {
+                XCTAssertEqual(result[i], 0.0)
+            }
+        }
+    }
+
 }

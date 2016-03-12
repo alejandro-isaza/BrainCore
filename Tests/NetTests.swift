@@ -33,20 +33,20 @@ class NetTests: MetalTestCase {
     func testTwoInputOneOutputActivation() {
         let net = Net()
 
-        let source = Source(data: [1, 1])
+        let source = Source(data: [1, 1, 2, 2])
         let weights = Matrix<Float>(rows: 2, columns: 1, elements: [2, 4])
         let biases = ValueArray<Float>([1])
 
         let ip = InnerProductLayer(weights: weights, biases: biases)
         let sink = Sink()
 
-        let inputBuffer = net.addBufferWithName("input", size: 2)
-        let ipBuffer = net.addBufferWithName("IP", size: 1)
-        let outputBuffer = net.addBufferWithName("output", size: 1)
+        let inputBuffer = net.addBufferWithName("input", size: 4)
+        let ipBuffer = net.addBufferWithName("IP", size: 2)
+        let outputBuffer = net.addBufferWithName("output", size: 2)
 
         let sourceLayer = net.addLayer(source, name: "source")
         let ipLayer = net.addLayer(ip, name: "inner product")
-        let reluLayer = net.addLayer(ReLULayer(size: 1), name: "ReLU")
+        let reluLayer = net.addLayer(ReLULayer(size: 2), name: "ReLU")
         let sinkLayer = net.addLayer(sink, name: "sink")
 
         net.connectLayer(sourceLayer, toBuffer: inputBuffer)
@@ -57,7 +57,7 @@ class NetTests: MetalTestCase {
         net.connectBuffer(outputBuffer, toLayer: sinkLayer)
 
         let expecation = expectationWithDescription("Net forward pass")
-        let runner = try! Runner(net: net, device: device)
+        let runner = try! Runner(net: net, device: device, batchSize: 2)
         runner.forwardPassAction = {
             expecation.fulfill()
         }
@@ -68,6 +68,7 @@ class NetTests: MetalTestCase {
                 XCTFail("Net.forward() failed: \(error)")
             }
             XCTAssertEqual(sink.data[0], 7)
+            XCTAssertEqual(sink.data[1], 13)
         }
     }
 
