@@ -8,6 +8,7 @@
 import Metal
 
 public class Runner {
+    public let batchSize: Int
     public let net: Net
     public var forwardPassAction: (() -> Void)?
 
@@ -22,7 +23,8 @@ public class Runner {
     var instances = [RunnerInstance]()
     var nextInstanceIndex = 0
 
-    public init(net: Net, device: MTLDevice) throws {
+    public init(net: Net, device: MTLDevice, batchSize: Int = 1) throws {
+        self.batchSize = batchSize
         self.net = net
         self.device = device
 
@@ -97,8 +99,9 @@ public class Runner {
 
             let commandBuffer = commandQueue.commandBuffer()
             forwardLayer.encodeForwardInBuffer(commandBuffer,
-                input: inputBuffer, offset: node.inputOffset,
-                output: outputBuffer, offset: node.outputOffset)
+                batchSize: batchSize, input: inputBuffer,
+                offset: node.inputOffset, output: outputBuffer,
+                offset: node.outputOffset)
 
             commandBuffer.addCompletedHandler() { commandBuffer in
                 dispatch_async(self.queue) {
