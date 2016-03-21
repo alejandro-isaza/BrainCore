@@ -29,7 +29,9 @@ kernel void lstm_forward(const device float* input [[ buffer(0) ]],
                          uint2 id [[ thread_position_in_grid ]])
 {
     auto unit = id.x;
-    if (unit >= params.unitCount || id.y >= params.batchSize)
+    const auto batchElement = id.y;
+
+    if (unit >= params.unitCount || batchElement >= params.batchSize)
         return;
 
     const auto inputGateIndex  = 0 * params.unitCount + unit;
@@ -43,17 +45,17 @@ kernel void lstm_forward(const device float* input [[ buffer(0) ]],
     auto outputGate = biases[outputGateIndex];
 
     for (uint i = 0; i < params.inputSize; i += 1) {
-        inputGate  += weights[inputGateIndex  + i * 4 * params.unitCount] * input[i + id.y * params.inputSize];
-        newInput   += weights[newInputIndex   + i * 4 * params.unitCount] * input[i + id.y * params.inputSize];
-        forgetGate += weights[forgetGateIndex + i * 4 * params.unitCount] * input[i + id.y * params.inputSize];
-        outputGate += weights[outputGateIndex + i * 4 * params.unitCount] * input[i + id.y * params.inputSize];
+        inputGate  += weights[inputGateIndex  + i * 4 * params.unitCount] * input[i + batchElement * params.inputSize];
+        newInput   += weights[newInputIndex   + i * 4 * params.unitCount] * input[i + batchElement * params.inputSize];
+        forgetGate += weights[forgetGateIndex + i * 4 * params.unitCount] * input[i + batchElement * params.inputSize];
+        outputGate += weights[outputGateIndex + i * 4 * params.unitCount] * input[i + batchElement * params.inputSize];
     }
     for (uint i = 0; i < params.unitCount; i += 1) {
         const auto j = i + params.inputSize;
-        inputGate  += weights[inputGateIndex  + j * 4 * params.unitCount] * state[params.unitCount * (id.y * 2 + 1) + i];
-        newInput   += weights[newInputIndex   + j * 4 * params.unitCount] * state[params.unitCount * (id.y * 2 + 1) + i];
-        forgetGate += weights[forgetGateIndex + j * 4 * params.unitCount] * state[params.unitCount * (id.y * 2 + 1) + i];
-        outputGate += weights[outputGateIndex + j * 4 * params.unitCount] * state[params.unitCount * (id.y * 2 + 1) + i];
+        inputGate  += weights[inputGateIndex  + j * 4 * params.unitCount] * state[params.unitCount * (batchElement * 2 + 1) + i];
+        newInput   += weights[newInputIndex   + j * 4 * params.unitCount] * state[params.unitCount * (batchElement * 2 + 1) + i];
+        forgetGate += weights[forgetGateIndex + j * 4 * params.unitCount] * state[params.unitCount * (batchElement * 2 + 1) + i];
+        outputGate += weights[outputGateIndex + j * 4 * params.unitCount] * state[params.unitCount * (batchElement * 2 + 1) + i];
     }
 
     const auto previousActivation = state[unit];
@@ -63,7 +65,7 @@ kernel void lstm_forward(const device float* input [[ buffer(0) ]],
     }
     const auto out = sigmoid(outputGate) * tanh(activation);
 
-    output[unit + id.y * params.unitCount] = out;
-    state[unit + id.y * 2 * params.unitCount] = activation;
-    state[unit + params.unitCount + id.y * 2 * params.unitCount] = out;
+    output[unit + batchElement * params.unitCount] = out;
+    state[unit + batchElement * 2 * params.unitCount] = activation;
+    state[unit + params.unitCount + batchElement * 2 * params.unitCount] = out;
 }

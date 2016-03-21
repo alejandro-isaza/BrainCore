@@ -21,10 +21,13 @@ kernel void linear_rectify_forward(const device float* input [[ buffer(0) ]],
                                    constant ReluDimensions& dims [[ buffer(2) ]],
                                    uint2 id [[ thread_position_in_grid ]])
 {
-    if (id.x >= dims.size || id.y >= dims.batch_size)
+    const auto sizeElement = id.x;
+    const auto batchElement = id.y;
+    
+    if (sizeElement >= dims.size || batchElement >= dims.batch_size)
         return;
     
-    output[id.x + id.y * dims.size] = fmax(0.0, input[id.x + id.y * dims.size]);
+    output[sizeElement + batchElement * dims.size] = fmax(0.0, input[sizeElement + batchElement * dims.size]);
 }
 
 kernel void linear_rectify_backward(const device float* outputDiff [[ buffer(0) ]],
@@ -33,10 +36,13 @@ kernel void linear_rectify_backward(const device float* outputDiff [[ buffer(0) 
                                     constant ReluDimensions& dims [[ buffer(3) ]],
                                     uint2 id [[ thread_position_in_grid ]])
 {
-    if (id.x >= dims.size || id.y >= dims.batch_size)
+    const auto sizeElement = id.x;
+    const auto batchElement = id.y;
+    
+    if (sizeElement >= dims.size || batchElement >= dims.batch_size)
         return;
     
-    auto index = id.x + id.y * dims.size;
+    auto index = sizeElement + batchElement * dims.size;
     if (input[index] > 0) {
         inputDiff[index] = outputDiff[index];
     } else {
