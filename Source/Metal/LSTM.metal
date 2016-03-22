@@ -28,7 +28,7 @@ kernel void lstm_forward(const device float* input [[ buffer(0) ]],
                          constant LSTMParameters& params [[ buffer(5) ]],
                          uint2 id [[ thread_position_in_grid ]])
 {
-    auto unit = id.x;
+    const auto unit = id.x;
     const auto batchElement = id.y;
 
     if (unit >= params.unitCount || batchElement >= params.batchSize)
@@ -52,13 +52,13 @@ kernel void lstm_forward(const device float* input [[ buffer(0) ]],
     }
     for (uint i = 0; i < params.unitCount; i += 1) {
         const auto j = i + params.inputSize;
-        inputGate  += weights[inputGateIndex  + j * 4 * params.unitCount] * state[params.unitCount * (batchElement * 2 + 1) + i];
-        newInput   += weights[newInputIndex   + j * 4 * params.unitCount] * state[params.unitCount * (batchElement * 2 + 1) + i];
-        forgetGate += weights[forgetGateIndex + j * 4 * params.unitCount] * state[params.unitCount * (batchElement * 2 + 1) + i];
-        outputGate += weights[outputGateIndex + j * 4 * params.unitCount] * state[params.unitCount * (batchElement * 2 + 1) + i];
+        inputGate  += weights[inputGateIndex  + j * 4 * params.unitCount] * state[params.unitCount * (1 + batchElement * 2) + i];
+        newInput   += weights[newInputIndex   + j * 4 * params.unitCount] * state[params.unitCount * (1 + batchElement * 2) + i];
+        forgetGate += weights[forgetGateIndex + j * 4 * params.unitCount] * state[params.unitCount * (1 + batchElement * 2) + i];
+        outputGate += weights[outputGateIndex + j * 4 * params.unitCount] * state[params.unitCount * (1 + batchElement * 2) + i];
     }
 
-    const auto previousActivation = state[unit];
+    const auto previousActivation = state[unit + batchElement * 2 * params.unitCount];
     auto activation = sigmoid(forgetGate + 1) * previousActivation + sigmoid(inputGate) * tanh(newInput);
     if (params.clipTo > 0) {
         activation = clamp(activation, -params.clipTo, params.clipTo);
@@ -67,5 +67,5 @@ kernel void lstm_forward(const device float* input [[ buffer(0) ]],
 
     output[unit + batchElement * params.unitCount] = out;
     state[unit + batchElement * 2 * params.unitCount] = activation;
-    state[unit + params.unitCount + batchElement * 2 * params.unitCount] = out;
+    state[unit + params.unitCount * (1 + batchElement * 2)] = out;
 }
