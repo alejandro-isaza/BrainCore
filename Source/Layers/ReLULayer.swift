@@ -61,7 +61,6 @@ public class ReLULayer: ForwardLayer, BackwardLayer {
     }
 
     public func encodeBackwardInBuffer(buffer: MTLCommandBuffer, batchSize: Int, outputDiff: MTLBuffer, input: MTLBuffer, inputDiff: MTLBuffer) {
-        print(size)
         var dimensions = ReluDimensions(batchSize: UInt32(batchSize), size: UInt32(size))
         dimensionsBuffer = buffer.device.newBufferWithBytes(&dimensions, length: sizeof(ReluDimensions), options: .CPUCacheModeWriteCombined)
         dimensionsBuffer.label = "ReluDimensions"
