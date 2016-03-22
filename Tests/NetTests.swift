@@ -58,7 +58,7 @@ class NetTests: MetalTestCase {
 
         let expecation = expectationWithDescription("Net forward pass")
         let runner = try! Runner(net: net, device: device, batchSize: 2)
-        runner.forwardPassAction = {
+        runner.forwardPassAction = { _ in
             expecation.fulfill()
         }
         runner.forward()
@@ -101,7 +101,7 @@ class NetTests: MetalTestCase {
 
         let expecation = expectationWithDescription("Net forward pass")
         let runner = try! Runner(net: net, device: device)
-        runner.forwardPassAction = {
+        runner.forwardPassAction = { _ in
             expecation.fulfill()
         }
         runner.forward()
