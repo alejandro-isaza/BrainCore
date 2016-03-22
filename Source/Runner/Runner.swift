@@ -10,7 +10,8 @@ import Metal
 public class Runner {
     public let batchSize: Int
     public let net: Net
-    public var forwardPassAction: (() -> Void)?
+    public var forwardPassAction: ((ForwardRunnerInstance) -> Void)?
+    public var backwardPassAction: ((BackwardRunnerInstance) -> Void)?
 
     let device: MTLDevice
     var library: MTLLibrary!
@@ -20,10 +21,12 @@ public class Runner {
     var inflightSemaphore: dispatch_semaphore_t
 
     let instanceCount = 3
-    var instances = [RunnerInstance]()
-    var nextInstanceIndex = 0
+    var forwardInstances = [ForwardRunnerInstance]()
+    var nextForwardInstanceIndex = 0
+    var backwardInstances = [BackwardRunnerInstance]()
+    var nextBackwardInstanceIndex = 0
 
-    public init(net: Net, device: MTLDevice, batchSize: Int = 1) throws {
+    public init(net: Net, device: MTLDevice, batchSize: Int = 1, params: SolverParameters? = nil) throws {
         self.batchSize = batchSize
         self.net = net
         self.device = device
@@ -39,8 +42,12 @@ public class Runner {
         library = try device.newLibraryWithFile(path)
 
         for _ in 0..<instanceCount {
-            let instance = RunnerInstance(buffers: net.buffers, device: device)
-            instances.append(instance)
+            let forwardInstance = ForwardRunnerInstance(buffers: net.buffers, device: device)
+            forwardInstances.append(forwardInstance)
+            if var params = params {
+                let backwardwardInstance = BackwardRunnerInstance(diffBuffers: net.buffers, device: device, solverParameters: &params)
+                backwardInstances.append(backwardwardInstance)
+            }
         }
 
         for node in net.nodes {
@@ -54,9 +61,9 @@ public class Runner {
     public func forward() {
         dispatch_semaphore_wait(inflightSemaphore, DISPATCH_TIME_FOREVER)
 
-        let instance = instances[nextInstanceIndex]
+        let instance = forwardInstances[nextForwardInstanceIndex]
         instance.reset()
-        nextInstanceIndex = (nextInstanceIndex + 1) % instanceCount
+        nextForwardInstanceIndex = (nextForwardInstanceIndex + 1) % instanceCount
 
         commandQueue.insertDebugCaptureBoundary()
 
@@ -75,50 +82,30 @@ public class Runner {
         }
 
         dispatch_async(queue) {
-            self.processNodesOfInstance(instance)
+            instance.processNodes(self)
         }
     }
 
-    func processNodesOfInstance(instance: RunnerInstance) {
-        while !instance.openNodes.isEmpty {
-            let node = instance.openNodes.popLast()!
-            if instance.closedNodes.contains(node) {
-                continue
-            }
-
-            guard let forwardLayer = node.layer as? ForwardLayer else {
-                continue
-            }
-
-            guard let input = node.inputBuffer, output = node.outputBuffer else {
-                preconditionFailure("Layer '\(node.name)' is missing a buffer")
-            }
-
-            let inputBuffer = instance.buffers[input.id]
-            let outputBuffer = instance.buffers[output.id]
-
-            let commandBuffer = commandQueue.commandBuffer()
-            forwardLayer.encodeForwardInBuffer(commandBuffer,
-                batchSize: batchSize, input: inputBuffer,
-                offset: node.inputOffset, output: outputBuffer,
-                offset: node.outputOffset)
-
-            commandBuffer.addCompletedHandler() { commandBuffer in
-                dispatch_async(self.queue) {
-                    instance.finishNode(node)
-                    if instance.isFinished() {
-                        self.terminateForwardPass(instance)
-                    }
-                }
-            }
-            commandBuffer.commit()
-
-            instance.closeNode(node)
+    /// Perform a backward pass on the network
+    public func backward(forwardInstance: ForwardRunnerInstance) {
+        dispatch_semaphore_wait(inflightSemaphore, DISPATCH_TIME_FOREVER)
+        
+        let backwardInstance = backwardInstances[nextBackwardInstanceIndex]
+        backwardInstance.reset()
+        nextBackwardInstanceIndex = (nextBackwardInstanceIndex + 1) % instanceCount
+        
+        commandQueue.insertDebugCaptureBoundary()
+        
+        for n in net.lossNodes {
+            backwardInstance.openNodes.append(n)
+        }
+        
+        dispatch_async(queue) {
+            backwardInstance.processNodes(self, forwardInstance: forwardInstance)
         }
     }
-
-    func terminateForwardPass(instance: RunnerInstance) {
-
+    
+    func terminateForwardPass(instance: ForwardRunnerInstance) {
         // Collect all data
         for n in net.sinkNodes {
             let sinkLayer = n.layer as! SinkLayer
@@ -128,7 +115,12 @@ public class Runner {
             }
         }
 
-        self.forwardPassAction?()
+        self.forwardPassAction?(instance)
         dispatch_semaphore_signal(inflightSemaphore);
+    }
+
+    func terminateBackwardPass(instance: BackwardRunnerInstance) {
+        self.backwardPassAction?(instance)
+        dispatch_semaphore_signal(self.inflightSemaphore);
     }
 }

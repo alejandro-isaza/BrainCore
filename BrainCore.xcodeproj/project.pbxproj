@@ -30,8 +30,8 @@
 		614198041C600BA900FB6770 /* InnerProduct.metal in Sources */ = {isa = PBXBuildFile; fileRef = 614197FF1C5FEFB700FB6770 /* InnerProduct.metal */; };
 		6141B1AD1C6BFEBE0074BD8C /* NetBuffer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6141B1A91C6BFEBE0074BD8C /* NetBuffer.swift */; };
 		6141B1AE1C6BFEBE0074BD8C /* NetNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6141B1AA1C6BFEBE0074BD8C /* NetNode.swift */; };
-		6141B1AF1C6BFEBE0074BD8C /* Runner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6141B1AB1C6BFEBE0074BD8C /* Runner.swift */; };
-		6141B1B01C6BFEBE0074BD8C /* RunnerInstance.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6141B1AC1C6BFEBE0074BD8C /* RunnerInstance.swift */; };
+		6141B1AF1C6BFEBE0074BD8C /* BackwardRunnerInstance.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6141B1AB1C6BFEBE0074BD8C /* BackwardRunnerInstance.swift */; };
+		6141B1B01C6BFEBE0074BD8C /* Runner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6141B1AC1C6BFEBE0074BD8C /* Runner.swift */; };
 		6159F86A1BD1F55D0010F83C /* BrainCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6159F85F1BD1F55D0010F83C /* BrainCore.framework */; };
 		6159F8881BD1F59F0010F83C /* BrainCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6159F87E1BD1F59F0010F83C /* BrainCore.framework */; };
 		6159F8A21BD1F5CE0010F83C /* BrainCore.h in Headers */ = {isa = PBXBuildFile; fileRef = 6159F8971BD1F5CE0010F83C /* BrainCore.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -55,6 +55,10 @@
 		61CE4BD01BED703F000E0D34 /* Upsurge.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 61CE4BC51BED6F7F000E0D34 /* Upsurge.framework */; };
 		8C378A561CA1B47600D1B153 /* L2LossLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C378A551CA1B47600D1B153 /* L2LossLayer.swift */; };
 		8C378A5C1CA1B49B00D1B153 /* L2Loss.metal in Sources */ = {isa = PBXBuildFile; fileRef = 8C378A5A1CA1B49B00D1B153 /* L2Loss.metal */; };
+		8C378A601CA1BB1800D1B153 /* ForwardRunnerInstance.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C378A5F1CA1BB1800D1B153 /* ForwardRunnerInstance.swift */; };
+		8C378A611CA1BB1800D1B153 /* ForwardRunnerInstance.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C378A5F1CA1BB1800D1B153 /* ForwardRunnerInstance.swift */; };
+		8C378A621CA1BB2400D1B153 /* Runner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6141B1AC1C6BFEBE0074BD8C /* Runner.swift */; };
+		8C378A631CA1C2DB00D1B153 /* BackwardRunnerInstance.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6141B1AB1C6BFEBE0074BD8C /* BackwardRunnerInstance.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -85,8 +89,8 @@
 		614197FF1C5FEFB700FB6770 /* InnerProduct.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = InnerProduct.metal; sourceTree = "<group>"; };
 		6141B1A91C6BFEBE0074BD8C /* NetBuffer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NetBuffer.swift; sourceTree = "<group>"; };
 		6141B1AA1C6BFEBE0074BD8C /* NetNode.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NetNode.swift; sourceTree = "<group>"; };
-		6141B1AB1C6BFEBE0074BD8C /* Runner.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Runner.swift; sourceTree = "<group>"; };
-		6141B1AC1C6BFEBE0074BD8C /* RunnerInstance.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RunnerInstance.swift; sourceTree = "<group>"; };
+		6141B1AB1C6BFEBE0074BD8C /* BackwardRunnerInstance.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = BackwardRunnerInstance.swift; path = Runner/BackwardRunnerInstance.swift; sourceTree = "<group>"; };
+		6141B1AC1C6BFEBE0074BD8C /* Runner.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Runner.swift; path = /Users/agomez/Dev/BrainCore/Source/Runner/Runner.swift; sourceTree = "<absolute>"; };
 		6159F85F1BD1F55D0010F83C /* BrainCore.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = BrainCore.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		6159F8691BD1F55D0010F83C /* BrainCoreTests.OSX.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BrainCoreTests.OSX.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		6159F87E1BD1F59F0010F83C /* BrainCore.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = BrainCore.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -106,6 +110,7 @@
 		61CE4BC61BED6F7F000E0D34 /* Upsurge.framework.dSYM */ = {isa = PBXFileReference; lastKnownFileType = wrapper.dsym; path = Upsurge.framework.dSYM; sourceTree = "<group>"; };
 		8C378A551CA1B47600D1B153 /* L2LossLayer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = L2LossLayer.swift; sourceTree = "<group>"; };
 		8C378A5A1CA1B49B00D1B153 /* L2Loss.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = L2Loss.metal; sourceTree = "<group>"; };
+		8C378A5F1CA1BB1800D1B153 /* ForwardRunnerInstance.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ForwardRunnerInstance.swift; path = Runner/ForwardRunnerInstance.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -175,8 +180,7 @@
 				6159F89C1BD1F5CE0010F83C /* Net.swift */,
 				6141B1A91C6BFEBE0074BD8C /* NetBuffer.swift */,
 				6141B1AA1C6BFEBE0074BD8C /* NetNode.swift */,
-				6141B1AB1C6BFEBE0074BD8C /* Runner.swift */,
-				6141B1AC1C6BFEBE0074BD8C /* RunnerInstance.swift */,
+				8C378A5E1CA1BB0400D1B153 /* Runners */,
 				6119AC291C6041D20020E0E6 /* Utilities.swift */,
 				6159F8981BD1F5CE0010F83C /* Layers */,
 				615C96241C5BF8F700A1CFD4 /* Metal */,
@@ -247,6 +251,16 @@
 				61CE4BC41BED6F7F000E0D34 /* Mac */,
 			);
 			name = Dependencies;
+			sourceTree = "<group>";
+		};
+		8C378A5E1CA1BB0400D1B153 /* Runners */ = {
+			isa = PBXGroup;
+			children = (
+				6141B1AC1C6BFEBE0074BD8C /* Runner.swift */,
+				6141B1AB1C6BFEBE0074BD8C /* BackwardRunnerInstance.swift */,
+				8C378A5F1CA1BB1800D1B153 /* ForwardRunnerInstance.swift */,
+			);
+			name = Runners;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -426,15 +440,16 @@
 				6159F8A41BD1F5CE0010F83C /* Layer.swift in Sources */,
 				8C378A561CA1B47600D1B153 /* L2LossLayer.swift in Sources */,
 				6119AC331C61486D0020E0E6 /* LSTM.metal in Sources */,
+				8C378A601CA1BB1800D1B153 /* ForwardRunnerInstance.swift in Sources */,
 				615C96261C5BF91500A1CFD4 /* ReLU.metal in Sources */,
 				6159F8A61BD1F5CE0010F83C /* Net.swift in Sources */,
 				6141B1AD1C6BFEBE0074BD8C /* NetBuffer.swift in Sources */,
 				6159F8A31BD1F5CE0010F83C /* InnerProductLayer.swift in Sources */,
 				6119AC2A1C6041D20020E0E6 /* Utilities.swift in Sources */,
 				6141B1AE1C6BFEBE0074BD8C /* NetNode.swift in Sources */,
-				6141B1B01C6BFEBE0074BD8C /* RunnerInstance.swift in Sources */,
-				6141B1AF1C6BFEBE0074BD8C /* Runner.swift in Sources */,
+				6141B1B01C6BFEBE0074BD8C /* Runner.swift in Sources */,
 				8C378A5C1CA1B49B00D1B153 /* L2Loss.metal in Sources */,
+				6141B1AF1C6BFEBE0074BD8C /* BackwardRunnerInstance.swift in Sources */,
 				6159F8A51BD1F5CE0010F83C /* ReLULayer.swift in Sources */,
 				6119AC301C6139900020E0E6 /* LSTMLayer.swift in Sources */,
 			);
@@ -460,8 +475,11 @@
 			buildActionMask = 2147483647;
 			files = (
 				614198011C5FEFB700FB6770 /* InnerProduct.metal in Sources */,
+				8C378A621CA1BB2400D1B153 /* Runner.swift in Sources */,
 				615C96271C5BF91500A1CFD4 /* ReLU.metal in Sources */,
+				8C378A611CA1BB1800D1B153 /* ForwardRunnerInstance.swift in Sources */,
 				6119AC351C61486D0020E0E6 /* LSTM.metal in Sources */,
+				8C378A631CA1C2DB00D1B153 /* BackwardRunnerInstance.swift in Sources */,
 				6159F8AD1BD1F5EB0010F83C /* InnerProductLayer.swift in Sources */,
 				6159F8AF1BD1F5EB0010F83C /* ReLULayer.swift in Sources */,
 				6119AC2B1C6041D20020E0E6 /* Utilities.swift in Sources */,
