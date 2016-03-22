@@ -53,6 +53,8 @@
 		61CE4BCE1BED6F90000E0D34 /* Upsurge.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 61CE4BC21BED6F7F000E0D34 /* Upsurge.framework */; };
 		61CE4BCF1BED703B000E0D34 /* Upsurge.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 61CE4BC21BED6F7F000E0D34 /* Upsurge.framework */; };
 		61CE4BD01BED703F000E0D34 /* Upsurge.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 61CE4BC51BED6F7F000E0D34 /* Upsurge.framework */; };
+		8C378A561CA1B47600D1B153 /* L2LossLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C378A551CA1B47600D1B153 /* L2LossLayer.swift */; };
+		8C378A5C1CA1B49B00D1B153 /* L2Loss.metal in Sources */ = {isa = PBXBuildFile; fileRef = 8C378A5A1CA1B49B00D1B153 /* L2Loss.metal */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -102,6 +104,8 @@
 		61CE4BC31BED6F7F000E0D34 /* Upsurge.framework.dSYM */ = {isa = PBXFileReference; lastKnownFileType = wrapper.dsym; path = Upsurge.framework.dSYM; sourceTree = "<group>"; };
 		61CE4BC51BED6F7F000E0D34 /* Upsurge.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Upsurge.framework; sourceTree = "<group>"; };
 		61CE4BC61BED6F7F000E0D34 /* Upsurge.framework.dSYM */ = {isa = PBXFileReference; lastKnownFileType = wrapper.dsym; path = Upsurge.framework.dSYM; sourceTree = "<group>"; };
+		8C378A551CA1B47600D1B153 /* L2LossLayer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = L2LossLayer.swift; sourceTree = "<group>"; };
+		8C378A5A1CA1B49B00D1B153 /* L2Loss.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = L2Loss.metal; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -186,6 +190,7 @@
 				6159F89A1BD1F5CE0010F83C /* Layer.swift */,
 				6159F8991BD1F5CE0010F83C /* InnerProductLayer.swift */,
 				6119AC2F1C6139900020E0E6 /* LSTMLayer.swift */,
+				8C378A551CA1B47600D1B153 /* L2LossLayer.swift */,
 				6159F89B1BD1F5CE0010F83C /* ReLULayer.swift */,
 			);
 			path = Layers;
@@ -209,6 +214,7 @@
 			children = (
 				614197FF1C5FEFB700FB6770 /* InnerProduct.metal */,
 				6119AC321C61486D0020E0E6 /* LSTM.metal */,
+				8C378A5A1CA1B49B00D1B153 /* L2Loss.metal */,
 				615C96251C5BF91500A1CFD4 /* ReLU.metal */,
 			);
 			path = Metal;
@@ -418,6 +424,7 @@
 			files = (
 				614198001C5FEFB700FB6770 /* InnerProduct.metal in Sources */,
 				6159F8A41BD1F5CE0010F83C /* Layer.swift in Sources */,
+				8C378A561CA1B47600D1B153 /* L2LossLayer.swift in Sources */,
 				6119AC331C61486D0020E0E6 /* LSTM.metal in Sources */,
 				615C96261C5BF91500A1CFD4 /* ReLU.metal in Sources */,
 				6159F8A61BD1F5CE0010F83C /* Net.swift in Sources */,
@@ -427,6 +434,7 @@
 				6141B1AE1C6BFEBE0074BD8C /* NetNode.swift in Sources */,
 				6141B1B01C6BFEBE0074BD8C /* RunnerInstance.swift in Sources */,
 				6141B1AF1C6BFEBE0074BD8C /* Runner.swift in Sources */,
+				8C378A5C1CA1B49B00D1B153 /* L2Loss.metal in Sources */,
 				6159F8A51BD1F5CE0010F83C /* ReLULayer.swift in Sources */,
 				6119AC301C6139900020E0E6 /* LSTMLayer.swift in Sources */,
 			);
