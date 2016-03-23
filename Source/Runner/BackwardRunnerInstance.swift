@@ -14,7 +14,7 @@ public class BackwardRunnerInstance {
     var finishedNodes = Set<NetNode>()
 
     var batchSize: Int
-    
+
     var queue: dispatch_queue_t
 
     var solverParametersBuffer: MTLBuffer
@@ -33,33 +33,33 @@ public class BackwardRunnerInstance {
         self.solverParametersBuffer = device.newBufferWithBytes(&solverParameters, length: sizeof(SolverParameters), options: .CPUCacheModeWriteCombined)
         self.solverParametersBuffer.label = "SolverParametersBuffer"
     }
-    
+
     func processNodes(buffer: MTLCommandBuffer, forwardInstance: ForwardRunnerInstance, terminateBackwardPass: (BackwardRunnerInstance) -> Void) {
         while !openNodes.isEmpty {
             let node = openNodes.popLast()!
             if closedNodes.contains(node) {
                 continue
             }
-            
+
             guard let backwardLayer = node.layer as? BackwardLayer else {
                 continue
             }
-            
+
             guard let input = node.inputBuffer, output = node.outputBuffer else {
                 preconditionFailure("Layer '\(node.name)' is missing a buffer")
             }
-            
+
             let inputBuffer = forwardInstance.buffers[input.id]
             let inputDiffBuffer = diffBuffers[input.id]
             let outputDiffBuffer = diffBuffers[output.id]
-            
+
             backwardLayer.encodeBackwardInBuffer(buffer,
                                                  batchSize: batchSize,
                                                  outputDiff: outputDiffBuffer,
                                                  input: inputBuffer,
                                                  inputDiff: inputDiffBuffer)
 
-            
+
             buffer.addCompletedHandler() { commandBuffer in
                 dispatch_async(self.queue) {
                     self.finishNode(node)
@@ -69,7 +69,7 @@ public class BackwardRunnerInstance {
                 }
             }
             buffer.commit()
-            
+
             closeNode(node)
         }
     }
@@ -95,7 +95,7 @@ public class BackwardRunnerInstance {
 
     func closeNode(node: NetNode) {
         closedNodes.insert(node)
-        
+
         if let buffer = node.outputBuffer {
             let newOpenNodes = buffer.inputNodes.filter{ isNodeReady($0) }
             openNodes.appendContentsOf(newOpenNodes)

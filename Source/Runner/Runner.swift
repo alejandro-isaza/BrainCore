@@ -99,22 +99,22 @@ public class Runner {
     /// Perform a backward pass on the network
     public func backward(forwardInstance: ForwardRunnerInstance) {
         dispatch_semaphore_wait(backwardInflightSemaphore, DISPATCH_TIME_FOREVER)
-        
+
         let backwardInstance = backwardInstances[nextBackwardInstanceIndex]
         backwardInstance.reset()
         nextBackwardInstanceIndex = (nextBackwardInstanceIndex + 1) % instanceCount
-        
+
         commandQueue.insertDebugCaptureBoundary()
-        
+
         for n in net.lossNodes {
             backwardInstance.openNodes.append(n)
         }
-        
+
         dispatch_async(queue) {
             backwardInstance.processNodes(self.commandQueue.commandBuffer(), forwardInstance: forwardInstance, terminateBackwardPass: self.terminateBackwardPass)
         }
     }
-    
+
     func terminateForwardPass(instance: ForwardRunnerInstance) {
         // Collect all data
         for n in net.sinkNodes {

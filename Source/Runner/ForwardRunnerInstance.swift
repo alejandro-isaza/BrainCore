@@ -29,7 +29,7 @@ public class ForwardRunnerInstance {
             self.buffers.append(mtlBuffer)
         }
     }
-    
+
     func processNodes(commandQueue: MTLCommandQueue, terminateForwardPass: (ForwardRunnerInstance) -> Void) {
         while !openNodes.isEmpty {
             let node = openNodes.popLast()!
@@ -55,7 +55,6 @@ public class ForwardRunnerInstance {
                                                offset: node.inputOffset,
                                                output: outputBuffer,
                                                offset: node.outputOffset)
-
 
             buffer.addCompletedHandler() { commandBuffer in
                 dispatch_async(self.queue) {
