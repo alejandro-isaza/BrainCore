@@ -15,7 +15,7 @@ public class ForwardRunnerInstance {
 
     var batchSize: Int
 
-    var queue: dispatch_queue_t
+    private var queue: dispatch_queue_t
 
     init(buffers: [NetBuffer], device: MTLDevice, batchSize: Int) {
         self.batchSize = batchSize

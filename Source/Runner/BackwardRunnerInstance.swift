@@ -15,7 +15,7 @@ public class BackwardRunnerInstance {
 
     var batchSize: Int
 
-    var queue: dispatch_queue_t
+    private var queue: dispatch_queue_t
 
     var solverParametersBuffer: MTLBuffer
 
@@ -35,6 +35,12 @@ public class BackwardRunnerInstance {
     }
 
     func processNodes(buffer: MTLCommandBuffer, forwardInstance: ForwardRunnerInstance, terminateBackwardPass: (BackwardRunnerInstance) -> Void) {
+        dispatch_async(queue) {
+            self.processNodesInQueue(buffer, forwardInstance: forwardInstance, terminateBackwardPass: terminateBackwardPass)
+        }
+    }
+
+    private func processNodesInQueue(buffer: MTLCommandBuffer, forwardInstance: ForwardRunnerInstance, terminateBackwardPass: (BackwardRunnerInstance) -> Void) {
         while !openNodes.isEmpty {
             let node = openNodes.popLast()!
             if closedNodes.contains(node) {
