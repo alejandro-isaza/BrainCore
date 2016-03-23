@@ -12,8 +12,15 @@ public class ForwardRunnerInstance {
     var openNodes = [NetNode]()
     var closedNodes = Set<NetNode>()
     var finishedNodes = Set<NetNode>()
-    
-    init(buffers: [NetBuffer], device: MTLDevice) {
+
+    var batchSize: Int
+
+    var queue: dispatch_queue_t
+
+    init(buffers: [NetBuffer], device: MTLDevice, batchSize: Int) {
+        self.batchSize = batchSize
+        self.queue = dispatch_queue_create("BrainCore.ForwardRunnerInstance", DISPATCH_QUEUE_SERIAL)
+
         self.buffers = [MTLBuffer]()
         self.buffers.reserveCapacity(buffers.count)
         for buffer in buffers {
@@ -23,40 +30,43 @@ public class ForwardRunnerInstance {
         }
     }
     
-    func processNodes(runner: Runner) {
+    func processNodes(commandQueue: MTLCommandQueue, terminateForwardPass: (ForwardRunnerInstance) -> Void) {
         while !openNodes.isEmpty {
             let node = openNodes.popLast()!
             if closedNodes.contains(node) {
                 continue
             }
-            
+
             guard let forwardLayer = node.layer as? ForwardLayer else {
                 continue
             }
-            
+
             guard let input = node.inputBuffer, output = node.outputBuffer else {
                 preconditionFailure("Layer '\(node.name)' is missing a buffer")
             }
-            
+
             let inputBuffer = buffers[input.id]
             let outputBuffer = buffers[output.id]
-            
-            let commandBuffer = runner.commandQueue.commandBuffer()
-            forwardLayer.encodeForwardInBuffer(commandBuffer,
-                                               batchSize: runner.batchSize, input: inputBuffer,
-                                               offset: node.inputOffset, output: outputBuffer,
+
+            let buffer = commandQueue.commandBuffer()
+            forwardLayer.encodeForwardInBuffer(buffer,
+                                               batchSize: batchSize,
+                                               input: inputBuffer,
+                                               offset: node.inputOffset,
+                                               output: outputBuffer,
                                                offset: node.outputOffset)
-            
-            commandBuffer.addCompletedHandler() { commandBuffer in
-                dispatch_async(runner.queue) {
+
+
+            buffer.addCompletedHandler() { commandBuffer in
+                dispatch_async(self.queue) {
                     self.finishNode(node)
                     if self.isFinished() {
-                        runner.terminateForwardPass(self)
+                        terminateForwardPass(self)
                     }
                 }
             }
-            commandBuffer.commit()
-            
+            buffer.commit()
+
             closeNode(node)
         }
     }
@@ -95,5 +105,28 @@ public class ForwardRunnerInstance {
     
     func isFinished() -> Bool {
         return openNodes.isEmpty && closedNodes == finishedNodes
+    }
+
+    func wipeBuffers(runner: Runner) {
+        let commandBuffer = runner.commandQueue.commandBuffer()
+        for buffer in buffers {
+            var dimensions = BufferDimensions(count: UInt32(buffer.length))
+            let bufferDimensions = buffer.device.newBufferWithBytes(&dimensions, length: sizeof(BufferDimensions), options: .CPUCacheModeWriteCombined)
+            bufferDimensions.label = "BufferDimensions"
+
+            let encoder = commandBuffer.computeCommandEncoder()
+            encoder.label = "ResetBuffer"
+            encoder.setComputePipelineState(runner.resetState)
+            encoder.setBuffer(buffer, offset: 0, atIndex: 0)
+            encoder.setBuffer(bufferDimensions, offset: 0, atIndex: 1)
+
+            let count = Int(dimensions.count)
+            let threadsPerGroup = MTLSize(width: runner.resetState.threadExecutionWidth, height: 1, depth: 1)
+            let numThreadgroups = MTLSize(width: (count - 1) / runner.resetState.threadExecutionWidth + 1, height: 1, depth:1)
+            encoder.dispatchThreadgroups(numThreadgroups, threadsPerThreadgroup: threadsPerGroup)
+            
+            encoder.endEncoding()
+        }
+        commandBuffer.commit()
     }
 }

@@ -19,30 +19,39 @@ struct L2LossDimensions {
 kernel void l2_loss_forward(const device float* input [[ buffer(0) ]],
                             device float* output [[ buffer(1) ]],
                             constant L2LossDimensions& dims [[ buffer(2) ]],
-                            uint id [[ thread_position_in_grid ]])
+                            uint2 id [[ thread_position_in_grid ]])
 {
-    if (id >= 1) {
+    const auto inputElement = id.x;
+    const auto batchElement = id.y;
+
+    if (inputElement >= dims.input_size / 2 || batchElement >= dims.batch_size) {
         return;
     }
-    
-    output[0] = 0;
-    for (auto i = 0; i < dims.input_size / 2; ++i) {
-        auto diff = input[i] - input[(dims.input_size / 2) + i];
-        output[0] += diff * diff / 2;
-    }
+
+    const auto dataIndex = inputElement + batchElement * dims.input_size;
+    const auto labelIndex = inputElement + batchElement * dims.input_size + dims.input_size / 2;
+
+    auto diff = input[dataIndex] - input[labelIndex];
+    output[0] += diff * diff / 2;
 }
 
 kernel void l2_loss_backward(const device float* input [[ buffer(0) ]],
                              device float* inputDiff [[ buffer(1) ]],
                              constant L2LossDimensions& dims [[ buffer(2) ]],
-                             uint id [[ thread_position_in_grid ]])
+                             uint2 id [[ thread_position_in_grid ]])
 {
-    if (id >= dims.input_size / 2) {
+    const auto inputElement = id.x;
+    const auto batchElement = id.y;
+
+    if (inputElement >= dims.input_size / 2 || batchElement >= dims.batch_size) {
         return;
     }
 
+    const auto dataIndex = inputElement + batchElement * dims.input_size;
+    const auto labelIndex = inputElement + batchElement * dims.input_size + dims.input_size / 2;
+
     auto alpha = 1 / dims.batch_size;
-    auto diff = input[id] - input[(dims.input_size / 2) + id];
-    inputDiff[id] = alpha * diff;
-    inputDiff[(dims.input_size / 2) + id] = alpha * -diff;
+    auto diff = input[dataIndex] - input[labelIndex];
+    inputDiff[dataIndex] = alpha * diff;
+    inputDiff[labelIndex] = alpha * -diff;
 }

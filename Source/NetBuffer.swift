@@ -5,6 +5,10 @@
 // contained in the file LICENSE at the root of the source code distribution
 // tree.
 
+struct BufferDimensions {
+    let count: UInt32
+}
+
 class NetBuffer: Hashable {
     let id: Int
     let name: String

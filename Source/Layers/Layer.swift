@@ -42,11 +42,8 @@ public protocol BackwardLayer: ForwardLayer {
     func encodeBackwardInBuffer(buffer: MTLCommandBuffer, batchSize: Int, outputDiff: MTLBuffer, input: MTLBuffer, inputDiff: MTLBuffer)
 }
 
-public protocol LossLayer: ForwardLayer {
+public protocol LossLayer: BackwardLayer {
     var loss: Double { get set }
-    
-    /// Backward-propagate the label-logit
-    func encodeBackwardInBuffer(buffer: MTLCommandBuffer, input: MTLBuffer, inputDiff: MTLBuffer)
 }
 
 public protocol BackwardParameterLayer: BackwardLayer {

@@ -16,9 +16,11 @@ public class Runner {
     let device: MTLDevice
     var library: MTLLibrary!
     var commandQueue: MTLCommandQueue
+    var resetState: MTLComputePipelineState!
 
     var queue: dispatch_queue_t
-    var inflightSemaphore: dispatch_semaphore_t
+    var forwardInflightSemaphore: dispatch_semaphore_t
+    var backwardInflightSemaphore: dispatch_semaphore_t
 
     let instanceCount = 3
     var forwardInstances = [ForwardRunnerInstance]()
@@ -26,7 +28,7 @@ public class Runner {
     var backwardInstances = [BackwardRunnerInstance]()
     var nextBackwardInstanceIndex = 0
 
-    public init(net: Net, device: MTLDevice, batchSize: Int = 1, params: SolverParameters? = nil) throws {
+    public init(net: Net, device: MTLDevice, batchSize: Int = 1, params: SolverParameters? = nil, updateFunctionName: String? = nil) throws {
         self.batchSize = batchSize
         self.net = net
         self.device = device
@@ -34,7 +36,8 @@ public class Runner {
         commandQueue = device.newCommandQueue()
         commandQueue.label = "BrainCore.Runner"
         queue = dispatch_queue_create("BrainCore.Runner", DISPATCH_QUEUE_SERIAL)
-        inflightSemaphore = dispatch_semaphore_create(instanceCount)
+        forwardInflightSemaphore = dispatch_semaphore_create(instanceCount)
+        backwardInflightSemaphore = dispatch_semaphore_create(instanceCount)
 
         guard let path = NSBundle(forClass: self.dynamicType).pathForResource("default", ofType: "metallib") else {
             fatalError("Metal library not found")
@@ -42,24 +45,31 @@ public class Runner {
         library = try device.newLibraryWithFile(path)
 
         for _ in 0..<instanceCount {
-            let forwardInstance = ForwardRunnerInstance(buffers: net.buffers, device: device)
+            let forwardInstance = ForwardRunnerInstance(buffers: net.buffers, device: device, batchSize: batchSize)
             forwardInstances.append(forwardInstance)
             if var params = params {
-                let backwardwardInstance = BackwardRunnerInstance(diffBuffers: net.buffers, device: device, solverParameters: &params)
+                let backwardwardInstance = BackwardRunnerInstance(diffBuffers: net.buffers, device: device, solverParameters: &params, batchSize: batchSize)
                 backwardInstances.append(backwardwardInstance)
             }
         }
 
         for node in net.nodes {
-            if let forwardLayer = node.layer as? ForwardLayer {
+            if let paramsLayer = node.layer as? BackwardParameterLayer, updateFunctionName = updateFunctionName {
+                try paramsLayer.setupInLibrary(library, updateFunctionName: updateFunctionName)
+            } else if let forwardLayer = node.layer as? ForwardLayer {
                 try forwardLayer.setupInLibrary(library)
             }
         }
     }
 
+    public func setupInLibrary() throws {
+        let resetBuffer = library.newFunctionWithName("reset_buffer")!
+        resetState = try library.device.newComputePipelineStateWithFunction(resetBuffer)
+    }
+
     /// Perform a forward pass on the network
     public func forward() {
-        dispatch_semaphore_wait(inflightSemaphore, DISPATCH_TIME_FOREVER)
+        dispatch_semaphore_wait(forwardInflightSemaphore, DISPATCH_TIME_FOREVER)
 
         let instance = forwardInstances[nextForwardInstanceIndex]
         instance.reset()
@@ -82,13 +92,13 @@ public class Runner {
         }
 
         dispatch_async(queue) {
-            instance.processNodes(self)
+            instance.processNodes(self.commandQueue, terminateForwardPass: self.terminateForwardPass)
         }
     }
 
     /// Perform a backward pass on the network
     public func backward(forwardInstance: ForwardRunnerInstance) {
-        dispatch_semaphore_wait(inflightSemaphore, DISPATCH_TIME_FOREVER)
+        dispatch_semaphore_wait(backwardInflightSemaphore, DISPATCH_TIME_FOREVER)
         
         let backwardInstance = backwardInstances[nextBackwardInstanceIndex]
         backwardInstance.reset()
@@ -101,7 +111,7 @@ public class Runner {
         }
         
         dispatch_async(queue) {
-            backwardInstance.processNodes(self, forwardInstance: forwardInstance)
+            backwardInstance.processNodes(self.commandQueue.commandBuffer(), forwardInstance: forwardInstance, terminateBackwardPass: self.terminateBackwardPass)
         }
     }
     
@@ -116,11 +126,11 @@ public class Runner {
         }
 
         self.forwardPassAction?(instance)
-        dispatch_semaphore_signal(inflightSemaphore);
+        dispatch_semaphore_signal(forwardInflightSemaphore);
     }
 
     func terminateBackwardPass(instance: BackwardRunnerInstance) {
         self.backwardPassAction?(instance)
-        dispatch_semaphore_signal(self.inflightSemaphore);
+        dispatch_semaphore_signal(backwardInflightSemaphore);
     }
 }

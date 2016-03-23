@@ -12,10 +12,17 @@ public class BackwardRunnerInstance {
     var openNodes = [NetNode]()
     var closedNodes = Set<NetNode>()
     var finishedNodes = Set<NetNode>()
+
+    var batchSize: Int
     
+    var queue: dispatch_queue_t
+
     var solverParametersBuffer: MTLBuffer
 
-    init(diffBuffers: [NetBuffer], device: MTLDevice, inout solverParameters: SolverParameters) {
+    init(diffBuffers: [NetBuffer], device: MTLDevice, inout solverParameters: SolverParameters, batchSize: Int) {
+        self.batchSize = batchSize
+        self.queue = dispatch_queue_create("BrainCore.ForwardRunnerInstance", DISPATCH_QUEUE_SERIAL)
+
         self.diffBuffers = [MTLBuffer]()
         self.diffBuffers.reserveCapacity(diffBuffers.count)
         for buffer in diffBuffers {
@@ -27,7 +34,7 @@ public class BackwardRunnerInstance {
         self.solverParametersBuffer.label = "SolverParametersBuffer"
     }
     
-    func processNodes(runner: Runner, forwardInstance: ForwardRunnerInstance) {
+    func processNodes(buffer: MTLCommandBuffer, forwardInstance: ForwardRunnerInstance, terminateBackwardPass: (BackwardRunnerInstance) -> Void) {
         while !openNodes.isEmpty {
             let node = openNodes.popLast()!
             if closedNodes.contains(node) {
@@ -46,23 +53,22 @@ public class BackwardRunnerInstance {
             let inputDiffBuffer = diffBuffers[input.id]
             let outputDiffBuffer = diffBuffers[output.id]
             
-            let commandBuffer = runner.commandQueue.commandBuffer()
-            backwardLayer.encodeBackwardInBuffer(commandBuffer,
-                                                 batchSize: runner.batchSize,
+            backwardLayer.encodeBackwardInBuffer(buffer,
+                                                 batchSize: batchSize,
                                                  outputDiff: outputDiffBuffer,
                                                  input: inputBuffer,
                                                  inputDiff: inputDiffBuffer)
 
             
-            commandBuffer.addCompletedHandler() { commandBuffer in
-                dispatch_async(runner.queue) {
+            buffer.addCompletedHandler() { commandBuffer in
+                dispatch_async(self.queue) {
                     self.finishNode(node)
                     if self.isFinished() {
-                        runner.terminateBackwardPass(self)
+                        terminateBackwardPass(self)
                     }
                 }
             }
-            commandBuffer.commit()
+            buffer.commit()
             
             closeNode(node)
         }
