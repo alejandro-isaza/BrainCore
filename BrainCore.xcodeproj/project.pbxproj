@@ -53,6 +53,8 @@
 		61CE4BCE1BED6F90000E0D34 /* Upsurge.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 61CE4BC21BED6F7F000E0D34 /* Upsurge.framework */; };
 		61CE4BCF1BED703B000E0D34 /* Upsurge.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 61CE4BC21BED6F7F000E0D34 /* Upsurge.framework */; };
 		61CE4BD01BED703F000E0D34 /* Upsurge.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 61CE4BC51BED6F7F000E0D34 /* Upsurge.framework */; };
+		8C378A7B1CA3406300D1B153 /* Utilities.h in Headers */ = {isa = PBXBuildFile; fileRef = 8C378A7A1CA3406300D1B153 /* Utilities.h */; };
+		8C378A7C1CA3406300D1B153 /* Utilities.h in Headers */ = {isa = PBXBuildFile; fileRef = 8C378A7A1CA3406300D1B153 /* Utilities.h */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -102,6 +104,7 @@
 		61CE4BC31BED6F7F000E0D34 /* Upsurge.framework.dSYM */ = {isa = PBXFileReference; lastKnownFileType = wrapper.dsym; path = Upsurge.framework.dSYM; sourceTree = "<group>"; };
 		61CE4BC51BED6F7F000E0D34 /* Upsurge.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Upsurge.framework; sourceTree = "<group>"; };
 		61CE4BC61BED6F7F000E0D34 /* Upsurge.framework.dSYM */ = {isa = PBXFileReference; lastKnownFileType = wrapper.dsym; path = Upsurge.framework.dSYM; sourceTree = "<group>"; };
+		8C378A7A1CA3406300D1B153 /* Utilities.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Utilities.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -210,6 +213,7 @@
 				614197FF1C5FEFB700FB6770 /* InnerProduct.metal */,
 				6119AC321C61486D0020E0E6 /* LSTM.metal */,
 				615C96251C5BF91500A1CFD4 /* ReLU.metal */,
+				8C378A7A1CA3406300D1B153 /* Utilities.h */,
 			);
 			path = Metal;
 			sourceTree = "<group>";
@@ -251,6 +255,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				6159F8A21BD1F5CE0010F83C /* BrainCore.h in Headers */,
+				8C378A7B1CA3406300D1B153 /* Utilities.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -259,6 +264,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				6159F8AB1BD1F5DB0010F83C /* BrainCore.h in Headers */,
+				8C378A7C1CA3406300D1B153 /* Utilities.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

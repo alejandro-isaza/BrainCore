@@ -7,6 +7,8 @@
 
 #include <metal_stdlib>
 
+#include "Utilities.h"
+
 using namespace metal;
 
 struct LSTMParameters {
@@ -15,10 +17,6 @@ struct LSTMParameters {
     ushort inputSize;
     float clipTo;
 };
-
-inline float sigmoid(const float x) {
-    return 1.0 / (1.0 + exp(-x));
-}
 
 kernel void lstm_forward(const device float* input [[ buffer(0) ]],
                          const device float* weights [[ buffer(1) ]],
@@ -59,11 +57,11 @@ kernel void lstm_forward(const device float* input [[ buffer(0) ]],
     }
 
     const auto previousActivation = state[unit + batchElement * 2 * params.unitCount];
-    auto activation = sigmoid(forgetGate + 1) * previousActivation + sigmoid(inputGate) * tanh(newInput);
+    auto activation = sigmoid(forgetGate + 1) * previousActivation + sigmoid(inputGate) * safe_tanh(newInput);
     if (params.clipTo > 0) {
         activation = clamp(activation, -params.clipTo, params.clipTo);
     }
-    const auto out = sigmoid(outputGate) * tanh(activation);
+    const auto out = sigmoid(outputGate) * safe_tanh(activation);
 
     output[unit + batchElement * params.unitCount] = out;
     state[unit + batchElement * 2 * params.unitCount] = activation;
