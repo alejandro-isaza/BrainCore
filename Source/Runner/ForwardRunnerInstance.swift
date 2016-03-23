@@ -31,6 +31,12 @@ public class ForwardRunnerInstance {
     }
 
     func processNodes(commandQueue: MTLCommandQueue, terminateForwardPass: (ForwardRunnerInstance) -> Void) {
+        dispatch_async(queue) {
+            self.processNodesInQueue(commandQueue, terminateForwardPass: terminateForwardPass)
+        }
+    }
+
+    private func processNodesInQueue(commandQueue: MTLCommandQueue, terminateForwardPass: (ForwardRunnerInstance) -> Void) {
         while !openNodes.isEmpty {
             let node = openNodes.popLast()!
             if closedNodes.contains(node) {

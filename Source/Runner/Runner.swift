@@ -18,7 +18,7 @@ public class Runner {
     var commandQueue: MTLCommandQueue
     var resetState: MTLComputePipelineState!
 
-    var queue: dispatch_queue_t
+    private var queue: dispatch_queue_t
     var forwardInflightSemaphore: dispatch_semaphore_t
     var backwardInflightSemaphore: dispatch_semaphore_t
 
