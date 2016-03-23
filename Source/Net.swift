@@ -13,6 +13,7 @@ public class Net {
 
     var buffers = [NetBuffer]()
     var dataNodes = [NetNode]()
+    var lossNodes = [NetNode]()
     var sinkNodes = [NetNode]()
     var nodes = [NetNode]()
 
@@ -31,6 +32,8 @@ public class Net {
 
         if layer is DataLayer {
             dataNodes.append(node)
+        } else if layer is LossLayer {
+            lossNodes.append(node)
         } else if layer is SinkLayer {
             sinkNodes.append(node)
         }

@@ -9,7 +9,7 @@ import Foundation
 import Metal
 import Upsurge
 
-public class InnerProductLayer: ForwardLayer, BackwardLayer {
+public class InnerProductLayer: BackwardParameterLayer {
     public let weights: Matrix<Float>
     public let biases: ValueArray<Float>
 
@@ -24,6 +24,7 @@ public class InnerProductLayer: ForwardLayer, BackwardLayer {
     public var forwardState: MTLComputePipelineState!
     public var backwardParamsState: MTLComputePipelineState!
     public var backwardInputState: MTLComputePipelineState!
+    public var backwardUpdateState: MTLComputePipelineState!
 
     public var weightsBuffer: MTLBuffer!
     public var biasesBuffer: MTLBuffer!
@@ -65,6 +66,14 @@ public class InnerProductLayer: ForwardLayer, BackwardLayer {
         biasesBuffer.label = "InnerProductBiases"
     }
 
+    public func setupInLibrary(library: MTLLibrary, updateFunctionName: String) throws {
+        let backwardUpdateFunction = library.newFunctionWithName(updateFunctionName)!
+        backwardUpdateState = try library.device.newComputePipelineStateWithFunction(backwardUpdateFunction)
+        
+        try setupInLibrary(library)
+    }
+
+    
     public func encodeForwardInBuffer(buffer: MTLCommandBuffer, batchSize: Int, input: MTLBuffer, offset inputOffset: Int, output: MTLBuffer, offset outputOffset: Int) {
         var dimensions = InnerProductDimensions(batchSize: UInt16(batchSize), inputSize: UInt16(inputSize), outputSize: UInt16(outputSize))
         dimensionsBuffer = buffer.device.newBufferWithBytes(&dimensions, length: sizeof(InnerProductDimensions), options: .CPUCacheModeWriteCombined)
@@ -137,5 +146,49 @@ public class InnerProductLayer: ForwardLayer, BackwardLayer {
 
             encoder.endEncoding()
         }
+    }
+    
+    public func update(buffer: MTLCommandBuffer, solverParams: MTLBuffer?) {
+        if weightDiff == nil {
+            weightDiff = buffer.device.newBufferWithLength(inputSize * outputSize, options: .CPUCacheModeDefaultCache)
+            weightDiff!.label = "InnerProductWeightDiffs"
+        }
+        if biasDiff == nil {
+            biasDiff = buffer.device.newBufferWithLength(outputSize, options: .CPUCacheModeDefaultCache)
+            biasDiff!.label = "InnerProductBiasDiffs"
+        }
+
+        do {
+            let encoder = buffer.computeCommandEncoder()
+            encoder.label = "InnerProductUpdateParamsWeights"
+            encoder.setComputePipelineState(backwardUpdateState)
+            encoder.setBuffer(weightsBuffer, offset: 0, atIndex: 0)
+            encoder.setBuffer(weightDiff, offset: 0, atIndex: 1)
+            encoder.setBuffer(solverParams, offset: 0, atIndex: 2)
+            
+            let count = weights.count
+            let threadsPerGroup = MTLSize(width: forwardState.threadExecutionWidth, height: 1, depth: 1)
+            let numThreadgroups = MTLSize(width: (count - 1) / forwardState.threadExecutionWidth + 1, height: 1, depth:1)
+            encoder.dispatchThreadgroups(numThreadgroups, threadsPerThreadgroup: threadsPerGroup)
+            
+            encoder.endEncoding()
+        }
+        
+        do {
+            let encoder = buffer.computeCommandEncoder()
+            encoder.label = "InnerProductUpdateParamsBiases"
+            encoder.setComputePipelineState(backwardUpdateState)
+            encoder.setBuffer(biasesBuffer, offset: 0, atIndex: 0)
+            encoder.setBuffer(biasDiff, offset: 0, atIndex: 1)
+            encoder.setBuffer(solverParams, offset: 0, atIndex: 2)
+            
+            let count = biases.count
+            let threadsPerGroup = MTLSize(width: forwardState.threadExecutionWidth, height: 1, depth: 1)
+            let numThreadgroups = MTLSize(width: (count - 1) / forwardState.threadExecutionWidth + 1, height: 1, depth:1)
+            encoder.dispatchThreadgroups(numThreadgroups, threadsPerThreadgroup: threadsPerGroup)
+            
+            encoder.endEncoding()
+        }
+
     }
 }
