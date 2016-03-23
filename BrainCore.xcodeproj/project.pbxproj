@@ -108,7 +108,7 @@
 		6141B1A91C6BFEBE0074BD8C /* NetBuffer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NetBuffer.swift; sourceTree = "<group>"; };
 		6141B1AA1C6BFEBE0074BD8C /* NetNode.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NetNode.swift; sourceTree = "<group>"; };
 		6141B1AB1C6BFEBE0074BD8C /* BackwardRunnerInstance.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = BackwardRunnerInstance.swift; path = Runner/BackwardRunnerInstance.swift; sourceTree = "<group>"; };
-		6141B1AC1C6BFEBE0074BD8C /* Runner.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Runner.swift; path = /Users/agomez/Dev/BrainCore/Source/Runner/Runner.swift; sourceTree = "<absolute>"; };
+		6141B1AC1C6BFEBE0074BD8C /* Runner.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Runner.swift; path = Runner/Runner.swift; sourceTree = "<group>"; };
 		6159F85F1BD1F55D0010F83C /* BrainCore.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = BrainCore.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		6159F8691BD1F55D0010F83C /* BrainCoreTests.OSX.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BrainCoreTests.OSX.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		6159F87E1BD1F59F0010F83C /* BrainCore.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = BrainCore.framework; sourceTree = BUILT_PRODUCTS_DIR; };
