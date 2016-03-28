@@ -10,7 +10,7 @@ import Metal
 public class Runner {
     public let batchSize: Int
     public let net: Net
-    public var forwardPassAction: (() -> Void)?
+    public var forwardPassAction: (([MTLBuffer]) -> Void)?
 
     let device: MTLDevice
     var library: MTLLibrary!
@@ -128,7 +128,7 @@ public class Runner {
             }
         }
 
-        self.forwardPassAction?()
+        self.forwardPassAction?(instance.buffers)
         dispatch_semaphore_signal(inflightSemaphore);
     }
 }

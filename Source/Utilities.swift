@@ -20,9 +20,9 @@ public func arrayFromBuffer(buffer: MTLBuffer, start: Int = 0) -> Array<Float> {
     return Array<Float>(UnsafeBufferPointer(start: pointer, count: count))
 }
 
-public func valueArrayFromBuffer(buffer: MTLBuffer, start: Int = 0) -> ValueArray<Float> {
+public func valueArrayFromBuffer(buffer: MTLBuffer, start: Int = 0, count: Int? = nil) -> ValueArray<Float> {
     let pointer = UnsafeMutablePointer<Float>(buffer.contents()) + start
-    let count = buffer.length / sizeof(Float) - start
+    let count = count ?? buffer.length / sizeof(Float) - start
     var array = ValueArray<Float>(count: count)
     withPointer(&array) { $0.assignFrom(pointer, count: count) }
     return array
