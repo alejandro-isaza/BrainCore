@@ -57,11 +57,11 @@ kernel void lstm_forward(const device float* input [[ buffer(0) ]],
     }
 
     const auto previousActivation = state[unit + batchElement * 2 * params.unitCount];
-    auto activation = sigmoid(forgetGate + 1) * previousActivation + sigmoid(inputGate) * safe_tanh(newInput);
+    auto activation = bc::sigmoid(forgetGate + 1) * previousActivation + bc::sigmoid(inputGate) * bc::tanh(newInput);
     if (params.clipTo > 0) {
         activation = clamp(activation, -params.clipTo, params.clipTo);
     }
-    const auto out = sigmoid(outputGate) * safe_tanh(activation);
+    const auto out = bc::sigmoid(outputGate) * bc::tanh(activation);
 
     output[unit + batchElement * params.unitCount] = out;
     state[unit + batchElement * 2 * params.unitCount] = activation;
