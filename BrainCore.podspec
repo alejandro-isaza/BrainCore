@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name         = "BrainCore"
-  s.version      = "0.1.3"
+  s.version      = "0.2.0"
   s.summary      = "The iOS and OS X neural network framework"
   s.homepage     = "https://github.com/aleph7/BrainCore"
   s.license      = "MIT"
@@ -12,5 +12,5 @@ Pod::Spec.new do |s|
   s.source       = { git: "https://github.com/aleph7/BrainCore.git", tag: s.version, submodules: true }
   s.source_files  = "Source", "Source/Layers", "Source/Metal/*.metal"
 
-  s.dependency "Upsurge", '~> 0.6.0'
+  s.dependency "Upsurge", '~> 0.7'
 end
