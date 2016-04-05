@@ -19,8 +19,8 @@ public class Net {
     public init() {
     }
 
-    public func addBufferWithName(name: String, size: Int) -> BufferRef {
-        let buffer = NetBuffer(id: buffers.count, name: name, size: size)
+    public func addBufferWithName(name: String) -> BufferRef {
+        let buffer = NetBuffer(id: buffers.count, name: name)
         buffers.append(buffer)
         return buffer.id
     }
@@ -140,3 +140,4 @@ public class Net {
         buffer.outputNodes.append(node)
     }
 }
+

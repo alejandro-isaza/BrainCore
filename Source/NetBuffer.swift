@@ -8,15 +8,36 @@
 class NetBuffer: Hashable {
     let id: Int
     let name: String
-    let size: Int
+
+    var size: Int {
+        let inputSize = inputNodes.reduce(0) { currentValue, node in
+            if let forwardLayer = node.layer as? ForwardLayer {
+                return currentValue + forwardLayer.outputSize
+            } else if let dataLayer = node.layer as? DataLayer {
+                return currentValue + dataLayer.outputSize
+            }
+            preconditionFailure("Cannot costruct buffer from \(node.layer.dynamicType).")
+        }
+
+        let outputSize = outputNodes.reduce(0) { currentValue, node in
+            if let forwardLayer = node.layer as? ForwardLayer {
+                return currentValue + forwardLayer.inputSize
+            } else if let sinkLayer = node.layer as? SinkLayer {
+                return currentValue + sinkLayer.inputSize
+            }
+            preconditionFailure("Cannot costruct buffer from \(node.layer.dynamicType).")
+        }
+
+        precondition(inputSize == outputSize, "Incompatible input and output sizes.")
+        return inputSize
+    }
 
     var inputNodes = [NetNode]()
     var outputNodes = [NetNode]()
     
-    init(id: Int, name: String, size: Int) {
+    init(id: Int, name: String) {
         self.id = id
         self.name = name
-        self.size = size
     }
 
     var hashValue: Int {

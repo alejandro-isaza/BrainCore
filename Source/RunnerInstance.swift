@@ -13,11 +13,11 @@ class RunnerInstance {
     var closedNodes = Set<NetNode>()
     var finishedNodes = Set<NetNode>()
 
-    init(buffers: [NetBuffer], device: MTLDevice) {
+    init(buffers: [NetBuffer], device: MTLDevice, batchSize: Int = 1) {
         self.buffers = [MTLBuffer]()
         self.buffers.reserveCapacity(buffers.count)
         for buffer in buffers {
-            let mtlBuffer = device.newBufferWithLength(buffer.size * sizeof(Float), options: .CPUCacheModeDefaultCache)
+            let mtlBuffer = device.newBufferWithLength(buffer.size * batchSize * sizeof(Float), options: .CPUCacheModeDefaultCache)
             mtlBuffer.label = "\(buffer.name)Buffer"
             self.buffers.append(mtlBuffer)
         }

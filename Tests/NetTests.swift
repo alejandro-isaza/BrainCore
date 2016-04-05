@@ -12,18 +12,27 @@ import Upsurge
 class NetTests: MetalTestCase {
     class Source: DataLayer {
         var data: Blob
+        var batchSize: Int
 
         var outputSize: Int {
-            return data.count
+            return data.count / batchSize
         }
 
-        init(data: Blob) {
+        init(data: Blob, batchSize: Int) {
             self.data = data
+            self.batchSize = batchSize
         }
     }
 
     class Sink: SinkLayer {
         var data: Blob = []
+        var inputSize: Int
+        var batchSize: Int
+
+        init(inputSize: Int, batchSize: Int) {
+            self.inputSize = inputSize
+            self.batchSize = batchSize
+        }
 
         func consume(input: Blob) {
             data = input
@@ -33,20 +42,20 @@ class NetTests: MetalTestCase {
     func testTwoInputOneOutputActivation() {
         let net = Net()
 
-        let source = Source(data: [1, 1, 2, 2])
+        let source = Source(data: [1, 1, 2, 2], batchSize: 2)
         let weights = Matrix<Float>(rows: 2, columns: 1, elements: [2, 4])
         let biases = ValueArray<Float>([1])
 
         let ip = InnerProductLayer(weights: weights, biases: biases)
-        let sink = Sink()
+        let sink = Sink(inputSize: 1, batchSize: 2)
 
-        let inputBuffer = net.addBufferWithName("input", size: 4)
-        let ipBuffer = net.addBufferWithName("IP", size: 2)
-        let outputBuffer = net.addBufferWithName("output", size: 2)
+        let inputBuffer = net.addBufferWithName("input")
+        let ipBuffer = net.addBufferWithName("IP")
+        let outputBuffer = net.addBufferWithName("output")
 
         let sourceLayer = net.addLayer(source, name: "source")
         let ipLayer = net.addLayer(ip, name: "inner product")
-        let reluLayer = net.addLayer(ReLULayer(size: 2), name: "ReLU")
+        let reluLayer = net.addLayer(ReLULayer(size: 1), name: "ReLU")
         let sinkLayer = net.addLayer(sink, name: "sink")
 
         net.connectLayer(sourceLayer, toBuffer: inputBuffer)
@@ -76,16 +85,16 @@ class NetTests: MetalTestCase {
         let device = self.device
         let net = Net()
 
-        let source = Source(data: [1, 1])
+        let source = Source(data: [1, 1], batchSize: 1)
         let weights = Matrix<Float>(rows: 2, columns: 1, elements: [2, -4])
         let biases = ValueArray<Float>([1])
 
         let ip = InnerProductLayer(weights: weights, biases: biases)
-        let sink = Sink()
+        let sink = Sink(inputSize: 1, batchSize: 2)
 
-        let inputBuffer = net.addBufferWithName("input", size: 2)
-        let ipBuffer = net.addBufferWithName("IP", size: 1)
-        let outputBuffer = net.addBufferWithName("output", size: 1)
+        let inputBuffer = net.addBufferWithName("input")
+        let ipBuffer = net.addBufferWithName("IP")
+        let outputBuffer = net.addBufferWithName("output")
 
         let sourceLayer = net.addLayer(source, name: "source")
         let ipLayer = net.addLayer(ip, name: "inner product")

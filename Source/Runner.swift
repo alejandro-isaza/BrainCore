@@ -39,7 +39,7 @@ public class Runner {
         library = try device.newLibraryWithFile(path)
 
         for _ in 0..<instanceCount {
-            let instance = RunnerInstance(buffers: net.buffers, device: device)
+            let instance = RunnerInstance(buffers: net.buffers, device: device, batchSize: batchSize)
             instances.append(instance)
         }
 
@@ -63,10 +63,9 @@ public class Runner {
         // Collect all data
         for n in net.dataNodes {
             let dataLayer = n.layer as! DataLayer
-            precondition(dataLayer.data.count == dataLayer.outputSize)
+            precondition(dataLayer.data.count == dataLayer.outputSize * batchSize)
 
             if let netBuffer = n.outputBuffer {
-                precondition(dataLayer.data.count <= netBuffer.size - n.outputOffset)
                 let buffer = instance.buffers[netBuffer.id]
                 fillBuffer(buffer, start: n.outputOffset, withElements: dataLayer.data)
             }
