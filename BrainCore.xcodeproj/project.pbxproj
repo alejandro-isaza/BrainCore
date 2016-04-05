@@ -59,6 +59,14 @@
 		61CE4BD01BED703F000E0D34 /* Upsurge.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 61CE4BC51BED6F7F000E0D34 /* Upsurge.framework */; };
 		8C378A7B1CA3406300D1B153 /* Utilities.h in Headers */ = {isa = PBXBuildFile; fileRef = 8C378A7A1CA3406300D1B153 /* Utilities.h */; };
 		8C378A7C1CA3406300D1B153 /* Utilities.h in Headers */ = {isa = PBXBuildFile; fileRef = 8C378A7A1CA3406300D1B153 /* Utilities.h */; };
+		8CB932EC1CB42F5F00C4D6BE /* L2LossLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CB932EB1CB42F5F00C4D6BE /* L2LossLayer.swift */; };
+		8CB932ED1CB42F6400C4D6BE /* L2LossLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CB932EB1CB42F5F00C4D6BE /* L2LossLayer.swift */; };
+		8CB932EF1CB42F6B00C4D6BE /* L2Loss.metal in Sources */ = {isa = PBXBuildFile; fileRef = 8CB932EE1CB42F6B00C4D6BE /* L2Loss.metal */; };
+		8CB932F01CB42F6F00C4D6BE /* L2Loss.metal in Sources */ = {isa = PBXBuildFile; fileRef = 8CB932EE1CB42F6B00C4D6BE /* L2Loss.metal */; };
+		8CB932F11CB42F7000C4D6BE /* L2Loss.metal in Sources */ = {isa = PBXBuildFile; fileRef = 8CB932EE1CB42F6B00C4D6BE /* L2Loss.metal */; };
+		8CB932F21CB42F7100C4D6BE /* L2Loss.metal in Sources */ = {isa = PBXBuildFile; fileRef = 8CB932EE1CB42F6B00C4D6BE /* L2Loss.metal */; };
+		8CB932F51CB42F8400C4D6BE /* L2LossLayerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CB932F31CB42F8100C4D6BE /* L2LossLayerTests.swift */; };
+		8CB932F61CB42F8500C4D6BE /* L2LossLayerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CB932F31CB42F8100C4D6BE /* L2LossLayerTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -109,6 +117,9 @@
 		61CE4BC51BED6F7F000E0D34 /* Upsurge.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Upsurge.framework; sourceTree = "<group>"; };
 		61CE4BC61BED6F7F000E0D34 /* Upsurge.framework.dSYM */ = {isa = PBXFileReference; lastKnownFileType = wrapper.dsym; path = Upsurge.framework.dSYM; sourceTree = "<group>"; };
 		8C378A7A1CA3406300D1B153 /* Utilities.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Utilities.h; sourceTree = "<group>"; };
+		8CB932EB1CB42F5F00C4D6BE /* L2LossLayer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = L2LossLayer.swift; sourceTree = "<group>"; };
+		8CB932EE1CB42F6B00C4D6BE /* L2Loss.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = L2Loss.metal; sourceTree = "<group>"; };
+		8CB932F31CB42F8100C4D6BE /* L2LossLayerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = L2LossLayerTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -193,6 +204,7 @@
 				6159F89A1BD1F5CE0010F83C /* Layer.swift */,
 				6159F8991BD1F5CE0010F83C /* InnerProductLayer.swift */,
 				6119AC2F1C6139900020E0E6 /* LSTMLayer.swift */,
+				8CB932EB1CB42F5F00C4D6BE /* L2LossLayer.swift */,
 				6159F89B1BD1F5CE0010F83C /* ReLULayer.swift */,
 			);
 			path = Layers;
@@ -202,11 +214,12 @@
 			isa = PBXGroup;
 			children = (
 				6159F89E1BD1F5CE0010F83C /* Info.plist */,
+				610AAB8A1BDAF766008CC910 /* InnerProductLayerTests.swift */,
+				6119AC371C616F4F0020E0E6 /* LSTMLayerTests.swift */,
+				8CB932F31CB42F8100C4D6BE /* L2LossLayerTests.swift */,
 				6119AC2C1C61266B0020E0E6 /* MetalTestCase.swift */,
 				6159F89F1BD1F5CE0010F83C /* NetTests.swift */,
-				610AAB8A1BDAF766008CC910 /* InnerProductLayerTests.swift */,
 				610AAB8D1BDAF776008CC910 /* ReLULayerTests.swift */,
-				6119AC371C616F4F0020E0E6 /* LSTMLayerTests.swift */,
 			);
 			path = Tests;
 			sourceTree = "<group>";
@@ -216,6 +229,7 @@
 			children = (
 				614197FF1C5FEFB700FB6770 /* InnerProduct.metal */,
 				6119AC321C61486D0020E0E6 /* LSTM.metal */,
+				8CB932EE1CB42F6B00C4D6BE /* L2Loss.metal */,
 				615C96251C5BF91500A1CFD4 /* ReLU.metal */,
 				8C378A7A1CA3406300D1B153 /* Utilities.h */,
 			);
@@ -427,7 +441,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				614198001C5FEFB700FB6770 /* InnerProduct.metal in Sources */,
+				8CB932EF1CB42F6B00C4D6BE /* L2Loss.metal in Sources */,
 				6159F8A41BD1F5CE0010F83C /* Layer.swift in Sources */,
+				8CB932EC1CB42F5F00C4D6BE /* L2LossLayer.swift in Sources */,
 				6119AC331C61486D0020E0E6 /* LSTM.metal in Sources */,
 				615C96261C5BF91500A1CFD4 /* ReLU.metal in Sources */,
 				6159F8A61BD1F5CE0010F83C /* Net.swift in Sources */,
@@ -450,9 +466,11 @@
 				614198031C600BA800FB6770 /* InnerProduct.metal in Sources */,
 				610AAB8B1BDAF766008CC910 /* InnerProductLayerTests.swift in Sources */,
 				6159F8B11BD1F73D0010F83C /* NetTests.swift in Sources */,
+				8CB932F51CB42F8400C4D6BE /* L2LossLayerTests.swift in Sources */,
 				610AAB8E1BDAF776008CC910 /* ReLULayerTests.swift in Sources */,
 				6119AC2D1C61266B0020E0E6 /* MetalTestCase.swift in Sources */,
 				6119AC341C61486D0020E0E6 /* LSTM.metal in Sources */,
+				8CB932F01CB42F6F00C4D6BE /* L2Loss.metal in Sources */,
 				6119AC381C616F4F0020E0E6 /* LSTMLayerTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -462,7 +480,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				614198011C5FEFB700FB6770 /* InnerProduct.metal in Sources */,
+				8CB932F11CB42F7000C4D6BE /* L2Loss.metal in Sources */,
 				615C96271C5BF91500A1CFD4 /* ReLU.metal in Sources */,
+				8CB932ED1CB42F6400C4D6BE /* L2LossLayer.swift in Sources */,
 				6119AC351C61486D0020E0E6 /* LSTM.metal in Sources */,
 				6159F8AD1BD1F5EB0010F83C /* InnerProductLayer.swift in Sources */,
 				6159F8AF1BD1F5EB0010F83C /* ReLULayer.swift in Sources */,
@@ -485,9 +505,11 @@
 				614198041C600BA900FB6770 /* InnerProduct.metal in Sources */,
 				6159F8B21BD1F73E0010F83C /* NetTests.swift in Sources */,
 				610AAB8F1BDAF776008CC910 /* ReLULayerTests.swift in Sources */,
+				8CB932F61CB42F8500C4D6BE /* L2LossLayerTests.swift in Sources */,
 				614198021C600BA600FB6770 /* ReLU.metal in Sources */,
 				6119AC2E1C61266B0020E0E6 /* MetalTestCase.swift in Sources */,
 				6119AC361C61486D0020E0E6 /* LSTM.metal in Sources */,
+				8CB932F21CB42F7100C4D6BE /* L2Loss.metal in Sources */,
 				6119AC391C616F4F0020E0E6 /* LSTMLayerTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
