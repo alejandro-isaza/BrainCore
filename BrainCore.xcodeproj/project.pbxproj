@@ -59,6 +59,14 @@
 		61CE4BD01BED703F000E0D34 /* Upsurge.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 61CE4BC51BED6F7F000E0D34 /* Upsurge.framework */; };
 		8C378A7B1CA3406300D1B153 /* Utilities.h in Headers */ = {isa = PBXBuildFile; fileRef = 8C378A7A1CA3406300D1B153 /* Utilities.h */; };
 		8C378A7C1CA3406300D1B153 /* Utilities.h in Headers */ = {isa = PBXBuildFile; fileRef = 8C378A7A1CA3406300D1B153 /* Utilities.h */; };
+		8CB933061CB43DE100C4D6BE /* SigmoidLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CB933051CB43DE100C4D6BE /* SigmoidLayer.swift */; };
+		8CB933081CB43DE700C4D6BE /* Sigmoid.metal in Sources */ = {isa = PBXBuildFile; fileRef = 8CB933071CB43DE700C4D6BE /* Sigmoid.metal */; };
+		8CB9330C1CB43DF000C4D6BE /* SigmoidLayerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CB933091CB43DEC00C4D6BE /* SigmoidLayerTests.swift */; };
+		8CB9330D1CB43DF100C4D6BE /* SigmoidLayerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CB933091CB43DEC00C4D6BE /* SigmoidLayerTests.swift */; };
+		8CB9330E1CB43DF600C4D6BE /* Sigmoid.metal in Sources */ = {isa = PBXBuildFile; fileRef = 8CB933071CB43DE700C4D6BE /* Sigmoid.metal */; };
+		8CB9330F1CB43DF600C4D6BE /* Sigmoid.metal in Sources */ = {isa = PBXBuildFile; fileRef = 8CB933071CB43DE700C4D6BE /* Sigmoid.metal */; };
+		8CB933101CB43DF700C4D6BE /* Sigmoid.metal in Sources */ = {isa = PBXBuildFile; fileRef = 8CB933071CB43DE700C4D6BE /* Sigmoid.metal */; };
+		8CB933111CB43DF900C4D6BE /* SigmoidLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CB933051CB43DE100C4D6BE /* SigmoidLayer.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -109,6 +117,9 @@
 		61CE4BC51BED6F7F000E0D34 /* Upsurge.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Upsurge.framework; sourceTree = "<group>"; };
 		61CE4BC61BED6F7F000E0D34 /* Upsurge.framework.dSYM */ = {isa = PBXFileReference; lastKnownFileType = wrapper.dsym; path = Upsurge.framework.dSYM; sourceTree = "<group>"; };
 		8C378A7A1CA3406300D1B153 /* Utilities.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Utilities.h; sourceTree = "<group>"; };
+		8CB933051CB43DE100C4D6BE /* SigmoidLayer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SigmoidLayer.swift; sourceTree = "<group>"; };
+		8CB933071CB43DE700C4D6BE /* Sigmoid.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = Sigmoid.metal; sourceTree = "<group>"; };
+		8CB933091CB43DEC00C4D6BE /* SigmoidLayerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SigmoidLayerTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -194,6 +205,7 @@
 				6159F8991BD1F5CE0010F83C /* InnerProductLayer.swift */,
 				6119AC2F1C6139900020E0E6 /* LSTMLayer.swift */,
 				6159F89B1BD1F5CE0010F83C /* ReLULayer.swift */,
+				8CB933051CB43DE100C4D6BE /* SigmoidLayer.swift */,
 			);
 			path = Layers;
 			sourceTree = "<group>";
@@ -207,6 +219,7 @@
 				610AAB8A1BDAF766008CC910 /* InnerProductLayerTests.swift */,
 				610AAB8D1BDAF776008CC910 /* ReLULayerTests.swift */,
 				6119AC371C616F4F0020E0E6 /* LSTMLayerTests.swift */,
+				8CB933091CB43DEC00C4D6BE /* SigmoidLayerTests.swift */,
 			);
 			path = Tests;
 			sourceTree = "<group>";
@@ -217,6 +230,7 @@
 				614197FF1C5FEFB700FB6770 /* InnerProduct.metal */,
 				6119AC321C61486D0020E0E6 /* LSTM.metal */,
 				615C96251C5BF91500A1CFD4 /* ReLU.metal */,
+				8CB933071CB43DE700C4D6BE /* Sigmoid.metal */,
 				8C378A7A1CA3406300D1B153 /* Utilities.h */,
 			);
 			path = Metal;
@@ -430,6 +444,7 @@
 				6159F8A41BD1F5CE0010F83C /* Layer.swift in Sources */,
 				6119AC331C61486D0020E0E6 /* LSTM.metal in Sources */,
 				615C96261C5BF91500A1CFD4 /* ReLU.metal in Sources */,
+				8CB933061CB43DE100C4D6BE /* SigmoidLayer.swift in Sources */,
 				6159F8A61BD1F5CE0010F83C /* Net.swift in Sources */,
 				6141B1AD1C6BFEBE0074BD8C /* NetBuffer.swift in Sources */,
 				6159F8A31BD1F5CE0010F83C /* InnerProductLayer.swift in Sources */,
@@ -437,6 +452,7 @@
 				6141B1AE1C6BFEBE0074BD8C /* NetNode.swift in Sources */,
 				6141B1B01C6BFEBE0074BD8C /* RunnerInstance.swift in Sources */,
 				6141B1AF1C6BFEBE0074BD8C /* Runner.swift in Sources */,
+				8CB933081CB43DE700C4D6BE /* Sigmoid.metal in Sources */,
 				6159F8A51BD1F5CE0010F83C /* ReLULayer.swift in Sources */,
 				6119AC301C6139900020E0E6 /* LSTMLayer.swift in Sources */,
 			);
@@ -454,6 +470,8 @@
 				6119AC2D1C61266B0020E0E6 /* MetalTestCase.swift in Sources */,
 				6119AC341C61486D0020E0E6 /* LSTM.metal in Sources */,
 				6119AC381C616F4F0020E0E6 /* LSTMLayerTests.swift in Sources */,
+				8CB9330F1CB43DF600C4D6BE /* Sigmoid.metal in Sources */,
+				8CB9330C1CB43DF000C4D6BE /* SigmoidLayerTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -461,6 +479,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8CB933111CB43DF900C4D6BE /* SigmoidLayer.swift in Sources */,
 				614198011C5FEFB700FB6770 /* InnerProduct.metal in Sources */,
 				615C96271C5BF91500A1CFD4 /* ReLU.metal in Sources */,
 				6119AC351C61486D0020E0E6 /* LSTM.metal in Sources */,
@@ -469,6 +488,7 @@
 				612CE8C21CA9AF2700C260EC /* NetBuffer.swift in Sources */,
 				6119AC2B1C6041D20020E0E6 /* Utilities.swift in Sources */,
 				6159F8AC1BD1F5E60010F83C /* Net.swift in Sources */,
+				8CB9330E1CB43DF600C4D6BE /* Sigmoid.metal in Sources */,
 				612CE8C31CA9AF2C00C260EC /* NetNode.swift in Sources */,
 				612CE8C51CA9AF3100C260EC /* RunnerInstance.swift in Sources */,
 				612CE8C41CA9AF2E00C260EC /* Runner.swift in Sources */,
@@ -489,6 +509,8 @@
 				6119AC2E1C61266B0020E0E6 /* MetalTestCase.swift in Sources */,
 				6119AC361C61486D0020E0E6 /* LSTM.metal in Sources */,
 				6119AC391C616F4F0020E0E6 /* LSTMLayerTests.swift in Sources */,
+				8CB933101CB43DF700C4D6BE /* Sigmoid.metal in Sources */,
+				8CB9330D1CB43DF100C4D6BE /* SigmoidLayerTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

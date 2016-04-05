@@ -10,10 +10,6 @@ import Accelerate
 import BrainCore
 import Upsurge
 
-func sigmoid(x: Float) -> Float {
-    return 1.0 / (1.0 + exp(-x))
-}
-
 class LSTMLayerTests: MetalTestCase {
     func testForward() {
         let device = self.device
