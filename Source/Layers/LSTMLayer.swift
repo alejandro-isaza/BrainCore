@@ -11,18 +11,19 @@ import Upsurge
 
 /// Long short-term memory unit (LSTM) recurrent network cell.
 public class LSTMLayer: ForwardLayer {
-    public struct Parameters {
-        public var batchSize: UInt16
-        public let unitCount: UInt16
-        public let inputSize: UInt16
-        public let clipTo: Float
+    struct Parameters {
+        var batchSize: UInt16
+        let unitCount: UInt16
+        let inputSize: UInt16
+        let clipTo: Float
 
         /// Initialize the parameters for an LSTM cell.
         ///
+        /// - parameter batchSize: The batch size
         /// - parameter unitCount: The number of units in the LSTM cell
         /// - parameter inputSize: The dimensionality of the inputs into the LSTM cell
         /// - parameter clipTo: A float value, if provided the cell state is clipped by this value prior to the cell output activation.
-        public init(batchSize: Int, unitCount: Int, inputSize: Int, clipTo: Float? = nil) {
+        init(batchSize: Int, unitCount: Int, inputSize: Int, clipTo: Float? = nil) {
             self.batchSize = UInt16(batchSize)
             self.unitCount = UInt16(unitCount)
             self.inputSize = UInt16(inputSize)
@@ -30,16 +31,13 @@ public class LSTMLayer: ForwardLayer {
         }
     }
 
+    var parameters: Parameters
     public let weights: Matrix<Float>
     public let biases: ValueArray<Float>
-    public var parameters: Parameters
-
-    public var forwardState: MTLComputePipelineState!
     
     public var weightsBuffer: MTLBuffer!
     public var biasesBuffer: MTLBuffer!
     public var stateBuffer: MTLBuffer!
-    public var state: Matrix<Float>!
     public var parametersBuffer: MTLBuffer!
 
     public var inputSize: Int {
@@ -66,9 +64,12 @@ public class LSTMLayer: ForwardLayer {
         precondition(biases.count == 4 * unitCount)
     }
 
+    static let forwardFunctionName = "lstm_forward"
+    public var forwardFunction: MTLComputePipelineState!
+
     public func setupInLibrary(library: MTLLibrary) throws {
-        let forwardFunction = library.newFunctionWithName("lstm_forward")!
-        forwardState = try library.device.newComputePipelineStateWithFunction(forwardFunction)
+        let function = library.newFunctionWithName(LSTMLayer.forwardFunctionName)!
+        forwardFunction = try library.device.newComputePipelineStateWithFunction(function)
 
         withPointer(weights) { pointer in
             weightsBuffer = library.device.newBufferWithBytes(pointer, length: weights.count * sizeof(Float), options: .CPUCacheModeDefaultCache)
@@ -80,7 +81,7 @@ public class LSTMLayer: ForwardLayer {
         }
         biasesBuffer.label = "LSTMBiases"
         
-        state = Matrix<Float>(rows: Int(parameters.batchSize), columns: stateSize, repeatedValue: 0.0)
+        let state = Matrix<Float>(rows: Int(parameters.batchSize), columns: stateSize, repeatedValue: 0.0)
         withPointer(state) { pointer in
             self.stateBuffer = library.device.newBufferWithBytes(pointer, length: Int(parameters.batchSize) * stateSize * sizeof(Float), options: .CPUCacheModeDefaultCache)
             self.stateBuffer.label = "LSTMState"
@@ -93,17 +94,15 @@ public class LSTMLayer: ForwardLayer {
         self.parametersBuffer = buffer.device.newBufferWithBytes(&parameters, length: sizeof(Parameters), options: .CPUCacheModeDefaultCache)
         self.parametersBuffer.label = "LSTMParameters"
 
-        if batchSize > state.rows {
-            state = Matrix<Float>(rows: batchSize, columns: stateSize, repeatedValue: 0.0)
-            withPointer(state) { pointer in
-                self.stateBuffer = buffer.device.newBufferWithBytes(pointer, length: state.count * sizeof(Float), options: .CPUCacheModeDefaultCache)
-                self.stateBuffer.label = "LSTMState"
-            }
+        let state = Matrix<Float>(rows: batchSize, columns: stateSize, repeatedValue: 0.0)
+        withPointer(state) { pointer in
+            self.stateBuffer = buffer.device.newBufferWithBytes(pointer, length: state.count * sizeof(Float), options: .CPUCacheModeDefaultCache)
+            self.stateBuffer.label = "LSTMState"
         }
         
         let encoder = buffer.computeCommandEncoder()
         encoder.label = "LSTMForward"
-        encoder.setComputePipelineState(forwardState)
+        encoder.setComputePipelineState(forwardFunction)
         encoder.setBuffer(input, offset: inputOffset * sizeof(Float), atIndex: 0)
         encoder.setBuffer(weightsBuffer, offset: 0, atIndex: 1)
         encoder.setBuffer(biasesBuffer, offset: 0, atIndex: 2)
@@ -112,8 +111,8 @@ public class LSTMLayer: ForwardLayer {
         encoder.setBuffer(parametersBuffer, offset: 0, atIndex: 5)
 
         let count = Int(parameters.unitCount)
-        let threadsPerGroup = MTLSize(width: forwardState.threadExecutionWidth, height: 1, depth: 1)
-        let numThreadgroups = MTLSize(width: (count - 1) / forwardState.threadExecutionWidth + 1, height: batchSize, depth:1)
+        let threadsPerGroup = MTLSize(width: forwardFunction.threadExecutionWidth, height: 1, depth: 1)
+        let numThreadgroups = MTLSize(width: (count - 1) / forwardFunction.threadExecutionWidth + 1, height: batchSize, depth:1)
         encoder.dispatchThreadgroups(numThreadgroups, threadsPerThreadgroup: threadsPerGroup)
 
         encoder.endEncoding()
@@ -122,7 +121,7 @@ public class LSTMLayer: ForwardLayer {
     /// Reset the internal LSTM state
     public func reset() {
         let pointer = UnsafeMutablePointer<Float>(stateBuffer.contents())
-        for i in 0..<state.count {
+        for i in 0..<stateBuffer.length / sizeof(Float) {
             pointer[i] = 0.0
         }
     }

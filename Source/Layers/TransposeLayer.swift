@@ -10,9 +10,6 @@ import Metal
 
 /// TransposeLayer transposes input data so that elements in consecutive batches are contiguous in memory. We do this so that concatenation of layer outputs becomes concatenation of memory blocks removing the need of concat and split layers. This class does not perform matrix transposition in the general sense and therefore is an internal class to avoid confusion.
 internal class TransposeLayer: ForwardLayer {
-    static let metalFunctionName = "transpose"
-    var metalFunction: MTLComputePipelineState!
-
     /// The size of each batch element
     let size: Int
 
@@ -33,6 +30,9 @@ internal class TransposeLayer: ForwardLayer {
         let inputSize: UInt32
     }
 
+    static let metalFunctionName = "transpose"
+    var metalFunction: MTLComputePipelineState!
+
     func setupInLibrary(library: MTLLibrary) throws {
         let forwardFunction = library.newFunctionWithName(TransposeLayer.metalFunctionName)!
         metalFunction = try library.device.newComputePipelineStateWithFunction(forwardFunction)
@@ -50,9 +50,8 @@ internal class TransposeLayer: ForwardLayer {
         encoder.setBuffer(output, offset: outputOffset * sizeof(Float), atIndex: 1)
         encoder.setBuffer(dimensionsBuffer, offset: 0, atIndex: 2)
 
-        let count = input.length / sizeof(Float)
         let threadsPerGroup = MTLSize(width: metalFunction.threadExecutionWidth, height: 1, depth: 1)
-        let numThreadgroups = MTLSize(width: (count - 1) / metalFunction.threadExecutionWidth + 1, height: batchSize, depth:1)
+        let numThreadgroups = MTLSize(width: (size - 1) / metalFunction.threadExecutionWidth + 1, height: batchSize, depth:1)
         encoder.dispatchThreadgroups(numThreadgroups, threadsPerThreadgroup: threadsPerGroup)
 
         encoder.endEncoding()

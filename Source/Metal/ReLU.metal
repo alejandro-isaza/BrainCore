@@ -19,33 +19,26 @@ struct ReluDimensions {
 kernel void linear_rectify_forward(const device float* input [[ buffer(0) ]],
                                    device float* output [[ buffer(1) ]],
                                    constant ReluDimensions& dims [[ buffer(2) ]],
-                                   uint2 id [[ thread_position_in_grid ]])
+                                   uint id [[ thread_position_in_grid ]])
 {
-    const auto sizeElement = id.x;
-    const auto batchElement = id.y;
-    
-    if (sizeElement >= dims.size || batchElement >= dims.batch_size)
+    if (id >= dims.size * dims.batch_size)
         return;
     
-    output[sizeElement + batchElement * dims.size] = fmax(0.0, input[sizeElement + batchElement * dims.size]);
+    output[id] = fmax(0.0, input[id]);
 }
 
 kernel void linear_rectify_backward(const device float* outputDiff [[ buffer(0) ]],
                                     const device float* input [[ buffer(1) ]],
                                     device float* inputDiff [[ buffer(2) ]],
                                     constant ReluDimensions& dims [[ buffer(3) ]],
-                                    uint2 id [[ thread_position_in_grid ]])
+                                    uint id [[ thread_position_in_grid ]])
 {
-    const auto sizeElement = id.x;
-    const auto batchElement = id.y;
-    
-    if (sizeElement >= dims.size || batchElement >= dims.batch_size)
+    if (id >= dims.size * dims.batch_size)
         return;
-    
-    auto index = sizeElement + batchElement * dims.size;
-    if (input[index] > 0) {
-        inputDiff[index] = outputDiff[index];
+
+    if (input[id] > 0) {
+        inputDiff[id] = outputDiff[id];
     } else {
-        inputDiff[index] = 0.0;
+        inputDiff[id] = 0.0;
     }
 }

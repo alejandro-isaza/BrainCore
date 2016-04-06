@@ -9,13 +9,13 @@ import Foundation
 import Metal
 
 public class L2LossLayer: LossLayer {
-    public var loss: Double = 0.0
-    
+    struct Parameters {
+        let inputSize: UInt16
+        let batchSize: UInt16
+    }
+
     public let size: Int
-    public var forwardState: MTLComputePipelineState!
-    public var backwardState: MTLComputePipelineState!
-    
-    public var dimensionsBuffer: MTLBuffer!
+    public var loss: Double = 0.0
     
     public var outputSize: Int {
         return 1
@@ -24,58 +24,58 @@ public class L2LossLayer: LossLayer {
         return size
     }
     
-    struct L2LossDimensions {
-        let inputSize: UInt16
-        let batchSize: UInt16
-    }
-    
     public init(size: Int) {
         self.size = size
     }
+
+    static let forwardFunctionName = "sigmoid_forward"
+    static let backwardFunctionName = "sigmoid_backward"
+
+    var forwardFunction: MTLComputePipelineState!
+    var backwardFunction: MTLComputePipelineState!
     
     public func setupInLibrary(library: MTLLibrary) throws {
-        let forwardFunction = library.newFunctionWithName("l2_loss_forward")!
-        forwardState = try library.device.newComputePipelineStateWithFunction(forwardFunction)
+        let forwardLibraryFunction = library.newFunctionWithName("l2_loss_forward")!
+        forwardFunction = try library.device.newComputePipelineStateWithFunction(forwardLibraryFunction)
         
-        let backwardFunction = library.newFunctionWithName("l2_loss_backward")!
-        backwardState = try library.device.newComputePipelineStateWithFunction(backwardFunction)
+        let backwardLibraryFunction = library.newFunctionWithName("l2_loss_backward")!
+        backwardFunction = try library.device.newComputePipelineStateWithFunction(backwardLibraryFunction)
     }
     
     public func encodeForwardInBuffer(buffer: MTLCommandBuffer, batchSize: Int, input: MTLBuffer, offset inputOffset: Int, output: MTLBuffer, offset outputOffset: Int) {
-        var dimensions = L2LossDimensions(inputSize: UInt16(inputSize), batchSize: UInt16(batchSize))
-        dimensionsBuffer = buffer.device.newBufferWithBytes(&dimensions, length: sizeof(L2LossDimensions), options: .CPUCacheModeWriteCombined)
+        var dimensions = Parameters(inputSize: UInt16(inputSize), batchSize: UInt16(batchSize))
+        let dimensionsBuffer = buffer.device.newBufferWithBytes(&dimensions, length: sizeof(Parameters), options: .CPUCacheModeWriteCombined)
         dimensionsBuffer.label = "L2LossDimensions"
 
         let encoder = buffer.computeCommandEncoder()
         encoder.label = "L2LossForward"
-        encoder.setComputePipelineState(forwardState)
+        encoder.setComputePipelineState(forwardFunction)
         encoder.setBuffer(input, offset: inputOffset * sizeof(Float), atIndex: 0)
         encoder.setBuffer(output, offset: outputOffset * sizeof(Float), atIndex: 1)
         encoder.setBuffer(dimensionsBuffer, offset: 0, atIndex: 2)
-        
-        let count = batchSize / sizeof(Float)
-        let threadsPerGroup = MTLSize(width: forwardState.threadExecutionWidth, height: 1, depth: 1)
-        let numThreadgroups = MTLSize(width: (count - 1) / forwardState.threadExecutionWidth + 1, height: 1, depth:1)
+
+        let threadsPerGroup = MTLSize(width: forwardFunction.threadExecutionWidth, height: 1, depth: 1)
+        let numThreadgroups = MTLSize(width: (batchSize - 1) / forwardFunction.threadExecutionWidth + 1, height: 1, depth:1)
         encoder.dispatchThreadgroups(numThreadgroups, threadsPerThreadgroup: threadsPerGroup)
         
         encoder.endEncoding()
     }
 
     public func encodeBackwardLossInBuffer(buffer: MTLCommandBuffer, batchSize: Int, input: MTLBuffer, deltas: MTLBuffer) {
-        var dimensions = L2LossDimensions(inputSize: UInt16(inputSize), batchSize: UInt16(batchSize))
-        dimensionsBuffer = buffer.device.newBufferWithBytes(&dimensions, length: sizeof(L2LossDimensions), options: .CPUCacheModeWriteCombined)
+        var dimensions = Parameters(inputSize: UInt16(inputSize), batchSize: UInt16(batchSize))
+        let dimensionsBuffer = buffer.device.newBufferWithBytes(&dimensions, length: sizeof(Parameters), options: .CPUCacheModeWriteCombined)
         dimensionsBuffer.label = "L2LossDimensions"
 
         let encoder = buffer.computeCommandEncoder()
         encoder.label = "L2LossBackward"
-        encoder.setComputePipelineState(backwardState)
+        encoder.setComputePipelineState(backwardFunction)
         encoder.setBuffer(input, offset: 0, atIndex: 0)
         encoder.setBuffer(deltas, offset: 0, atIndex: 1)
         encoder.setBuffer(dimensionsBuffer, offset: 0, atIndex: 2)
 
-        let count = inputSize / (2 * sizeof(Float))
-        let threadsPerGroup = MTLSize(width: backwardState.threadExecutionWidth, height: 1, depth: 1)
-        let numThreadgroups = MTLSize(width: (count - 1) / backwardState.threadExecutionWidth + 1, height: batchSize, depth: 1)
+        let count = inputSize / 2
+        let threadsPerGroup = MTLSize(width: backwardFunction.threadExecutionWidth, height: 1, depth: 1)
+        let numThreadgroups = MTLSize(width: (count - 1) / backwardFunction.threadExecutionWidth + 1, height: batchSize, depth: 1)
         encoder.dispatchThreadgroups(numThreadgroups, threadsPerThreadgroup: threadsPerGroup)
         
         encoder.endEncoding()
