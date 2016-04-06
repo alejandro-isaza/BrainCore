@@ -84,7 +84,7 @@ class NetTests: MetalTestCase {
     }
 
     func testTwoInputOneOutputActivation() {
-        let source = Source(data: [1, 2, 1, 2], batchSize: 2)
+        let source = Source(data: [1, 1, 2, 2], batchSize: 2)
         let weights = Matrix<Float>(rows: 2, columns: 1, elements: [2, 4])
         let biases = ValueArray<Float>([1])
 
