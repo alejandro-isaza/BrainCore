@@ -11,7 +11,7 @@ import Metal
 public class ReLULayer: ForwardLayer, BackwardLayer {
     struct Parameters {
         let batchSize: UInt32
-        let size: UInt32
+        let inputSize: UInt32
     }
 
     /// The size of each batch element
@@ -44,7 +44,7 @@ public class ReLULayer: ForwardLayer, BackwardLayer {
     }
 
     public func encodeForwardInBuffer(buffer: MTLCommandBuffer, batchSize: Int, input: MTLBuffer, offset inputOffset: Int, output: MTLBuffer, offset outputOffset: Int) {
-        var dimensions = Parameters(batchSize: UInt32(batchSize), size: UInt32(size))
+        var dimensions = Parameters(batchSize: UInt32(batchSize), inputSize: UInt32(inputSize))
         let dimensionsBuffer = buffer.device.newBufferWithBytes(&dimensions, length: sizeof(Parameters), options: .CPUCacheModeWriteCombined)
         dimensionsBuffer.label = "ReluDimensions"
 
@@ -64,7 +64,7 @@ public class ReLULayer: ForwardLayer, BackwardLayer {
     }
 
     public func encodeBackwardInBuffer(buffer: MTLCommandBuffer, batchSize: Int, outputDiff: MTLBuffer, input: MTLBuffer, inputDiff: MTLBuffer) {
-        var dimensions = Parameters(batchSize: UInt32(batchSize), size: UInt32(size))
+        var dimensions = Parameters(batchSize: UInt32(batchSize), inputSize: UInt32(inputSize))
         let dimensionsBuffer = buffer.device.newBufferWithBytes(&dimensions, length: sizeof(Parameters), options: .CPUCacheModeWriteCombined)
         dimensionsBuffer.label = "ReluDimensions"
 

@@ -10,8 +10,8 @@ import Metal
 
 public class L2LossLayer: LossLayer {
     struct Parameters {
-        let inputSize: UInt16
         let batchSize: UInt16
+        let inputSize: UInt16
     }
 
     public let size: Int
@@ -43,7 +43,7 @@ public class L2LossLayer: LossLayer {
     }
     
     public func encodeForwardInBuffer(buffer: MTLCommandBuffer, batchSize: Int, input: MTLBuffer, offset inputOffset: Int, output: MTLBuffer, offset outputOffset: Int) {
-        var dimensions = Parameters(inputSize: UInt16(inputSize), batchSize: UInt16(batchSize))
+        var dimensions = Parameters(batchSize: UInt16(batchSize), inputSize: UInt16(inputSize))
         let dimensionsBuffer = buffer.device.newBufferWithBytes(&dimensions, length: sizeof(Parameters), options: .CPUCacheModeWriteCombined)
         dimensionsBuffer.label = "L2LossDimensions"
 
@@ -62,7 +62,7 @@ public class L2LossLayer: LossLayer {
     }
 
     public func encodeBackwardLossInBuffer(buffer: MTLCommandBuffer, batchSize: Int, input: MTLBuffer, deltas: MTLBuffer) {
-        var dimensions = Parameters(inputSize: UInt16(inputSize), batchSize: UInt16(batchSize))
+        var dimensions = Parameters(batchSize: UInt16(batchSize), inputSize: UInt16(inputSize))
         let dimensionsBuffer = buffer.device.newBufferWithBytes(&dimensions, length: sizeof(Parameters), options: .CPUCacheModeWriteCombined)
         dimensionsBuffer.label = "L2LossDimensions"
 
