@@ -29,12 +29,21 @@ public class Net {
         validateLayer(layer)
         let node = NetNode(id: nodes.count, name: name, layer: layer)
 
-        if layer is DataLayer {
+        nodes.append(node)
+        if let dataLayer = layer as? DataLayer {
             dataNodes.append(node)
+
+            let buff = addBufferWithName("Transpose \(name)")
+            let transposeLayer = TransposeLayer(size: dataLayer.outputSize)
+            let transposeId = addLayer(transposeLayer, name: "Transpose \(name)")
+
+            connectLayer(node.id, toBuffer: buff)
+            connectBuffer(buff, toLayer: transposeId)
+
+            return transposeId
         } else if layer is SinkLayer {
             sinkNodes.append(node)
         }
-        nodes.append(node)
 
         return node.id
     }

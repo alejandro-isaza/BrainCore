@@ -12,8 +12,8 @@ using namespace metal;
 
 
 struct L2LossDimensions {
-    ushort input_size;
     ushort batch_size;
+    ushort input_size;
 };
 
 kernel void l2_loss_forward(const device float* input [[ buffer(0) ]],
@@ -25,9 +25,9 @@ kernel void l2_loss_forward(const device float* input [[ buffer(0) ]],
         return;
     }
 
-    for (auto inputElement = 0; inputElement < dims.input_size / 2; ++inputElement) {
-        const auto dataIndex = inputElement + batchElement * dims.input_size / 2;
-        const auto labelIndex = dataIndex + dims.batch_size * dims.input_size / 2;
+    for (auto inputElement = 0; inputElement < dims.input_size; ++inputElement) {
+        const auto dataIndex = batchElement + inputElement * dims.batch_size;
+        const auto labelIndex = dataIndex + dims.batch_size * dims.input_size;
 
         const auto diff = input[dataIndex] - input[labelIndex];
         output[batchElement] += diff * diff / 2;
@@ -42,12 +42,12 @@ kernel void l2_loss_backward(const device float* input [[ buffer(0) ]],
     const auto inputElement = id.x;
     const auto batchElement = id.y;
 
-    if (inputElement >= dims.input_size / 2 || batchElement >= dims.batch_size) {
+    if (inputElement >= dims.input_size || batchElement >= dims.batch_size) {
         return;
     }
 
-    const auto dataIndex = inputElement + batchElement * dims.input_size / 2;
-    const auto labelIndex = dataIndex + dims.batch_size * dims.input_size / 2;
+    const auto dataIndex = batchElement + inputElement * dims.batch_size;
+    const auto labelIndex = dataIndex + dims.batch_size * dims.input_size;
 
     const auto alpha = 1.0 / dims.batch_size;
     const auto diff = input[dataIndex] - input[labelIndex];

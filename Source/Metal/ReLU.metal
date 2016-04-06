@@ -13,7 +13,7 @@ using namespace metal;
 
 struct ReluDimensions {
     uint batch_size;
-    uint size;
+    uint input_size;
 };
 
 kernel void linear_rectify_forward(const device float* input [[ buffer(0) ]],
@@ -21,7 +21,7 @@ kernel void linear_rectify_forward(const device float* input [[ buffer(0) ]],
                                    constant ReluDimensions& dims [[ buffer(2) ]],
                                    uint id [[ thread_position_in_grid ]])
 {
-    if (id >= dims.size * dims.batch_size)
+    if (id >= dims.input_size * dims.batch_size)
         return;
     
     output[id] = fmax(0.0, input[id]);
@@ -33,7 +33,7 @@ kernel void linear_rectify_backward(const device float* outputDiff [[ buffer(0) 
                                     constant ReluDimensions& dims [[ buffer(3) ]],
                                     uint id [[ thread_position_in_grid ]])
 {
-    if (id >= dims.size * dims.batch_size)
+    if (id >= dims.input_size * dims.batch_size)
         return;
 
     if (input[id] > 0) {

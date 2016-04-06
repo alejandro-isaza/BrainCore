@@ -63,11 +63,10 @@ public class Runner {
         // Collect all data
         for n in net.dataNodes {
             let dataLayer = n.layer as! DataLayer
-            precondition(dataLayer.data.count == dataLayer.outputSize * batchSize)
 
             if let netBuffer = n.outputBuffer {
                 let buffer = instance.buffers[netBuffer.id]
-                fillBuffer(buffer, start: n.outputOffset, withElements: dataLayer.data)
+                fillBuffer(buffer, start: n.outputOffset, withElements: dataLayer.nextBatch(batchSize))
             }
             instance.closeNode(n)
             instance.finishNode(n)

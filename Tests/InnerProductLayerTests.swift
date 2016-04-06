@@ -16,11 +16,11 @@ class InnerProductLayerTests: MetalTestCase {
         let inputSize = 1024
         let outputSize = 1024
 
-        let input = Matrix<Float>(rows: batchSize, columns: inputSize)
+        let input = Matrix<Float>(rows: inputSize, columns: batchSize)
         for i in 0..<inputSize {
-            input[0, i] = 2 * Float(arc4random()) / Float(UINT32_MAX) - 1.0
-            input[1, i] = 2 * Float(arc4random()) / Float(UINT32_MAX) - 1.0
-            input[2, i] = 2 * Float(arc4random()) / Float(UINT32_MAX) - 1.0
+            input[i, 0] = 2 * Float(arc4random()) / Float(UINT32_MAX) - 1.0
+            input[i, 1] = 2 * Float(arc4random()) / Float(UINT32_MAX) - 1.0
+            input[i, 2] = 2 * Float(arc4random()) / Float(UINT32_MAX) - 1.0
         }
 
         let weights = Matrix<Float>(rows: inputSize, columns: outputSize)
@@ -51,14 +51,14 @@ class InnerProductLayerTests: MetalTestCase {
             commandBuffer.waitUntilCompleted()
         }
 
-        let expectedResult0 = input[Interval(integerLiteral: 0), Interval.All] * weights + biases.toRowMatrix()
-        let expectedResult1 = input[Interval(integerLiteral: 1), Interval.All] * weights + biases.toRowMatrix()
-        let expectedResult2 = input[Interval(integerLiteral: 2), Interval.All] * weights + biases.toRowMatrix()
+        let expectedResult0 = transpose(input)[Interval(integerLiteral: 0), Interval.All] * weights + biases.toRowMatrix()
+        let expectedResult1 = transpose(input)[Interval(integerLiteral: 1), Interval.All] * weights + biases.toRowMatrix()
+        let expectedResult2 = transpose(input)[Interval(integerLiteral: 2), Interval.All] * weights + biases.toRowMatrix()
         let result = UnsafeMutablePointer<Float>(outputBuffer.contents())
         for i in 0..<outputSize {
-            XCTAssertEqualWithAccuracy(result[i], expectedResult0[0, i], accuracy: 0.0001)
-            XCTAssertEqualWithAccuracy(result[outputSize + i], expectedResult1[0, i], accuracy: 0.0001)
-            XCTAssertEqualWithAccuracy(result[2 * outputSize + i], expectedResult2[0, i], accuracy: 0.0001)
+            XCTAssertEqualWithAccuracy(result[0 + i * batchSize], expectedResult0[0, i], accuracy: 0.0001)
+            XCTAssertEqualWithAccuracy(result[1 + i * batchSize], expectedResult1[0, i], accuracy: 0.0001)
+            XCTAssertEqualWithAccuracy(result[2 + i * batchSize], expectedResult2[0, i], accuracy: 0.0001)
         }
     }
 

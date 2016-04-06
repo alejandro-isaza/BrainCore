@@ -22,6 +22,10 @@ class NetTests: MetalTestCase {
             self.data = data
             self.batchSize = batchSize
         }
+
+        func nextBatch(batchSize: Int) -> Blob {
+            return data
+        }
     }
 
     class Sink: SinkLayer {
