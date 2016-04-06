@@ -141,3 +141,96 @@ public class Net {
     }
 }
 
+
+
+infix operator => { associativity left precedence 160 }
+public func =>(lhs: Layer, rhs: Layer) -> Net {
+    let net = Net()
+
+    let l1 = net.addLayer(lhs, name: "0")
+    let l2 = net.addLayer(rhs, name: "1")
+    let buff = net.addBufferWithName("0")
+
+    net.connectLayer(l1, toBuffer: buff)
+    net.connectBuffer(buff, toLayer: l2)
+
+    return net
+}
+
+public func =>(net: Net, rhs: Layer) -> Net {
+    guard let lastLayer = net.nodes.last else {
+        fatalError("Cannot connect empty network.")
+    }
+    let l = net.addLayer(rhs, name: "\(net.nodes.count)")
+    let buff = net.addBufferWithName("\(net.buffers.count)")
+
+    net.connectLayer(lastLayer.id, toBuffer: buff)
+    net.connectBuffer(buff, toLayer: l)
+
+    return net
+}
+
+public func =>(lhs: [Layer], rhs: Layer) -> Net {
+    let net = Net()
+
+    var leftLayers = Array<Net.LayerRef>()
+    for layer in lhs {
+        leftLayers.append(net.addLayer(layer, name: "\(net.nodes.count)"))
+    }
+    let rightLayer = net.addLayer(rhs, name: "\(net.nodes.count)")
+    let buff = net.addBufferWithName("\(net.buffers.count)")
+
+    var offset = 0
+    for layerRef in leftLayers {
+        var outputSize: Int
+        if let dataLayer = net.nodes[layerRef].layer as? DataLayer {
+            outputSize = dataLayer.outputSize
+        } else if let forwardLayer = net.nodes[layerRef].layer as? ForwardLayer {
+            outputSize = forwardLayer.outputSize
+        } else {
+            fatalError("Cannot connect \(net.nodes[layerRef].layer.dynamicType)")
+        }
+
+        net.connectLayer(layerRef, toBuffer: buff, atOffset: offset)
+        offset += outputSize
+    }
+    net.connectBuffer(buff, toLayer: rightLayer)
+
+    return net
+}
+
+public func =>(lhs: Layer, rhs: [(layer: Layer, offset: Int)]) -> Net {
+    let net = Net()
+
+    let leftLayer = net.addLayer(lhs, name: "\(net.nodes.count)")
+    var rightLayers = Array<(Net.LayerRef, Int)>()
+    for (layer, offset) in rhs {
+        rightLayers.append((net.addLayer(layer, name: "\(net.nodes.count)"), offset))
+    }
+    let buff = net.addBufferWithName("\(net.buffers.count)")
+
+    net.connectLayer(leftLayer, toBuffer: buff)
+    for (layer, offset) in rightLayers {
+        net.connectBuffer(buff, atOffset: offset, toLayer: layer)
+    }
+
+    return net
+}
+
+public func =>(net: Net, rhs: [(layer: Layer, offset: Int)]) -> Net {
+    guard let lastLayer = net.nodes.last else {
+        fatalError("Cannot connect empty network.")
+    }
+    var rightLayers = Array<(Net.LayerRef, Int)>()
+    for (layer, offset) in rhs {
+        rightLayers.append((net.addLayer(layer, name: "\(net.nodes.count)"), offset))
+    }
+    let buff = net.addBufferWithName("\(net.buffers.count)")
+
+    net.connectLayer(lastLayer.id, toBuffer: buff)
+    for (layer, offset) in rightLayers {
+        net.connectBuffer(buff, atOffset: offset, toLayer: layer)
+    }
+
+    return net
+}
