@@ -65,10 +65,10 @@ class LSTMLayerTests: MetalTestCase {
         let device = self.device
 
         let batchSize = 64
-        let inputSize = 1024
+        let inputSize = 128
         let unitCount = 64
 
-        let input = Matrix<Float>(rows: batchSize, columns: inputSize)
+        let input = Matrix<Float>(rows: inputSize, columns: batchSize)
         for i in 0..<input.rows {
             for j in 0..<input.columns {
                 input[i, j] = 2 * Float(arc4random()) / Float(UINT32_MAX) - 1.0
@@ -109,11 +109,19 @@ class LSTMLayerTests: MetalTestCase {
         XCTAssertEqual(result.count, batchSize * unitCount)
         
         for i in 0..<batchSize {
-            for j in 0..<inputSize {
-                let inputValue = input[i, j]
-                let expectedActivation = sigmoid(weights[0, 0] * inputValue) * tanh(weights[0, 1] * inputValue)
-                let expectedOutput = sigmoid(weights[0, 3] * inputValue) * tanh(expectedActivation)
-                XCTAssertEqualWithAccuracy(result[i], expectedOutput, accuracy: 0.001)
+            for j in 0..<unitCount {
+                var inputGate: Float = 0.0
+                var newInput: Float = 0.0
+                var outputGate: Float = 0.0
+                for k in 0..<inputSize {
+                    let inputValue = input[k, i]
+                    inputGate += weights[k, j] * inputValue
+                    newInput += weights[k, j + unitCount] * inputValue
+                    outputGate += weights[k, j + 3 * unitCount] * inputValue
+                }
+                let expectedActivation = sigmoid(inputGate) * tanh(newInput)
+                let expectedOutput = sigmoid(outputGate) * tanh(expectedActivation)
+                XCTAssertEqualWithAccuracy(result[i + j * batchSize], expectedOutput, accuracy: 0.001)
             }
         }
     }
