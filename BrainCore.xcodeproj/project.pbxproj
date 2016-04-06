@@ -57,6 +57,14 @@
 		61CE4BCE1BED6F90000E0D34 /* Upsurge.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 61CE4BC21BED6F7F000E0D34 /* Upsurge.framework */; };
 		61CE4BCF1BED703B000E0D34 /* Upsurge.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 61CE4BC21BED6F7F000E0D34 /* Upsurge.framework */; };
 		61CE4BD01BED703F000E0D34 /* Upsurge.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 61CE4BC51BED6F7F000E0D34 /* Upsurge.framework */; };
+		8C2A22341CB58E05008291E2 /* TransposeLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C2A22331CB58E05008291E2 /* TransposeLayer.swift */; };
+		8C2A22351CB58E05008291E2 /* TransposeLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C2A22331CB58E05008291E2 /* TransposeLayer.swift */; };
+		8C2A22371CB58E14008291E2 /* Transpose.metal in Sources */ = {isa = PBXBuildFile; fileRef = 8C2A22361CB58E14008291E2 /* Transpose.metal */; };
+		8C2A22381CB58E14008291E2 /* Transpose.metal in Sources */ = {isa = PBXBuildFile; fileRef = 8C2A22361CB58E14008291E2 /* Transpose.metal */; };
+		8C2A22391CB58E14008291E2 /* Transpose.metal in Sources */ = {isa = PBXBuildFile; fileRef = 8C2A22361CB58E14008291E2 /* Transpose.metal */; };
+		8C2A223A1CB58E14008291E2 /* Transpose.metal in Sources */ = {isa = PBXBuildFile; fileRef = 8C2A22361CB58E14008291E2 /* Transpose.metal */; };
+		8C2A223C1CB58E22008291E2 /* TransposeLayerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C2A223B1CB58E22008291E2 /* TransposeLayerTests.swift */; };
+		8C2A223D1CB58E22008291E2 /* TransposeLayerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C2A223B1CB58E22008291E2 /* TransposeLayerTests.swift */; };
 		8C378A7B1CA3406300D1B153 /* Utilities.h in Headers */ = {isa = PBXBuildFile; fileRef = 8C378A7A1CA3406300D1B153 /* Utilities.h */; };
 		8C378A7C1CA3406300D1B153 /* Utilities.h in Headers */ = {isa = PBXBuildFile; fileRef = 8C378A7A1CA3406300D1B153 /* Utilities.h */; };
 		8CB932EC1CB42F5F00C4D6BE /* L2LossLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CB932EB1CB42F5F00C4D6BE /* L2LossLayer.swift */; };
@@ -124,6 +132,9 @@
 		61CE4BC31BED6F7F000E0D34 /* Upsurge.framework.dSYM */ = {isa = PBXFileReference; lastKnownFileType = wrapper.dsym; path = Upsurge.framework.dSYM; sourceTree = "<group>"; };
 		61CE4BC51BED6F7F000E0D34 /* Upsurge.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Upsurge.framework; sourceTree = "<group>"; };
 		61CE4BC61BED6F7F000E0D34 /* Upsurge.framework.dSYM */ = {isa = PBXFileReference; lastKnownFileType = wrapper.dsym; path = Upsurge.framework.dSYM; sourceTree = "<group>"; };
+		8C2A22331CB58E05008291E2 /* TransposeLayer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransposeLayer.swift; sourceTree = "<group>"; };
+		8C2A22361CB58E14008291E2 /* Transpose.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = Transpose.metal; sourceTree = "<group>"; };
+		8C2A223B1CB58E22008291E2 /* TransposeLayerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransposeLayerTests.swift; sourceTree = "<group>"; };
 		8C378A7A1CA3406300D1B153 /* Utilities.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Utilities.h; sourceTree = "<group>"; };
 		8CB932EB1CB42F5F00C4D6BE /* L2LossLayer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = L2LossLayer.swift; sourceTree = "<group>"; };
 		8CB932EE1CB42F6B00C4D6BE /* L2Loss.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = L2Loss.metal; sourceTree = "<group>"; };
@@ -218,6 +229,7 @@
 				8CB932EB1CB42F5F00C4D6BE /* L2LossLayer.swift */,
 				6159F89B1BD1F5CE0010F83C /* ReLULayer.swift */,
 				8CB933051CB43DE100C4D6BE /* SigmoidLayer.swift */,
+				8C2A22331CB58E05008291E2 /* TransposeLayer.swift */,
 			);
 			path = Layers;
 			sourceTree = "<group>";
@@ -227,13 +239,13 @@
 			children = (
 				6159F89E1BD1F5CE0010F83C /* Info.plist */,
 				610AAB8A1BDAF766008CC910 /* InnerProductLayerTests.swift */,
-				6119AC371C616F4F0020E0E6 /* LSTMLayerTests.swift */,
 				8CB932F31CB42F8100C4D6BE /* L2LossLayerTests.swift */,
 				6119AC2C1C61266B0020E0E6 /* MetalTestCase.swift */,
 				6159F89F1BD1F5CE0010F83C /* NetTests.swift */,
 				610AAB8D1BDAF776008CC910 /* ReLULayerTests.swift */,
 				6119AC371C616F4F0020E0E6 /* LSTMLayerTests.swift */,
 				8CB933091CB43DEC00C4D6BE /* SigmoidLayerTests.swift */,
+				8C2A223B1CB58E22008291E2 /* TransposeLayerTests.swift */,
 			);
 			path = Tests;
 			sourceTree = "<group>";
@@ -246,6 +258,7 @@
 				8CB932EE1CB42F6B00C4D6BE /* L2Loss.metal */,
 				615C96251C5BF91500A1CFD4 /* ReLU.metal */,
 				8CB933071CB43DE700C4D6BE /* Sigmoid.metal */,
+				8C2A22361CB58E14008291E2 /* Transpose.metal */,
 				8C378A7A1CA3406300D1B153 /* Utilities.h */,
 			);
 			path = Metal;
@@ -470,7 +483,9 @@
 				6141B1B01C6BFEBE0074BD8C /* RunnerInstance.swift in Sources */,
 				6141B1AF1C6BFEBE0074BD8C /* Runner.swift in Sources */,
 				8CB933081CB43DE700C4D6BE /* Sigmoid.metal in Sources */,
+				8C2A22341CB58E05008291E2 /* TransposeLayer.swift in Sources */,
 				6159F8A51BD1F5CE0010F83C /* ReLULayer.swift in Sources */,
+				8C2A22371CB58E14008291E2 /* Transpose.metal in Sources */,
 				6119AC301C6139900020E0E6 /* LSTMLayer.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -482,7 +497,9 @@
 				615C96281C5C1C6F00A1CFD4 /* ReLU.metal in Sources */,
 				614198031C600BA800FB6770 /* InnerProduct.metal in Sources */,
 				610AAB8B1BDAF766008CC910 /* InnerProductLayerTests.swift in Sources */,
+				8C2A22381CB58E14008291E2 /* Transpose.metal in Sources */,
 				6159F8B11BD1F73D0010F83C /* NetTests.swift in Sources */,
+				8C2A223C1CB58E22008291E2 /* TransposeLayerTests.swift in Sources */,
 				8CB932F51CB42F8400C4D6BE /* L2LossLayerTests.swift in Sources */,
 				610AAB8E1BDAF776008CC910 /* ReLULayerTests.swift in Sources */,
 				6119AC2D1C61266B0020E0E6 /* MetalTestCase.swift in Sources */,
@@ -513,7 +530,9 @@
 				612CE8C31CA9AF2C00C260EC /* NetNode.swift in Sources */,
 				612CE8C51CA9AF3100C260EC /* RunnerInstance.swift in Sources */,
 				612CE8C41CA9AF2E00C260EC /* Runner.swift in Sources */,
+				8C2A22351CB58E05008291E2 /* TransposeLayer.swift in Sources */,
 				6159F8AE1BD1F5EB0010F83C /* Layer.swift in Sources */,
+				8C2A22391CB58E14008291E2 /* Transpose.metal in Sources */,
 				6119AC311C6139900020E0E6 /* LSTMLayer.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -525,7 +544,9 @@
 				610AAB8C1BDAF766008CC910 /* InnerProductLayerTests.swift in Sources */,
 				614198041C600BA900FB6770 /* InnerProduct.metal in Sources */,
 				6159F8B21BD1F73E0010F83C /* NetTests.swift in Sources */,
+				8C2A223A1CB58E14008291E2 /* Transpose.metal in Sources */,
 				610AAB8F1BDAF776008CC910 /* ReLULayerTests.swift in Sources */,
+				8C2A223D1CB58E22008291E2 /* TransposeLayerTests.swift in Sources */,
 				8CB932F61CB42F8500C4D6BE /* L2LossLayerTests.swift in Sources */,
 				614198021C600BA600FB6770 /* ReLU.metal in Sources */,
 				6119AC2E1C61266B0020E0E6 /* MetalTestCase.swift in Sources */,
