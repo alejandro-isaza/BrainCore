@@ -9,8 +9,10 @@ BrainCore is a simple but fast neural network framework written in Swift. It use
 ## Features
 
 - [x] Inner product layers
-- [x] Linear rectifier (ReLU) layers 
+- [x] Linear rectifier (ReLU) layers
+- [x] Sigmoid layers
 - [x] LSTM layers
+- [x] L2 Loss layers
 
 
 ## Requirements
@@ -23,14 +25,6 @@ BrainCore is a simple but fast neural network framework written in Swift. It use
 
 Currently **BrainCore** only supports executing pre-trained networks. Ideally you would train your network on a server using one of the well-established neural network frameworks and import the trained weights into BrainCore. We are working on implementing solvers so that you can do everything inside **BrainCore**, stay posted.
 
-Start by building a network.
-
-```swift
-let net = Net()
-```
-
-The network build process is divided into three parts: create the layers, create the buffers between layers and connect everything together. The reason you have to explicitly provide the buffers is so that you have more flexibility on how data moves through the network. For instance you can concatenate by specifying different offsets of the same buffer or you can reuse the output of a layer for multiple subnets.
-
 Let's start by creating the layers.
 
 ```swift
@@ -41,46 +35,18 @@ let ipWeights = ...
 let ipBiases = ...
 
 // Create layers
-let dataLayer = MyDataLayer()
+let dataLayer1 = MyDataLayer()
+let dataLayer2 = MyDataLayer()
 let lstmLayer = LSTMLayer(weights: lstmWeights, biases: lstmBiases)
 let ipLayer = InnerProductLayer(weights: ipWeights, biases: ipBiases)
 let reluLayer = ReLULayer(size: ipBiases.count)
 let sinkLayer = MySinkLayer()
 ```
 
-Everything here is straightforward. Keep in mind that you have to provide your own data and sink layers. The responsibility of the data layer is provide the inputs to the network. You might get this from a file or from a real-time feed. And the sink layer is where you process the output of the network.
-
-Now let's create the buffers. In this case, and in most cases, there is a  single buffer between layers.
+Next we'll build the net. Square brackets (`[]`) indicate a concatenation of the contained layer's outputs.
 
 ```swift
-// Set up buffers
-let input = net.addBufferWithName("input", size: lstmLayer.inputSize)
-let lstmOutput = net.addBufferWithName("lstmOutput", size: lstmLayer.outputSize)
-let ipOutput = net.addBufferWithName("ipOutput", size: ipLayer.outputSize)
-let output = net.addBufferWithName("output", size: reluLayer.outputSize)
-```
-
-Next we connect everything together. This is the part that is a bit painful right now, but we are working on making this easier.
-
-```swift
-// Make connections
-let dataLayerRef = net.addLayer(dataLayer, name: "data")
-net.connectLayer(dataLayerRef, toBuffer: input)
-
-let lstmLayerRef = net.addLayer(lstmLayer, name: "lstm")
-net.connectBuffer(input, atOffset: 0, toLayer: lstmLayerRef)
-net.connectLayer(lstmLayerRef, toBuffer: lstmOutput)
-
-let ipLayerRef = net.addLayer(ipLayer, name: "ip")
-net.connectBuffer(lstmOutput, atOffset: 0, toLayer: ipLayerRef)
-net.connectLayer(ipLayerRef, toBuffer: ipOutput)
-
-let reluLayerRef = net.addLayer(reluLayer, name: "ReLU")
-net.connectBuffer(ipOutput, atOffset: 0, toLayer: reluLayerRef)
-net.connectLayer(reluLayerRef, toBuffer: output)
-
-let sinkLayerRef = net.addLayer(sinkLayer, name: "sink")
-net.connectBuffer(output, atOffset: 0, toLayer: sinkLayerRef)
+let net = [dataLayer1, dataLayer2] => lstmLayer => ipLayer => reluLayer => sinkLayer
 ```
 
 And finally execute! You need to provide a Metal device to the runner which is usually just the default device. 
