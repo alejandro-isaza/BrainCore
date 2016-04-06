@@ -73,9 +73,8 @@ public class L2LossLayer: LossLayer {
         encoder.setBuffer(deltas, offset: 0, atIndex: 1)
         encoder.setBuffer(dimensionsBuffer, offset: 0, atIndex: 2)
 
-        let count = inputSize / 2
         let threadsPerGroup = MTLSize(width: backwardFunction.threadExecutionWidth, height: 1, depth: 1)
-        let numThreadgroups = MTLSize(width: (count - 1) / backwardFunction.threadExecutionWidth + 1, height: batchSize, depth: 1)
+        let numThreadgroups = MTLSize(width: (inputSize - 1) / backwardFunction.threadExecutionWidth + 1, height: batchSize, depth: 1)
         encoder.dispatchThreadgroups(numThreadgroups, threadsPerThreadgroup: threadsPerGroup)
         
         encoder.endEncoding()
