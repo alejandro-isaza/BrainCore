@@ -12,21 +12,21 @@ import Upsurge
 
 class L2LossLayerTests: MetalTestCase {
     func testForward() {
-        let batchSize = 3
-        let inputSize = 4
-        let labelSize = 4
+        let batchSize = 64
+        let inputSize = 64
+        let labelSize = 64
 
         let input = Matrix<Float>(rows: inputSize, columns: batchSize)
         for i in 0..<inputSize {
             for j in 0..<batchSize {
-                input[i, j] = Float(arc4random()) / Float(UINT32_MAX)
+                input[i, j] = 2 * Float(arc4random()) / Float(UINT32_MAX) - 1.0
             }
         }
 
         let label = Matrix<Float>(rows: labelSize, columns: batchSize)
         for i in 0..<labelSize {
             for j in 0..<batchSize {
-                label[i, j] = Float(arc4random()) / Float(UINT32_MAX)
+                label[i, j] = 2 * Float(arc4random()) / Float(UINT32_MAX) - 1.0
             }
         }
 
@@ -55,25 +55,25 @@ class L2LossLayerTests: MetalTestCase {
         }
 
         let result = ValueArray<Float>((0..<batchSize).map{ UnsafeMutablePointer<Float>(outputBuffer.contents())[$0] })
-        XCTAssertEqualWithAccuracy(sum(result), expectedResult, accuracy: 0.0001)
+        XCTAssertEqualWithAccuracy(sum(result), expectedResult, accuracy: 0.01)
     }
 
     func testBackward() {
-        let batchSize = 3
-        let inputSize = 4
-        let labelSize = 4
+        let batchSize = 64
+        let inputSize = 64
+        let labelSize = 64
 
         let input = Matrix<Float>(rows: inputSize, columns: batchSize)
         for i in 0..<inputSize {
             for j in 0..<batchSize {
-                input[i, j] = Float(arc4random()) / Float(UINT32_MAX)
+                input[i, j] = 2 * Float(arc4random()) / Float(UINT32_MAX) - 1.0
             }
         }
 
         let label = Matrix<Float>(rows: labelSize, columns: batchSize)
         for i in 0..<labelSize {
             for j in 0..<batchSize {
-                label[i, j] = Float(arc4random()) / Float(UINT32_MAX)
+                label[i, j] = 2 * Float(arc4random()) / Float(UINT32_MAX) - 1.0
             }
         }
         

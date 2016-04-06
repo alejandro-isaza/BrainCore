@@ -14,8 +14,8 @@ import Upsurge
 class TransposeLayerTests: MetalTestCase {
 
     func testForward() {
-        let batchSize = 32
-        let dataSize = 16 * 16
+        let batchSize = 64
+        let dataSize = 64 * 64
 
         let device = self.device
         let layer = TransposeLayer(size: dataSize)
