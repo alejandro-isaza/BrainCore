@@ -13,6 +13,7 @@ public class Net {
 
     var buffers = [NetBuffer]()
     var dataNodes = [NetNode]()
+    var lossNodes = [NetNode]()
     var sinkNodes = [NetNode]()
     var nodes = [NetNode]()
 
@@ -33,7 +34,7 @@ public class Net {
         if let dataLayer = layer as? DataLayer {
             dataNodes.append(node)
 
-            let buff = addBufferWithName("Transpose \(name)")
+            let buff = addBufferWithName("Transpose buffer \(name)")
             let transposeLayer = TransposeLayer(size: dataLayer.outputSize)
             let transposeId = addLayer(transposeLayer, name: "Transpose \(name)")
 
@@ -41,6 +42,8 @@ public class Net {
             connectBuffer(buff, toLayer: transposeId)
 
             return transposeId
+        } else if layer is LossLayer {
+            lossNodes.append(node)
         } else if layer is SinkLayer {
             sinkNodes.append(node)
         }
@@ -148,6 +151,26 @@ public class Net {
         node.inputOffset = offset
         buffer.outputNodes.append(node)
     }
+
+    func combineNets(net: Net) -> LayerRef {
+        for i in 0..<net.nodes.count {
+            net.nodes[i].id = self.nodes.count + i
+            net.nodes[i].name = "\(net.nodes[i].id)"
+        }
+        for i in 0..<net.buffers.count {
+            net.buffers[i].id = self.buffers.count + i
+            net.buffers[i].name = "\(net.buffers[i].id)"
+        }
+
+        self.nodes.appendContentsOf(net.nodes)
+        self.dataNodes.appendContentsOf(net.dataNodes)
+        self.lossNodes.appendContentsOf(net.lossNodes)
+        self.sinkNodes.appendContentsOf(net.sinkNodes)
+
+        self.buffers.appendContentsOf(net.buffers)
+
+        return net.nodes[net.nodes.count-1].id
+    }
 }
 
 
@@ -179,12 +202,19 @@ public func =>(net: Net, rhs: Layer) -> Net {
     return net
 }
 
-public func =>(lhs: [Layer], rhs: Layer) -> Net {
+public func =>(lhs: NSArray, rhs: Layer) -> Net {
     let net = Net()
 
     var leftLayers = Array<Net.LayerRef>()
-    for layer in lhs {
-        leftLayers.append(net.addLayer(layer, name: "\(net.nodes.count)"))
+    for item in lhs {
+        if let layer = item as? Layer {
+            leftLayers.append(net.addLayer(layer, name: "\(net.nodes.count)"))
+        } else if let otherNet = item as? Net {
+            let lastRef = net.combineNets(otherNet)
+            leftLayers.append(lastRef)
+        } else {
+            fatalError("Invalid net composition with item type: \(item.dynamicType)")
+        }
     }
     let rightLayer = net.addLayer(rhs, name: "\(net.nodes.count)")
     let buff = net.addBufferWithName("\(net.buffers.count)")

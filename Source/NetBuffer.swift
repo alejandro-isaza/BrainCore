@@ -5,9 +5,10 @@
 // contained in the file LICENSE at the root of the source code distribution
 // tree.
 
+
 class NetBuffer: Hashable {
-    let id: Int
-    let name: String
+    var id: Int
+    var name: String
 
     var size: Int {
         let inputSize = inputNodes.reduce(0) { currentValue, node in
