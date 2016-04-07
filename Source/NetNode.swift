@@ -6,9 +6,9 @@
 // tree.
 
 class NetNode: Hashable {
-    let id: Int
+    var id: Int
     let layer: Layer
-    let name: String
+    var name: String
 
     weak var inputBuffer: NetBuffer?
     var inputOffset = 0

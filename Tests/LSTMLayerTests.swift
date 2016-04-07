@@ -65,8 +65,8 @@ class LSTMLayerTests: MetalTestCase {
         let device = self.device
 
         let batchSize = 64
-        let inputSize = 128
-        let unitCount = 64
+        let inputSize = 16
+        let unitCount = 32
 
         let input = Matrix<Float>(rows: inputSize, columns: batchSize)
         for i in 0..<input.rows {
