@@ -21,7 +21,7 @@ public class L2LossLayer: LossLayer {
         return 1
     }
     public var inputSize: Int {
-        return size
+        return 2 * size
     }
     
     public init(size: Int) {
@@ -43,7 +43,7 @@ public class L2LossLayer: LossLayer {
     }
     
     public func encodeForwardInBuffer(buffer: MTLCommandBuffer, batchSize: Int, input: MTLBuffer, offset inputOffset: Int, output: MTLBuffer, offset outputOffset: Int) {
-        var dimensions = Parameters(batchSize: UInt16(batchSize), inputSize: UInt16(inputSize))
+        var dimensions = Parameters(batchSize: UInt16(batchSize), inputSize: UInt16(inputSize / 2))
         let dimensionsBuffer = buffer.device.newBufferWithBytes(&dimensions, length: sizeof(Parameters), options: .CPUCacheModeWriteCombined)
         dimensionsBuffer.label = "L2LossDimensions"
 
@@ -62,7 +62,7 @@ public class L2LossLayer: LossLayer {
     }
 
     public func encodeBackwardLossInBuffer(buffer: MTLCommandBuffer, batchSize: Int, input: MTLBuffer, deltas: MTLBuffer) {
-        var dimensions = Parameters(batchSize: UInt16(batchSize), inputSize: UInt16(inputSize))
+        var dimensions = Parameters(batchSize: UInt16(batchSize), inputSize: UInt16(inputSize / 2))
         let dimensionsBuffer = buffer.device.newBufferWithBytes(&dimensions, length: sizeof(Parameters), options: .CPUCacheModeWriteCombined)
         dimensionsBuffer.label = "L2LossDimensions"
 
@@ -74,7 +74,7 @@ public class L2LossLayer: LossLayer {
         encoder.setBuffer(dimensionsBuffer, offset: 0, atIndex: 2)
 
         let threadsPerGroup = MTLSize(width: backwardFunction.threadExecutionWidth, height: 1, depth: 1)
-        let numThreadgroups = MTLSize(width: (inputSize - 1) / backwardFunction.threadExecutionWidth + 1, height: batchSize, depth: 1)
+        let numThreadgroups = MTLSize(width: ((inputSize / 2) - 1) / backwardFunction.threadExecutionWidth + 1, height: batchSize, depth: 1)
         encoder.dispatchThreadgroups(numThreadgroups, threadsPerThreadgroup: threadsPerGroup)
         
         encoder.endEncoding()
