@@ -64,6 +64,6 @@ kernel void inner_product_backward_input(const device float* outputDiff [[ buffe
         return;
 
     for (uint i = 0; i < dims.output_size; i += 1) {
-        inputDiff[batchElement + inputElement * dims.batch_size] = weights[i + inputElement * dims.output_size] * outputDiff[batchElement + i * dims.batch_size];
+        inputDiff[batchElement + inputElement * dims.batch_size] += weights[i + inputElement * dims.output_size] * outputDiff[batchElement + i * dims.batch_size];
     }
 }
