@@ -98,11 +98,11 @@ public class InnerProductLayer: ForwardLayer, BackwardLayer {
 
         
         if weightDiff == nil {
-            weightDiff = buffer.device.newBufferWithLength(inputSize * outputSize, options: .CPUCacheModeDefaultCache)
+            weightDiff = buffer.device.newBufferWithLength(inputSize * outputSize * sizeof(Float), options: .CPUCacheModeDefaultCache)
             weightDiff!.label = "InnerProductWeightDiffs"
         }
         if biasDiff == nil {
-            biasDiff = buffer.device.newBufferWithLength(outputSize, options: .CPUCacheModeDefaultCache)
+            biasDiff = buffer.device.newBufferWithLength(outputSize * sizeof(Float), options: .CPUCacheModeDefaultCache)
             biasDiff!.label = "InnerProductBiasDiffs"
         }
 

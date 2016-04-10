@@ -6,7 +6,7 @@
 // tree.
 
 import XCTest
-import BrainCore
+@testable import BrainCore
 import Upsurge
 
 class NetTests: MetalTestCase {
@@ -59,11 +59,7 @@ class NetTests: MetalTestCase {
 
         let expecation = expectationWithDescription("Net forward pass")
         let runner = try! Runner(net: net, device: device, batchSize: 1)
-        runner.forwardPassAction = { buffers in
-            for buffer in buffers {
-                let arr = arrayFromBuffer(buffer)
-                print(arr)
-            }
+        runner.forwardPassAction = { instance in
             expecation.fulfill()
         }
         runner.forward()
@@ -80,6 +76,75 @@ class NetTests: MetalTestCase {
             for i in 0..<sink2.inputSize {
                 XCTAssertEqualWithAccuracy(sink2.data[i], expected.elements[sink1.inputSize + i], accuracy: 0.0001)
             }
+        }
+    }
+
+    func testTwoInputOneOutputActivationForwardBackward() {
+        let net = Net()
+
+        let source = Source(data: [1, 1, 2, 2], batchSize: 2)
+        let labels = Source(data: [1, 2], batchSize: 2)
+        let weights = Matrix<Float>(rows: 2, columns: 1, elements: [2, 4])
+        let biases = ValueArray<Float>([1])
+
+        let ip = InnerProductLayer(weights: weights, biases: biases)
+        let loss = L2LossLayer(size: 1)
+        let sink = Sink(inputSize: 1, batchSize: 2)
+
+        let sourceLayer = net.addLayer(source, name: "source")
+        let labelsLayer = net.addLayer(labels, name: "labels")
+        let ipBuffer = net.addBufferWithName("ip buff")
+        let ipLayer = net.addLayer(ip, name: "ip")
+        let lossBuffer = net.addBufferWithName("source buff")
+        let lossLayer = net.addLayer(loss, name: "loss")
+        let sinkBuffer = net.addBufferWithName("source buff")
+        let sinkLayer = net.addLayer(sink, name: "sink")
+
+        net.connectLayer(sourceLayer, toBuffer: ipBuffer)
+        net.connectBuffer(ipBuffer, toLayer: ipLayer)
+        net.connectLayer(ipLayer, toBuffer: lossBuffer)
+        net.connectLayer(labelsLayer, toBuffer: lossBuffer, atOffset: ip.outputSize)
+        net.connectBuffer(lossBuffer, toLayer: lossLayer)
+        net.connectLayer(lossLayer, toBuffer: sinkBuffer)
+        net.connectBuffer(sinkBuffer, toLayer: sinkLayer)
+
+        let ipBufferId = net.nodes.reduce(-1) { val, node in
+            if node.layer is InnerProductLayer {
+                return node.inputBuffer!.id
+            }
+            return val
+        }
+
+        let forwardExpecation = expectationWithDescription("Net forward pass")
+        let backwardExpecation = expectationWithDescription("Net backward pass")
+        var ipInputDiff = [Float]()
+        var ipWeightsDiff = [Float]()
+        var ipBiasDiff = [Float]()
+
+        let runner = try! Runner(net: net, device: device, batchSize: 2, backward: true)
+        runner.forwardPassAction = { instance in
+            forwardExpecation.fulfill()
+            runner.backward(instance)
+        }
+        runner.backwardPassAction = { backwardInstance, forwardInstance in
+            ipInputDiff = arrayFromBuffer(backwardInstance.diffBuffers[ipBufferId])
+            ipWeightsDiff = arrayFromBuffer(ip.weightDiff!)
+            ipBiasDiff = arrayFromBuffer(ip.biasDiff!)
+
+            backwardExpecation.fulfill()
+        }
+        runner.forward()
+
+        waitForExpectationsWithTimeout(5) { error in
+            if let error = error {
+                XCTFail("Net.forward() failed: \(error)")
+            }
+
+            XCTAssertEqual(sink.data, [18, 60.5])
+
+            XCTAssertEqual(ipInputDiff, [6, 11, 12, 22])
+            XCTAssertEqual(ipWeightsDiff, [14, 14])
+            XCTAssertEqual(ipBiasDiff, [8.5])
         }
     }
 
