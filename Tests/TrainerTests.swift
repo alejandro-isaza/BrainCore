@@ -69,13 +69,6 @@ class TrainerTests: MetalTestCase {
         net.connectLayer(lossLayer, toBuffer: sinkBuffer)
         net.connectBuffer(sinkBuffer, toLayer: sinkLayer)
 
-        let ipBufferId = net.nodes.reduce(-1) { val, node in
-            if node.layer is InnerProductLayer {
-                return node.inputBuffer!.id
-            }
-            return val
-        }
-
         let expecation = expectationWithDescription("Net forward/backward pass")
         var ipInputDiff = [Float]()
         var ipWeightsDiff = [Float]()
@@ -83,7 +76,7 @@ class TrainerTests: MetalTestCase {
 
         let trainer = try! Trainer(net: net, device: device, batchSize: 2)
         trainer.run() { snapshot in
-            ipInputDiff = arrayFromBuffer(trainer.backwardInstance.buffers[ipBufferId])
+            ipInputDiff = [Float](snapshot.backwardContentsOfBuffer(ipBuffer))
             ipWeightsDiff = arrayFromBuffer(ip.weightDiff!)
             ipBiasDiff = arrayFromBuffer(ip.biasDiff!)
 
