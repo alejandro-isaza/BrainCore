@@ -40,8 +40,8 @@ public protocol BackwardLayer: ForwardLayer {
 }
 
 public protocol TrainableLayer {
-    /// Update any parameters after performing backwards pass.
-    func update(updateParameter: (parameter: MTLBuffer, parameterDifference: MTLBuffer) -> Void)
+    /// Update parameters for training.
+    func encodeParametersUpdate(encodeAction: (values: MTLBuffer, deltas: MTLBuffer) -> Void)
 }
 
 public protocol LossLayer: ForwardLayer {

@@ -146,7 +146,7 @@ public class InnerProductLayer: BackwardLayer, TrainableLayer {
         }
     }
 
-    public func update(updateParameter: (parameter: MTLBuffer, parameterDifference: MTLBuffer) -> Void) {
+    public func encodeParametersUpdate(encodeAction: (values: MTLBuffer, deltas: MTLBuffer) -> Void) {
         guard let weightDiff = weightDiff else {
             fatalError("Inner Product weights were not initialized")
         }
@@ -154,7 +154,7 @@ public class InnerProductLayer: BackwardLayer, TrainableLayer {
             fatalError("Inner Product biases were not initialized")
         }
 
-        updateParameter(parameter: weightsBuffer, parameterDifference: weightDiff)
-        updateParameter(parameter: biasesBuffer, parameterDifference: biasDiff)
+        encodeAction(values: weightsBuffer, deltas: weightDiff)
+        encodeAction(values: biasesBuffer, deltas: biasDiff)
     }
 }
