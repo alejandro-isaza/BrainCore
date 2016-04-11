@@ -51,10 +51,10 @@ public class Evaluator {
         queue = dispatch_queue_create("BrainCore.Evaluator", DISPATCH_QUEUE_SERIAL)
     }
 
-    /// Perform a forward pass on the network. Always call this method from the same thread/queue.
+    /// Perform a forward pass on the network. Always call this method from the same serial queue.
     ///
-    /// - parameter completion: Invoked when the evaluation finishes. It gets passed an array of buffers that can be used to inspect intermediate results. These buffers are short-lived, you should make a copy of the contents if you need them.
-    public func evaluate(completion: (([MTLBuffer]) -> Void)) {
+    /// - parameter completion: Invoked when the evaluation finishes. It gets passed a snapshot of the network results.
+    public func evaluate(completion: ((Snapshot) -> Void)) {
         dispatch_semaphore_wait(inflightSemaphore, DISPATCH_TIME_FOREVER)
 
         let instance = instances[nextInstanceIndex]
@@ -80,7 +80,7 @@ public class Evaluator {
         }
     }
 
-    func processNodesOfInstance(instance: EvaluatorInstance, completion: (([MTLBuffer]) -> Void)) {
+    func processNodesOfInstance(instance: EvaluatorInstance, completion: ((Snapshot) -> Void)) {
         while !instance.openNodes.isEmpty {
             let node = instance.openNodes.popLast()!
             if instance.closedNodes.contains(node) {
@@ -119,7 +119,7 @@ public class Evaluator {
         }
     }
 
-    func finishInstance(instance: EvaluatorInstance, completion: (([MTLBuffer]) -> Void)) {
+    func finishInstance(instance: EvaluatorInstance, completion: ((Snapshot) -> Void)) {
         for n in net.sinkNodes {
             let sinkLayer = n.layer as! SinkLayer
             if let netBuffer = n.inputBuffer {
@@ -128,7 +128,7 @@ public class Evaluator {
             }
         }
 
-        completion(instance.buffers)
+        completion(Snapshot(net: self.net, forwardBuffers: instance.buffers))
         dispatch_semaphore_signal(self.inflightSemaphore)
     }
 }

@@ -82,7 +82,7 @@ class TrainerTests: MetalTestCase {
         var ipBiasDiff = [Float]()
 
         let trainer = try! Trainer(net: net, device: device, batchSize: 2)
-        trainer.run() {
+        trainer.run() { snapshot in
             ipInputDiff = arrayFromBuffer(trainer.backwardInstance.buffers[ipBufferId])
             ipWeightsDiff = arrayFromBuffer(ip.weightDiff!)
             ipBiasDiff = arrayFromBuffer(ip.biasDiff!)

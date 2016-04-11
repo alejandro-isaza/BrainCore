@@ -49,10 +49,10 @@ public class Trainer {
         backwardInstance = TrainerInstance(buffers: net.buffers, device: device, batchSize: batchSize)
     }
 
-    /// Perform a forward/backward pass on the network. Always call this method from the same serial queue. It may block if there is another run executing.
+    /// Perform a forward-backward pass on the network. Always call this method from the same serial queue. It may block if there is another run executing.
     ///
-    /// - parameter completion: Invoked when the run finishes. It gets passed an array of buffers that can be used to inspect intermediate results. These buffers are short-lived, you should make a copy of the contents if you need them.
-    func run(completion: (() -> Void)) {
+    /// - parameter completion: Invoked when the run finishes. It gets passed a snapshot of the network results.
+    func run(completion: ((Snapshot) -> Void)) {
         dispatch_semaphore_wait(inflightSemaphore, DISPATCH_TIME_FOREVER)
 
         forwardInstance.reset()
@@ -73,12 +73,14 @@ public class Trainer {
             forwardInstance.finishNode(n)
         }
 
+        precondition(!forwardInstance.openNodes.isEmpty, "Network is empty")
         dispatch_async(queue) {
-            self.processNodes(completion)
+            self.processForwardNodes(completion)
+            self.processBackwardNodes(completion)
         }
     }
 
-    func processNodes(completion: (() -> Void)) {
+    func processForwardNodes(completion: ((Snapshot) -> Void)) {
         while !forwardInstance.openNodes.isEmpty {
             let node = forwardInstance.openNodes.popLast()!
             if forwardInstance.isClosed(node) {
@@ -108,7 +110,7 @@ public class Trainer {
                 dispatch_async(self.queue) {
                     self.forwardInstance.finishNode(node)
                     if self.forwardInstance.isFinished() && self.backwardInstance.isFinished() {
-                        completion()
+                        completion(Snapshot(net: self.net, forwardBuffers: self.forwardInstance.buffers, backwardBuffers: self.backwardInstance.buffers))
                         dispatch_semaphore_signal(self.inflightSemaphore)
                     }
                 }
@@ -121,7 +123,9 @@ public class Trainer {
                 backwardInstance.openNodes.append(node)
             }
         }
+    }
 
+    func processBackwardNodes(completion: ((Snapshot) -> Void)) {
         while !backwardInstance.openNodes.isEmpty {
             let node = backwardInstance.openNodes.popLast()!
             if backwardInstance.isClosed(node) {
@@ -159,7 +163,7 @@ public class Trainer {
                 dispatch_async(self.queue) {
                     self.backwardInstance.finishNode(node)
                     if self.forwardInstance.isFinished() && self.backwardInstance.isFinished() {
-                        completion()
+                        completion(Snapshot(net: self.net, forwardBuffers: self.forwardInstance.buffers, backwardBuffers: self.backwardInstance.buffers))
                         dispatch_semaphore_signal(self.inflightSemaphore)
                     }
                 }
