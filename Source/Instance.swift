@@ -8,7 +8,7 @@
 import Metal
 
 /// Keeps track of the state of each node in the network for a particular training batch.
-public class TrainerInstance {
+public class Instance {
     let batchSize: Int
 
     var buffers: [MTLBuffer]

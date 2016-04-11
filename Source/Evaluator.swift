@@ -21,7 +21,7 @@ public class Evaluator {
     var inflightSemaphore: dispatch_semaphore_t
     var queue: dispatch_queue_t
 
-    var instances = [EvaluatorInstance]()
+    var instances = [Instance]()
     var nextInstanceIndex = 0
 
     public init(net: Net, device: MTLDevice) throws {
@@ -37,7 +37,7 @@ public class Evaluator {
         library = try device.newLibraryWithFile(path)
 
         for _ in 0..<instanceCount {
-            let forwardInstance = EvaluatorInstance(buffers: net.buffers, device: device)
+            let forwardInstance = Instance(buffers: net.buffers, device: device, batchSize: 1)
             instances.append(forwardInstance)
         }
 
@@ -72,6 +72,7 @@ public class Evaluator {
                 fillBuffer(buffer, start: n.outputOffset, withElements: dataLayer.nextBatch(1))
             }
             instance.closeNode(n)
+            instance.openOutputsOf(n)
             instance.finishNode(n)
         }
 
@@ -80,7 +81,7 @@ public class Evaluator {
         }
     }
 
-    func processNodesOfInstance(instance: EvaluatorInstance, completion: ((Snapshot) -> Void)) {
+    func processNodesOfInstance(instance: Instance, completion: ((Snapshot) -> Void)) {
         while !instance.openNodes.isEmpty {
             let node = instance.openNodes.popLast()!
             if instance.closedNodes.contains(node) {
@@ -116,10 +117,11 @@ public class Evaluator {
             }
             buffer.commit()
             instance.closeNode(node)
+            instance.openOutputsOf(node)
         }
     }
 
-    func finishInstance(instance: EvaluatorInstance, completion: ((Snapshot) -> Void)) {
+    func finishInstance(instance: Instance, completion: ((Snapshot) -> Void)) {
         for n in net.sinkNodes {
             let sinkLayer = n.layer as! SinkLayer
             if let netBuffer = n.inputBuffer {

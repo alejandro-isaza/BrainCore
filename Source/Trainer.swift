@@ -21,8 +21,8 @@ public class Trainer {
     var inflightSemaphore: dispatch_semaphore_t
     var queue: dispatch_queue_t
 
-    var forwardInstance: TrainerInstance
-    var backwardInstance: TrainerInstance
+    var forwardInstance: Instance
+    var backwardInstance: Instance
     
     public init(net: Net, device: MTLDevice, batchSize: Int) throws {
         self.batchSize = batchSize
@@ -45,8 +45,8 @@ public class Trainer {
 
         inflightSemaphore = dispatch_semaphore_create(instanceCount)
         queue = dispatch_queue_create("BrainCore.Trainer", DISPATCH_QUEUE_SERIAL)
-        forwardInstance = TrainerInstance(buffers: net.buffers, device: device, batchSize: batchSize)
-        backwardInstance = TrainerInstance(buffers: net.buffers, device: device, batchSize: batchSize)
+        forwardInstance = Instance(buffers: net.buffers, device: device, batchSize: batchSize)
+        backwardInstance = Instance(buffers: net.buffers, device: device, batchSize: batchSize)
     }
 
     /// Perform a forward-backward pass on the network. Always call this method from the same serial queue. It may block if there is another run executing.
