@@ -63,6 +63,10 @@
 		8C2A223D1CB58E22008291E2 /* TransposeLayerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C2A223B1CB58E22008291E2 /* TransposeLayerTests.swift */; };
 		8C378A7B1CA3406300D1B153 /* Utilities.h in Headers */ = {isa = PBXBuildFile; fileRef = 8C378A7A1CA3406300D1B153 /* Utilities.h */; };
 		8C378A7C1CA3406300D1B153 /* Utilities.h in Headers */ = {isa = PBXBuildFile; fileRef = 8C378A7A1CA3406300D1B153 /* Utilities.h */; };
+		8C6E7BA31CBC3D59003B8074 /* NetBuffer.metal in Sources */ = {isa = PBXBuildFile; fileRef = 8C6E7BA11CBC3D59003B8074 /* NetBuffer.metal */; };
+		8C6E7BA71CBC3D65003B8074 /* NetBuffer.metal in Sources */ = {isa = PBXBuildFile; fileRef = 8C6E7BA11CBC3D59003B8074 /* NetBuffer.metal */; };
+		8C6E7BA91CBC3D66003B8074 /* NetBuffer.metal in Sources */ = {isa = PBXBuildFile; fileRef = 8C6E7BA11CBC3D59003B8074 /* NetBuffer.metal */; };
+		8C6E7BAB1CBC3D66003B8074 /* NetBuffer.metal in Sources */ = {isa = PBXBuildFile; fileRef = 8C6E7BA11CBC3D59003B8074 /* NetBuffer.metal */; };
 		8CB932EC1CB42F5F00C4D6BE /* L2LossLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CB932EB1CB42F5F00C4D6BE /* L2LossLayer.swift */; };
 		8CB932ED1CB42F6400C4D6BE /* L2LossLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CB932EB1CB42F5F00C4D6BE /* L2LossLayer.swift */; };
 		8CB932EF1CB42F6B00C4D6BE /* L2Loss.metal in Sources */ = {isa = PBXBuildFile; fileRef = 8CB932EE1CB42F6B00C4D6BE /* L2Loss.metal */; };
@@ -140,6 +144,7 @@
 		8C2A22361CB58E14008291E2 /* Transpose.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = Transpose.metal; sourceTree = "<group>"; };
 		8C2A223B1CB58E22008291E2 /* TransposeLayerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransposeLayerTests.swift; sourceTree = "<group>"; };
 		8C378A7A1CA3406300D1B153 /* Utilities.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Utilities.h; sourceTree = "<group>"; };
+		8C6E7BA11CBC3D59003B8074 /* NetBuffer.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = NetBuffer.metal; sourceTree = "<group>"; };
 		8CB932EB1CB42F5F00C4D6BE /* L2LossLayer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = L2LossLayer.swift; sourceTree = "<group>"; };
 		8CB932EE1CB42F6B00C4D6BE /* L2Loss.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = L2Loss.metal; sourceTree = "<group>"; };
 		8CB932F31CB42F8100C4D6BE /* L2LossLayerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = L2LossLayerTests.swift; sourceTree = "<group>"; };
@@ -216,12 +221,10 @@
 		6159F8951BD1F5CE0010F83C /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				8CFE89AB1CBC50EA001EE501 /* Net */,
 				6159F8971BD1F5CE0010F83C /* BrainCore.h */,
 				A981355B1CBC2C1400D69D0B /* Evaluator.swift */,
 				A981355D1CBC2C1400D69D0B /* Instance.swift */,
-				6159F89C1BD1F5CE0010F83C /* Net.swift */,
-				6141B1A91C6BFEBE0074BD8C /* NetBuffer.swift */,
-				6141B1AA1C6BFEBE0074BD8C /* NetNode.swift */,
 				A981355E1CBC2C1400D69D0B /* Snapshot.swift */,
 				A981355C1CBC2C1400D69D0B /* Trainer.swift */,
 				6119AC291C6041D20020E0E6 /* Utilities.swift */,
@@ -268,6 +271,7 @@
 				614197FF1C5FEFB700FB6770 /* InnerProduct.metal */,
 				6119AC321C61486D0020E0E6 /* LSTM.metal */,
 				8CB932EE1CB42F6B00C4D6BE /* L2Loss.metal */,
+				8C6E7BA11CBC3D59003B8074 /* NetBuffer.metal */,
 				615C96251C5BF91500A1CFD4 /* ReLU.metal */,
 				8CB933071CB43DE700C4D6BE /* Sigmoid.metal */,
 				8C2A22361CB58E14008291E2 /* Transpose.metal */,
@@ -303,6 +307,16 @@
 				61CE4BC41BED6F7F000E0D34 /* Mac */,
 			);
 			name = Dependencies;
+			sourceTree = "<group>";
+		};
+		8CFE89AB1CBC50EA001EE501 /* Net */ = {
+			isa = PBXGroup;
+			children = (
+				6159F89C1BD1F5CE0010F83C /* Net.swift */,
+				6141B1A91C6BFEBE0074BD8C /* NetBuffer.swift */,
+				6141B1AA1C6BFEBE0074BD8C /* NetNode.swift */,
+			);
+			name = Net;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -481,6 +495,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				614198001C5FEFB700FB6770 /* InnerProduct.metal in Sources */,
+				8C6E7BA31CBC3D59003B8074 /* NetBuffer.metal in Sources */,
 				8CB932EF1CB42F6B00C4D6BE /* L2Loss.metal in Sources */,
 				6159F8A41BD1F5CE0010F83C /* Layer.swift in Sources */,
 				8CB932EC1CB42F5F00C4D6BE /* L2LossLayer.swift in Sources */,
@@ -509,6 +524,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				615C96281C5C1C6F00A1CFD4 /* ReLU.metal in Sources */,
+				8C6E7BA71CBC3D65003B8074 /* NetBuffer.metal in Sources */,
 				614198031C600BA800FB6770 /* InnerProduct.metal in Sources */,
 				610AAB8B1BDAF766008CC910 /* InnerProductLayerTests.swift in Sources */,
 				8C2A22381CB58E14008291E2 /* Transpose.metal in Sources */,
@@ -531,6 +547,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				8CB933111CB43DF900C4D6BE /* SigmoidLayer.swift in Sources */,
+				8C6E7BA91CBC3D66003B8074 /* NetBuffer.metal in Sources */,
 				614198011C5FEFB700FB6770 /* InnerProduct.metal in Sources */,
 				8CB932F11CB42F7000C4D6BE /* L2Loss.metal in Sources */,
 				A98135661CBC30EB00D69D0B /* Trainer.swift in Sources */,
@@ -559,6 +576,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				610AAB8C1BDAF766008CC910 /* InnerProductLayerTests.swift in Sources */,
+				8C6E7BAB1CBC3D66003B8074 /* NetBuffer.metal in Sources */,
 				614198041C600BA900FB6770 /* InnerProduct.metal in Sources */,
 				6159F8B21BD1F73E0010F83C /* EvaluatorTests.swift in Sources */,
 				8C2A223A1CB58E14008291E2 /* Transpose.metal in Sources */,
