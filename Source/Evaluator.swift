@@ -84,7 +84,7 @@ public class Evaluator {
     func processNodesOfInstance(instance: Instance, completion: ((Snapshot) -> Void)) {
         while !instance.openNodes.isEmpty {
             let node = instance.openNodes.popLast()!
-            if instance.closedNodes.contains(node) {
+            if instance.isClosed(node) {
                 continue
             }
 

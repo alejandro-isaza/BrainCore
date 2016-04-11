@@ -30,22 +30,17 @@ public class Snapshot {
 
     /// Return a pointer to the forward-pass contents of a network buffer. The pointer is short-lived, you should copy any contents that you want preserve.
     public func forwardContentsOfBufferNamed(name: String) -> UnsafeMutableBufferPointer<Float>? {
-        for buffer in net.buffers {
-            if buffer.name == name {
-                return forwardContentsOfBuffer(buffer)
-            }
+        if let buffer = net.bufferWithName(name) {
+            return forwardContentsOfBuffer(buffer)
         }
         return nil
     }
 
     /// Return a pointer to the backward-pass contents of a network buffer. The pointer is short-lived, you should copy any contents that you want preserve.
     public func backwardContentsOfBufferNamed(name: String) -> UnsafeMutableBufferPointer<Float>? {
-        for buffer in net.buffers {
-            if buffer.name == name {
-                return backwardContentsOfBuffer(buffer)
-            }
+        if let buffer = net.bufferWithName(name) {
+            return backwardContentsOfBuffer(buffer)
         }
         return nil
     }
-
 }
