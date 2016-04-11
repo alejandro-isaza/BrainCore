@@ -85,6 +85,10 @@
 		A98135601CBC2C1400D69D0B /* Trainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A981355C1CBC2C1400D69D0B /* Trainer.swift */; };
 		A98135611CBC2C1400D69D0B /* Instance.swift in Sources */ = {isa = PBXBuildFile; fileRef = A981355D1CBC2C1400D69D0B /* Instance.swift */; };
 		A98135621CBC2C1400D69D0B /* Snapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = A981355E1CBC2C1400D69D0B /* Snapshot.swift */; };
+		A98135631CBC30DE00D69D0B /* Evaluator.swift in Sources */ = {isa = PBXBuildFile; fileRef = A981355B1CBC2C1400D69D0B /* Evaluator.swift */; };
+		A98135641CBC30E200D69D0B /* Instance.swift in Sources */ = {isa = PBXBuildFile; fileRef = A981355D1CBC2C1400D69D0B /* Instance.swift */; };
+		A98135651CBC30E800D69D0B /* Snapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = A981355E1CBC2C1400D69D0B /* Snapshot.swift */; };
+		A98135661CBC30EB00D69D0B /* Trainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A981355C1CBC2C1400D69D0B /* Trainer.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -529,12 +533,15 @@
 				8CB933111CB43DF900C4D6BE /* SigmoidLayer.swift in Sources */,
 				614198011C5FEFB700FB6770 /* InnerProduct.metal in Sources */,
 				8CB932F11CB42F7000C4D6BE /* L2Loss.metal in Sources */,
+				A98135661CBC30EB00D69D0B /* Trainer.swift in Sources */,
 				615C96271C5BF91500A1CFD4 /* ReLU.metal in Sources */,
 				8CB932ED1CB42F6400C4D6BE /* L2LossLayer.swift in Sources */,
 				6119AC351C61486D0020E0E6 /* LSTM.metal in Sources */,
 				6159F8AD1BD1F5EB0010F83C /* InnerProductLayer.swift in Sources */,
 				6159F8AF1BD1F5EB0010F83C /* ReLULayer.swift in Sources */,
 				612CE8C21CA9AF2700C260EC /* NetBuffer.swift in Sources */,
+				A98135651CBC30E800D69D0B /* Snapshot.swift in Sources */,
+				A98135641CBC30E200D69D0B /* Instance.swift in Sources */,
 				6119AC2B1C6041D20020E0E6 /* Utilities.swift in Sources */,
 				6159F8AC1BD1F5E60010F83C /* Net.swift in Sources */,
 				8CB9330E1CB43DF600C4D6BE /* Sigmoid.metal in Sources */,
@@ -543,6 +550,7 @@
 				6159F8AE1BD1F5EB0010F83C /* Layer.swift in Sources */,
 				8C2A22391CB58E14008291E2 /* Transpose.metal in Sources */,
 				6119AC311C6139900020E0E6 /* LSTMLayer.swift in Sources */,
+				A98135631CBC30DE00D69D0B /* Evaluator.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
