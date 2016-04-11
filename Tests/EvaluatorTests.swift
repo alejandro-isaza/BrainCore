@@ -9,7 +9,7 @@ import XCTest
 @testable import BrainCore
 import Upsurge
 
-class NetTests: MetalTestCase {
+class EvaluatorTests: MetalTestCase {
     class Source: DataLayer {
         var data: Blob
         var batchSize: Int
@@ -58,11 +58,10 @@ class NetTests: MetalTestCase {
         let net = [source1, source2] => ip => [(sink1, 0), (sink2, 6)]
 
         let expecation = expectationWithDescription("Net forward pass")
-        let runner = try! Runner(net: net, device: device, batchSize: 1)
-        runner.forwardPassAction = { instance in
+        let evaluator = try! Evaluator(net: net, device: device)
+        evaluator.evaluate() { _ in
             expecation.fulfill()
         }
-        runner.forward()
 
         let expected = data * weights + biases.toRowMatrix()
         print(expected)
@@ -108,32 +107,12 @@ class NetTests: MetalTestCase {
         net.connectLayer(lossLayer, toBuffer: sinkBuffer)
         net.connectBuffer(sinkBuffer, toLayer: sinkLayer)
 
-        let ipBufferId = net.nodes.reduce(-1) { val, node in
-            if node.layer is InnerProductLayer {
-                return node.inputBuffer!.id
-            }
-            return val
-        }
+        let expectation = expectationWithDescription("Net forward pass")
 
-        let forwardExpecation = expectationWithDescription("Net forward pass")
-        let backwardExpecation = expectationWithDescription("Net backward pass")
-        var ipInputDiff = [Float]()
-        var ipWeightsDiff = [Float]()
-        var ipBiasDiff = [Float]()
-
-        let runner = try! Runner(net: net, device: device, batchSize: 2, backward: true)
-        runner.forwardPassAction = { instance in
-            forwardExpecation.fulfill()
-            runner.backward(instance)
+        let evaluator = try! Evaluator(net: net, device: device)
+        evaluator.evaluate() { _ in
+            expectation.fulfill()
         }
-        runner.backwardPassAction = { backwardInstance, forwardInstance in
-            ipInputDiff = arrayFromBuffer(backwardInstance.diffBuffers[ipBufferId])
-            ipWeightsDiff = arrayFromBuffer(ip.weightDiff!)
-            ipBiasDiff = arrayFromBuffer(ip.biasDiff!)
-
-            backwardExpecation.fulfill()
-        }
-        runner.forward()
 
         waitForExpectationsWithTimeout(5) { error in
             if let error = error {
@@ -141,29 +120,24 @@ class NetTests: MetalTestCase {
             }
 
             XCTAssertEqual(sink.data, [18, 60.5])
-
-            XCTAssertEqual(ipInputDiff, [6, 11, 12, 22])
-            XCTAssertEqual(ipWeightsDiff, [14, 14])
-            XCTAssertEqual(ipBiasDiff, [8.5])
         }
     }
 
     func testTwoInputOneOutputActivation() {
-        let source = Source(data: [1, 1, 2, 2], batchSize: 2)
+        let source = Source(data: [1, 1, 2, 2], batchSize: 1)
         let weights = Matrix<Float>(rows: 2, columns: 1, elements: [2, 4])
         let biases = ValueArray<Float>([1])
 
         let ip = InnerProductLayer(weights: weights, biases: biases)
-        let sink = Sink(inputSize: 1, batchSize: 2)
+        let sink = Sink(inputSize: 1, batchSize: 1)
 
         let net = source => ip => sink
 
         let expecation = expectationWithDescription("Net forward pass")
-        let runner = try! Runner(net: net, device: device, batchSize: 2)
-        runner.forwardPassAction = { buffers in
+        let evaluator = try! Evaluator(net: net, device: device)
+        evaluator.evaluate() { _ in
             expecation.fulfill()
         }
-        runner.forward()
 
         waitForExpectationsWithTimeout(2) { error in
             if let error = error {
@@ -202,11 +176,10 @@ class NetTests: MetalTestCase {
         net.connectBuffer(outputBuffer, toLayer: sinkLayer)
 
         let expecation = expectationWithDescription("Net forward pass")
-        let runner = try! Runner(net: net, device: device)
-        runner.forwardPassAction = { buffers in
+        let evaluator = try! Evaluator(net: net, device: device)
+        evaluator.evaluate() { _ in
             expecation.fulfill()
         }
-        runner.forward()
         
         waitForExpectationsWithTimeout(2) { error in
             if let error = error {

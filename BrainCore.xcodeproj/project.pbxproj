@@ -44,8 +44,8 @@
 		6159F8AD1BD1F5EB0010F83C /* InnerProductLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6159F8991BD1F5CE0010F83C /* InnerProductLayer.swift */; };
 		6159F8AE1BD1F5EB0010F83C /* Layer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6159F89A1BD1F5CE0010F83C /* Layer.swift */; };
 		6159F8AF1BD1F5EB0010F83C /* ReLULayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6159F89B1BD1F5CE0010F83C /* ReLULayer.swift */; };
-		6159F8B11BD1F73D0010F83C /* NetTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6159F89F1BD1F5CE0010F83C /* NetTests.swift */; };
-		6159F8B21BD1F73E0010F83C /* NetTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6159F89F1BD1F5CE0010F83C /* NetTests.swift */; };
+		6159F8B11BD1F73D0010F83C /* EvaluatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6159F89F1BD1F5CE0010F83C /* EvaluatorTests.swift */; };
+		6159F8B21BD1F73E0010F83C /* EvaluatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6159F89F1BD1F5CE0010F83C /* EvaluatorTests.swift */; };
 		615C96261C5BF91500A1CFD4 /* ReLU.metal in Sources */ = {isa = PBXBuildFile; fileRef = 615C96251C5BF91500A1CFD4 /* ReLU.metal */; };
 		615C96271C5BF91500A1CFD4 /* ReLU.metal in Sources */ = {isa = PBXBuildFile; fileRef = 615C96251C5BF91500A1CFD4 /* ReLU.metal */; };
 		615C96281C5C1C6F00A1CFD4 /* ReLU.metal in Sources */ = {isa = PBXBuildFile; fileRef = 615C96251C5BF91500A1CFD4 /* ReLU.metal */; };
@@ -63,12 +63,12 @@
 		8C2A223D1CB58E22008291E2 /* TransposeLayerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C2A223B1CB58E22008291E2 /* TransposeLayerTests.swift */; };
 		8C378A7B1CA3406300D1B153 /* Utilities.h in Headers */ = {isa = PBXBuildFile; fileRef = 8C378A7A1CA3406300D1B153 /* Utilities.h */; };
 		8C378A7C1CA3406300D1B153 /* Utilities.h in Headers */ = {isa = PBXBuildFile; fileRef = 8C378A7A1CA3406300D1B153 /* Utilities.h */; };
-		8C6E7B701CB5D727003B8074 /* BackwardRunnerInstance.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C6E7B681CB5D694003B8074 /* BackwardRunnerInstance.swift */; };
-		8C6E7B711CB5D728003B8074 /* BackwardRunnerInstance.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C6E7B681CB5D694003B8074 /* BackwardRunnerInstance.swift */; };
-		8C6E7B721CB5D72B003B8074 /* ForwardRunnerInstance.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C6E7B691CB5D694003B8074 /* ForwardRunnerInstance.swift */; };
-		8C6E7B731CB5D72C003B8074 /* ForwardRunnerInstance.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C6E7B691CB5D694003B8074 /* ForwardRunnerInstance.swift */; };
-		8C6E7B741CB5DDA2003B8074 /* Runner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C6E7B6A1CB5D694003B8074 /* Runner.swift */; };
-		8C6E7B751CB5DDA3003B8074 /* Runner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C6E7B6A1CB5D694003B8074 /* Runner.swift */; };
+		8C6E7B701CB5D727003B8074 /* TrainerInstance.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C6E7B681CB5D694003B8074 /* TrainerInstance.swift */; };
+		8C6E7B711CB5D728003B8074 /* TrainerInstance.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C6E7B681CB5D694003B8074 /* TrainerInstance.swift */; };
+		8C6E7B721CB5D72B003B8074 /* EvaluatorInstance.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C6E7B691CB5D694003B8074 /* EvaluatorInstance.swift */; };
+		8C6E7B731CB5D72C003B8074 /* EvaluatorInstance.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C6E7B691CB5D694003B8074 /* EvaluatorInstance.swift */; };
+		8C6E7B741CB5DDA2003B8074 /* Evaluator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C6E7B6A1CB5D694003B8074 /* Evaluator.swift */; };
+		8C6E7B751CB5DDA3003B8074 /* Evaluator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C6E7B6A1CB5D694003B8074 /* Evaluator.swift */; };
 		8CB932EC1CB42F5F00C4D6BE /* L2LossLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CB932EB1CB42F5F00C4D6BE /* L2LossLayer.swift */; };
 		8CB932ED1CB42F6400C4D6BE /* L2LossLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CB932EB1CB42F5F00C4D6BE /* L2LossLayer.swift */; };
 		8CB932EF1CB42F6B00C4D6BE /* L2Loss.metal in Sources */ = {isa = PBXBuildFile; fileRef = 8CB932EE1CB42F6B00C4D6BE /* L2Loss.metal */; };
@@ -85,6 +85,10 @@
 		8CB9330F1CB43DF600C4D6BE /* Sigmoid.metal in Sources */ = {isa = PBXBuildFile; fileRef = 8CB933071CB43DE700C4D6BE /* Sigmoid.metal */; };
 		8CB933101CB43DF700C4D6BE /* Sigmoid.metal in Sources */ = {isa = PBXBuildFile; fileRef = 8CB933071CB43DE700C4D6BE /* Sigmoid.metal */; };
 		8CB933111CB43DF900C4D6BE /* SigmoidLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CB933051CB43DE100C4D6BE /* SigmoidLayer.swift */; };
+		A98135511CBBFE0B00D69D0B /* Trainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A98135501CBBFE0B00D69D0B /* Trainer.swift */; };
+		A98135521CBBFE0B00D69D0B /* Trainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A98135501CBBFE0B00D69D0B /* Trainer.swift */; };
+		A98135561CBC167E00D69D0B /* TrainerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A98135531CBC148900D69D0B /* TrainerTests.swift */; };
+		A98135571CBC167E00D69D0B /* TrainerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A98135531CBC148900D69D0B /* TrainerTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -125,7 +129,7 @@
 		6159F89B1BD1F5CE0010F83C /* ReLULayer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReLULayer.swift; sourceTree = "<group>"; };
 		6159F89C1BD1F5CE0010F83C /* Net.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Net.swift; sourceTree = "<group>"; };
 		6159F89E1BD1F5CE0010F83C /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		6159F89F1BD1F5CE0010F83C /* NetTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NetTests.swift; sourceTree = "<group>"; };
+		6159F89F1BD1F5CE0010F83C /* EvaluatorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EvaluatorTests.swift; sourceTree = "<group>"; };
 		6159F8A01BD1F5CE0010F83C /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		615C96251C5BF91500A1CFD4 /* ReLU.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = ReLU.metal; sourceTree = "<group>"; };
 		61CE4BC21BED6F7F000E0D34 /* Upsurge.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Upsurge.framework; sourceTree = "<group>"; };
@@ -136,15 +140,17 @@
 		8C2A22361CB58E14008291E2 /* Transpose.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = Transpose.metal; sourceTree = "<group>"; };
 		8C2A223B1CB58E22008291E2 /* TransposeLayerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransposeLayerTests.swift; sourceTree = "<group>"; };
 		8C378A7A1CA3406300D1B153 /* Utilities.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Utilities.h; sourceTree = "<group>"; };
-		8C6E7B681CB5D694003B8074 /* BackwardRunnerInstance.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BackwardRunnerInstance.swift; sourceTree = "<group>"; };
-		8C6E7B691CB5D694003B8074 /* ForwardRunnerInstance.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ForwardRunnerInstance.swift; sourceTree = "<group>"; };
-		8C6E7B6A1CB5D694003B8074 /* Runner.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Runner.swift; sourceTree = "<group>"; };
+		8C6E7B681CB5D694003B8074 /* TrainerInstance.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TrainerInstance.swift; sourceTree = "<group>"; };
+		8C6E7B691CB5D694003B8074 /* EvaluatorInstance.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EvaluatorInstance.swift; sourceTree = "<group>"; };
+		8C6E7B6A1CB5D694003B8074 /* Evaluator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Evaluator.swift; sourceTree = "<group>"; };
 		8CB932EB1CB42F5F00C4D6BE /* L2LossLayer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = L2LossLayer.swift; sourceTree = "<group>"; };
 		8CB932EE1CB42F6B00C4D6BE /* L2Loss.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = L2Loss.metal; sourceTree = "<group>"; };
 		8CB932F31CB42F8100C4D6BE /* L2LossLayerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = L2LossLayerTests.swift; sourceTree = "<group>"; };
 		8CB933051CB43DE100C4D6BE /* SigmoidLayer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SigmoidLayer.swift; sourceTree = "<group>"; };
 		8CB933071CB43DE700C4D6BE /* Sigmoid.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = Sigmoid.metal; sourceTree = "<group>"; };
 		8CB933091CB43DEC00C4D6BE /* SigmoidLayerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SigmoidLayerTests.swift; sourceTree = "<group>"; };
+		A98135501CBBFE0B00D69D0B /* Trainer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Trainer.swift; sourceTree = "<group>"; };
+		A98135531CBC148900D69D0B /* TrainerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TrainerTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -240,13 +246,14 @@
 			isa = PBXGroup;
 			children = (
 				6159F89E1BD1F5CE0010F83C /* Info.plist */,
+				6159F89F1BD1F5CE0010F83C /* EvaluatorTests.swift */,
 				610AAB8A1BDAF766008CC910 /* InnerProductLayerTests.swift */,
 				8CB932F31CB42F8100C4D6BE /* L2LossLayerTests.swift */,
-				6119AC2C1C61266B0020E0E6 /* MetalTestCase.swift */,
-				6159F89F1BD1F5CE0010F83C /* NetTests.swift */,
-				610AAB8D1BDAF776008CC910 /* ReLULayerTests.swift */,
 				6119AC371C616F4F0020E0E6 /* LSTMLayerTests.swift */,
+				6119AC2C1C61266B0020E0E6 /* MetalTestCase.swift */,
+				610AAB8D1BDAF776008CC910 /* ReLULayerTests.swift */,
 				8CB933091CB43DEC00C4D6BE /* SigmoidLayerTests.swift */,
+				A98135531CBC148900D69D0B /* TrainerTests.swift */,
 				8C2A223B1CB58E22008291E2 /* TransposeLayerTests.swift */,
 			);
 			path = Tests;
@@ -298,9 +305,10 @@
 		8C6E7B671CB5D694003B8074 /* Runner */ = {
 			isa = PBXGroup;
 			children = (
-				8C6E7B6A1CB5D694003B8074 /* Runner.swift */,
-				8C6E7B681CB5D694003B8074 /* BackwardRunnerInstance.swift */,
-				8C6E7B691CB5D694003B8074 /* ForwardRunnerInstance.swift */,
+				8C6E7B6A1CB5D694003B8074 /* Evaluator.swift */,
+				8C6E7B691CB5D694003B8074 /* EvaluatorInstance.swift */,
+				A98135501CBBFE0B00D69D0B /* Trainer.swift */,
+				8C6E7B681CB5D694003B8074 /* TrainerInstance.swift */,
 			);
 			path = Runner;
 			sourceTree = "<group>";
@@ -482,17 +490,18 @@
 			files = (
 				614198001C5FEFB700FB6770 /* InnerProduct.metal in Sources */,
 				8CB932EF1CB42F6B00C4D6BE /* L2Loss.metal in Sources */,
-				8C6E7B701CB5D727003B8074 /* BackwardRunnerInstance.swift in Sources */,
+				8C6E7B701CB5D727003B8074 /* TrainerInstance.swift in Sources */,
 				6159F8A41BD1F5CE0010F83C /* Layer.swift in Sources */,
 				8CB932EC1CB42F5F00C4D6BE /* L2LossLayer.swift in Sources */,
 				6119AC331C61486D0020E0E6 /* LSTM.metal in Sources */,
-				8C6E7B741CB5DDA2003B8074 /* Runner.swift in Sources */,
+				8C6E7B741CB5DDA2003B8074 /* Evaluator.swift in Sources */,
 				615C96261C5BF91500A1CFD4 /* ReLU.metal in Sources */,
 				8CB933061CB43DE100C4D6BE /* SigmoidLayer.swift in Sources */,
 				6159F8A61BD1F5CE0010F83C /* Net.swift in Sources */,
+				A98135511CBBFE0B00D69D0B /* Trainer.swift in Sources */,
 				6141B1AD1C6BFEBE0074BD8C /* NetBuffer.swift in Sources */,
 				6159F8A31BD1F5CE0010F83C /* InnerProductLayer.swift in Sources */,
-				8C6E7B721CB5D72B003B8074 /* ForwardRunnerInstance.swift in Sources */,
+				8C6E7B721CB5D72B003B8074 /* EvaluatorInstance.swift in Sources */,
 				6119AC2A1C6041D20020E0E6 /* Utilities.swift in Sources */,
 				6141B1AE1C6BFEBE0074BD8C /* NetNode.swift in Sources */,
 				8CB933081CB43DE700C4D6BE /* Sigmoid.metal in Sources */,
@@ -511,7 +520,7 @@
 				614198031C600BA800FB6770 /* InnerProduct.metal in Sources */,
 				610AAB8B1BDAF766008CC910 /* InnerProductLayerTests.swift in Sources */,
 				8C2A22381CB58E14008291E2 /* Transpose.metal in Sources */,
-				6159F8B11BD1F73D0010F83C /* NetTests.swift in Sources */,
+				6159F8B11BD1F73D0010F83C /* EvaluatorTests.swift in Sources */,
 				8C2A223C1CB58E22008291E2 /* TransposeLayerTests.swift in Sources */,
 				8CB932F51CB42F8400C4D6BE /* L2LossLayerTests.swift in Sources */,
 				610AAB8E1BDAF776008CC910 /* ReLULayerTests.swift in Sources */,
@@ -520,6 +529,7 @@
 				8CB932F01CB42F6F00C4D6BE /* L2Loss.metal in Sources */,
 				6119AC381C616F4F0020E0E6 /* LSTMLayerTests.swift in Sources */,
 				8CB9330F1CB43DF600C4D6BE /* Sigmoid.metal in Sources */,
+				A98135561CBC167E00D69D0B /* TrainerTests.swift in Sources */,
 				8CB9330C1CB43DF000C4D6BE /* SigmoidLayerTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -537,7 +547,8 @@
 				6159F8AD1BD1F5EB0010F83C /* InnerProductLayer.swift in Sources */,
 				6159F8AF1BD1F5EB0010F83C /* ReLULayer.swift in Sources */,
 				612CE8C21CA9AF2700C260EC /* NetBuffer.swift in Sources */,
-				8C6E7B711CB5D728003B8074 /* BackwardRunnerInstance.swift in Sources */,
+				8C6E7B711CB5D728003B8074 /* TrainerInstance.swift in Sources */,
+				A98135521CBBFE0B00D69D0B /* Trainer.swift in Sources */,
 				6119AC2B1C6041D20020E0E6 /* Utilities.swift in Sources */,
 				6159F8AC1BD1F5E60010F83C /* Net.swift in Sources */,
 				8CB9330E1CB43DF600C4D6BE /* Sigmoid.metal in Sources */,
@@ -545,8 +556,8 @@
 				8C2A22351CB58E05008291E2 /* TransposeLayer.swift in Sources */,
 				6159F8AE1BD1F5EB0010F83C /* Layer.swift in Sources */,
 				8C2A22391CB58E14008291E2 /* Transpose.metal in Sources */,
-				8C6E7B751CB5DDA3003B8074 /* Runner.swift in Sources */,
-				8C6E7B731CB5D72C003B8074 /* ForwardRunnerInstance.swift in Sources */,
+				8C6E7B751CB5DDA3003B8074 /* Evaluator.swift in Sources */,
+				8C6E7B731CB5D72C003B8074 /* EvaluatorInstance.swift in Sources */,
 				6119AC311C6139900020E0E6 /* LSTMLayer.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -557,7 +568,7 @@
 			files = (
 				610AAB8C1BDAF766008CC910 /* InnerProductLayerTests.swift in Sources */,
 				614198041C600BA900FB6770 /* InnerProduct.metal in Sources */,
-				6159F8B21BD1F73E0010F83C /* NetTests.swift in Sources */,
+				6159F8B21BD1F73E0010F83C /* EvaluatorTests.swift in Sources */,
 				8C2A223A1CB58E14008291E2 /* Transpose.metal in Sources */,
 				610AAB8F1BDAF776008CC910 /* ReLULayerTests.swift in Sources */,
 				8C2A223D1CB58E22008291E2 /* TransposeLayerTests.swift in Sources */,
@@ -568,6 +579,7 @@
 				8CB932F21CB42F7100C4D6BE /* L2Loss.metal in Sources */,
 				6119AC391C616F4F0020E0E6 /* LSTMLayerTests.swift in Sources */,
 				8CB933101CB43DF700C4D6BE /* Sigmoid.metal in Sources */,
+				A98135571CBC167E00D69D0B /* TrainerTests.swift in Sources */,
 				8CB9330D1CB43DF100C4D6BE /* SigmoidLayerTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
