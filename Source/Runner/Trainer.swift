@@ -69,6 +69,7 @@ public class Trainer {
                 fillBuffer(buffer, start: batchSize * n.outputOffset, withElements: dataLayer.nextBatch(batchSize))
             }
             forwardInstance.closeNode(n)
+            forwardInstance.openOutputsOf(n)
             forwardInstance.finishNode(n)
         }
 

@@ -28,6 +28,19 @@ class TrainerTests: MetalTestCase {
         }
     }
 
+    class Sink: SinkLayer {
+        var inputSize: Int
+        var batchSize: Int
+
+        init(inputSize: Int, batchSize: Int) {
+            self.inputSize = inputSize
+            self.batchSize = batchSize
+        }
+
+        func consume(input: Blob) {
+        }
+    }
+
     func testTwoInputOneOutputActivationForwardBackward() {
         let net = Net()
 
@@ -46,6 +59,7 @@ class TrainerTests: MetalTestCase {
         let lossBuffer = net.addBufferWithName("source buff")
         let lossLayer = net.addLayer(loss, name: "loss")
         let sinkBuffer = net.addBufferWithName("sink buff")
+        let sinkLayer = net.addLayer(Sink(inputSize: 1, batchSize: 2), name: "sink")
 
         net.connectLayer(sourceLayer, toBuffer: ipBuffer)
         net.connectBuffer(ipBuffer, toLayer: ipLayer)
@@ -53,6 +67,7 @@ class TrainerTests: MetalTestCase {
         net.connectLayer(labelsLayer, toBuffer: lossBuffer, atOffset: ip.outputSize)
         net.connectBuffer(lossBuffer, toLayer: lossLayer)
         net.connectLayer(lossLayer, toBuffer: sinkBuffer)
+        net.connectBuffer(sinkBuffer, toLayer: sinkLayer)
 
         let ipBufferId = net.nodes.reduce(-1) { val, node in
             if node.layer is InnerProductLayer {
