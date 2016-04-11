@@ -39,6 +39,11 @@ public protocol BackwardLayer: ForwardLayer {
     func encodeBackwardInBuffer(buffer: MTLCommandBuffer, batchSize: Int, outputDiff: MTLBuffer, input: MTLBuffer, inputDiff: MTLBuffer)
 }
 
+public protocol TrainableLayer {
+    /// Update any parameters after performing backwards pass.
+    func update(updateParameter: (parameter: MTLBuffer, parameterDifference: MTLBuffer) -> Void)
+}
+
 public protocol LossLayer: ForwardLayer {
     /// Compute the loss input deltas based on labels and actual values. The labels should be contained in the first half of the input buffer and the actual values on the second half.
     func encodeBackwardLossInBuffer(buffer: MTLCommandBuffer, batchSize: Int, input: MTLBuffer, deltas: MTLBuffer)

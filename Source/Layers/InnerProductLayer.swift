@@ -9,7 +9,7 @@ import Foundation
 import Metal
 import Upsurge
 
-public class InnerProductLayer: ForwardLayer, BackwardLayer {
+public class InnerProductLayer: BackwardLayer, TrainableLayer {
     struct Parameters {
         let batchSize: UInt16
         let inputSize: UInt16
@@ -47,7 +47,13 @@ public class InnerProductLayer: ForwardLayer, BackwardLayer {
     var forwardFunction: MTLComputePipelineState!
     var backwardParamsFunction: MTLComputePipelineState!
     var backwardInputFunction: MTLComputePipelineState!
+    var updateFunction: MTLComputePipelineState!
 
+    public func setupInLibrary(library: MTLLibrary, updateFunction: MTLComputePipelineState) throws {
+        self.updateFunction = updateFunction
+        try setupInLibrary(library)
+    }
+    
     public func setupInLibrary(library: MTLLibrary) throws {
         let forwardLibraryFunction = library.newFunctionWithName(InnerProductLayer.forwardFunctionName)!
         forwardFunction = try library.device.newComputePipelineStateWithFunction(forwardLibraryFunction)
@@ -138,5 +144,17 @@ public class InnerProductLayer: ForwardLayer, BackwardLayer {
 
             encoder.endEncoding()
         }
+    }
+
+    public func update(updateParameter: (parameter: MTLBuffer, parameterDifference: MTLBuffer) -> Void) {
+        guard let weightDiff = weightDiff else {
+            fatalError("Inner Product weights were not initialized")
+        }
+        guard let biasDiff = biasDiff else {
+            fatalError("Inner Product biases were not initialized")
+        }
+
+        updateParameter(parameter: weightsBuffer, parameterDifference: weightDiff)
+        updateParameter(parameter: biasesBuffer, parameterDifference: biasDiff)
     }
 }
