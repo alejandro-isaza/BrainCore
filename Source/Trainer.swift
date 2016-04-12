@@ -16,6 +16,8 @@ public class Trainer {
     var library: MTLLibrary!
     var commandQueue: MTLCommandQueue
 
+    var resetFunction: MTLComputePipelineState!
+
     /// Maximum number of instances to enqueue to the GPU at a time
     let instanceCount = 1
     var inflightSemaphore: dispatch_semaphore_t
@@ -47,6 +49,14 @@ public class Trainer {
         queue = dispatch_queue_create("BrainCore.Trainer", DISPATCH_QUEUE_SERIAL)
         forwardInstance = Instance(buffers: net.buffers, device: device, batchSize: batchSize)
         backwardInstance = Instance(buffers: net.buffers, device: device, batchSize: batchSize)
+
+        try! setupInLibrary()
+    }
+
+    public func setupInLibrary() throws {
+        let resetBuffer = library.newFunctionWithName("reset_buffer")!
+        resetFunction = try library.device.newComputePipelineStateWithFunction(resetBuffer)
+
     }
 
     /// Perform a forward-backward pass on the network. Always call this method from the same serial queue. It may block if there is another run executing.
