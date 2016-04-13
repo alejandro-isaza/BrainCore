@@ -12,6 +12,8 @@ import Upsurge
 
 class SGDSolverTests: MetalTestCase {
     class Source: DataLayer {
+        let name: String?
+        let id = NSUUID()
         var data: Blob
         var batchSize: Int
 
@@ -19,7 +21,8 @@ class SGDSolverTests: MetalTestCase {
             return data.count / batchSize
         }
 
-        init(data: Blob, batchSize: Int) {
+        init(name: String, data: Blob, batchSize: Int) {
+            self.name = name
             self.data = data
             self.batchSize = batchSize
         }
@@ -30,17 +33,21 @@ class SGDSolverTests: MetalTestCase {
     }
 
     class Sink: SinkLayer {
-        var data: Blob = []
+        let name: String?
+        let id = NSUUID()
         var inputSize: Int
         var batchSize: Int
 
-        init(inputSize: Int, batchSize: Int) {
+        var data: Blob = []
+
+        init(name: String, inputSize: Int, batchSize: Int) {
+            self.name = name
             self.inputSize = inputSize
             self.batchSize = batchSize
         }
 
         func consume(input: Blob) {
-            data = input
+            self.data = input
         }
     }
 
@@ -60,54 +67,27 @@ class SGDSolverTests: MetalTestCase {
         let inputs: ValueArray<Float> = [0.05, 0.10]
         let labels: ValueArray<Float> = [0.01, 0.99]
 
-        let net = Net()
+        let data = Source(name: "data", data: inputs, batchSize: batchSize)
+        let label = Source(name: "label", data: labels, batchSize: batchSize)
+        let ip1 = InnerProductLayer(weights: ip1Weights, biases: ip1Biases, name: "ip1")
+        let sigmoid1 = SigmoidLayer(size: outputSize, name: "sigmoid1")
+        let ip2 = InnerProductLayer(weights: ip2Weights, biases: ip2Biases, name: "ip2")
+        let sigmoid2 = SigmoidLayer(size: outputSize, name: "sigmoid2")
+        let loss = L2LossLayer(size: labelSize, name: "loss")
+        let sink = Sink(name: "sink", inputSize: 1, batchSize: batchSize)
 
-        let data = Source(data: inputs, batchSize: batchSize)
-        let label = Source(data: labels, batchSize: batchSize)
-        let ip1 = InnerProductLayer(weights: ip1Weights, biases: ip1Biases)
-        let sigmoid1 = SigmoidLayer(size: outputSize)
-        let ip2 = InnerProductLayer(weights: ip2Weights, biases: ip2Biases)
-        let sigmoid2 = SigmoidLayer(size: outputSize)
-        let loss = L2LossLayer(size: labelSize)
-        let sink = Sink(inputSize: 1, batchSize: batchSize)
-
-        let dataLayer = net.addLayer(data, name: "data")
-        let labelLayer = net.addLayer(label, name: "label")
-        let ip1Layer = net.addLayer(ip1, name: "ip 1")
-        let sigmoid1Layer = net.addLayer(sigmoid1, name: "sigmoid 1")
-        let ip2Layer = net.addLayer(ip2, name: "ip 2")
-        let sigmoid2Layer = net.addLayer(sigmoid2, name: "sigmoid 2")
-        let lossLayer = net.addLayer(loss, name: "loss")
-        let sinkLayer = net.addLayer(sink, name: "sink")
-
-        let ip1Buffer = net.addBufferWithName("ip 1")
-        let sigmoid1Buffer = net.addBufferWithName("sigmoid 1")
-        let ip2Buffer = net.addBufferWithName("ip 2")
-        let sigmoid2Buffer = net.addBufferWithName("sigmoid 2")
-        let lossBuffer = net.addBufferWithName("loss")
-        let sinkBuffer = net.addBufferWithName("sink")
-
-        net.connectLayer(dataLayer, toBuffer: ip1Buffer)
-        net.connectBuffer(ip1Buffer, toLayer: ip1Layer)
-        net.connectLayer(ip1Layer, toBuffer: sigmoid1Buffer)
-        net.connectBuffer(sigmoid1Buffer, toLayer: sigmoid1Layer)
-        net.connectLayer(sigmoid1Layer, toBuffer: ip2Buffer)
-        net.connectBuffer(ip2Buffer, toLayer: ip2Layer)
-        net.connectLayer(ip2Layer, toBuffer: sigmoid2Buffer)
-        net.connectBuffer(sigmoid2Buffer, toLayer: sigmoid2Layer)
-        net.connectLayer(sigmoid2Layer, toBuffer: lossBuffer, atOffset: 0)
-        net.connectLayer(labelLayer, toBuffer: lossBuffer, atOffset: sigmoid2.outputSize)
-        net.connectBuffer(lossBuffer, toLayer: lossLayer)
-        net.connectLayer(lossLayer, toBuffer: sinkBuffer)
-        net.connectBuffer(sinkBuffer, toLayer: sinkLayer)
+        let net = Net.build({
+            data => ip1 => sigmoid1 => ip2 => sigmoid2
+            [sigmoid2, label] => loss => sink
+        })
 
         let solver = try! SGDSolver(device: device, net: net, batchSize: batchSize, stepCount: 1, learningRate: 0.5, momentum: 1.0)
         let expecation = self.expectationWithDescription("Net forward pass 1")
         solver.stepAction = { snapshot in
-            let sinkData = [Float](snapshot.forwardContentsOfBuffer(sinkBuffer))
+            let sinkData = [Float](snapshot.inputOfLayer(sink)!)
             sink.consume(Blob(sinkData))
 
-            let sigmoid2Result = snapshot.forwardContentsOfBuffer(lossBuffer)
+            let sigmoid2Result = snapshot.outputOfLayer(sigmoid2)!
             let sigmoid2Expected: [Float] = [0.75136507, 0.772928465]
             for i in 0..<outputSize {
                 XCTAssertEqualWithAccuracy(sigmoid2Result[i], sigmoid2Expected[i], accuracy: 0.0001)

@@ -16,6 +16,9 @@ public class InnerProductLayer: BackwardLayer, TrainableLayer {
         let outputSize: UInt16
     }
 
+    public let name: String?
+    public let id = NSUUID()
+
     public let weights: Matrix<Float>
     public let biases: ValueArray<Float>
 
@@ -34,7 +37,8 @@ public class InnerProductLayer: BackwardLayer, TrainableLayer {
     public var weightDiff: MTLBuffer?
     public var biasDiff: MTLBuffer?
 
-    public init(weights: Matrix<Float>, biases: ValueArray<Float>) {
+    public init(weights: Matrix<Float>, biases: ValueArray<Float>, name: String? = nil) {
+        self.name = name
         self.weights = weights
         self.biases = biases
         precondition(biases.count == outputSize)
@@ -64,21 +68,13 @@ public class InnerProductLayer: BackwardLayer, TrainableLayer {
         let backwardInputLibraryFunction = library.newFunctionWithName(InnerProductLayer.backwardInputFunctionName)!
         backwardInputFunction = try library.device.newComputePipelineStateWithFunction(backwardInputLibraryFunction)
 
-        withPointer(weights) { pointer in
-            weightsBuffer = library.device.newBufferWithBytes(pointer, length: inputSize * outputSize * sizeof(Float), options: .CPUCacheModeWriteCombined)
-        }
-        weightsBuffer.label = "InnerProductWeights"
-
-        withPointer(biases) { pointer in
-            biasesBuffer = library.device.newBufferWithBytes(pointer, length: outputSize * sizeof(Float), options: .CPUCacheModeWriteCombined)
-        }
-        biasesBuffer.label = "InnerProductBiases"
+        weightsBuffer = createBuffer(inDevice: library.device, fromTensor: weights, withLabel: "InnerProductWeights")
+        biasesBuffer = createBuffer(inDevice: library.device, fromTensor: biases, withLabel: "InnerProductBiases")
     }
 
     public func encodeForwardInBuffer(buffer: MTLCommandBuffer, batchSize: Int, input: MTLBuffer, offset inputOffset: Int, output: MTLBuffer, offset outputOffset: Int) {
         var dimensions = Parameters(batchSize: UInt16(batchSize), inputSize: UInt16(inputSize), outputSize: UInt16(outputSize))
-        dimensionsBuffer = buffer.device.newBufferWithBytes(&dimensions, length: sizeof(Parameters), options: .CPUCacheModeWriteCombined)
-        dimensionsBuffer.label = "InnerProductDimensions"
+        dimensionsBuffer = createBuffer(inDevice: buffer.device, fromPointer: &dimensions, ofSize: sizeof(Parameters), withLabel: "InnerProductDimensions")
 
         
         let encoder = buffer.computeCommandEncoder()
@@ -99,17 +95,15 @@ public class InnerProductLayer: BackwardLayer, TrainableLayer {
 
     public func encodeBackwardInBuffer(buffer: MTLCommandBuffer, batchSize: Int, outputDiff: MTLBuffer, input: MTLBuffer, inputDiff: MTLBuffer) {
         var dimensions = Parameters(batchSize: UInt16(batchSize), inputSize: UInt16(inputSize), outputSize: UInt16(outputSize))
-        dimensionsBuffer = buffer.device.newBufferWithBytes(&dimensions, length: sizeof(Parameters), options: .CPUCacheModeWriteCombined)
-        dimensionsBuffer.label = "InnerProductDimensions"
+        dimensionsBuffer = createBuffer(inDevice: buffer.device, fromPointer: &dimensions, ofSize: sizeof(Parameters), withLabel: "InnerProductDimensions")
 
         
         if weightDiff == nil {
-            weightDiff = buffer.device.newBufferWithLength(inputSize * outputSize * sizeof(Float), options: .CPUCacheModeDefaultCache)
-            weightDiff!.label = "InnerProductWeightDiffs"
+            weightDiff = createBuffer(inDevice: buffer.device, ofSize: inputSize * outputSize * sizeof(Float), withLabel: "InnerProductWeightDiffs")
         }
         if biasDiff == nil {
-            biasDiff = buffer.device.newBufferWithLength(outputSize * sizeof(Float), options: .CPUCacheModeDefaultCache)
-            biasDiff!.label = "InnerProductBiasDiffs"
+            biasDiff = createBuffer(inDevice: buffer.device, ofSize: outputSize * sizeof(Float), withLabel: "InnerProductBiasDiffs")
+
         }
 
         do {
@@ -154,7 +148,7 @@ public class InnerProductLayer: BackwardLayer, TrainableLayer {
             fatalError("Inner Product biases were not initialized")
         }
 
-        encodeAction(values: weightsBuffer, deltas: weightDiff)
-        encodeAction(values: biasesBuffer, deltas: biasDiff)
+        encodeAction(values: weightsBuffer!, deltas: weightDiff)
+        encodeAction(values: biasesBuffer!, deltas: biasDiff)
     }
 }

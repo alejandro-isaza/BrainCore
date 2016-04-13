@@ -72,7 +72,7 @@ public class SGDSolver {
 
     func updateParameters(completion: () -> Void) {
         let commandBuffer = trainer.commandQueue.commandBuffer()
-        for node in trainer.net.nodes {
+        for node in trainer.net.nodes.values {
             guard let trainableLayer = node.layer as? TrainableLayer else {
                 continue
             }

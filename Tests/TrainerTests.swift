@@ -11,6 +11,8 @@ import Upsurge
 
 class TrainerTests: MetalTestCase {
     class Source: DataLayer {
+        let name: String?
+        let id = NSUUID()
         var data: Blob
         var batchSize: Int
 
@@ -18,7 +20,8 @@ class TrainerTests: MetalTestCase {
             return data.count / batchSize
         }
 
-        init(data: Blob, batchSize: Int) {
+        init(name: String, data: Blob, batchSize: Int) {
+            self.name = name
             self.data = data
             self.batchSize = batchSize
         }
@@ -29,10 +32,13 @@ class TrainerTests: MetalTestCase {
     }
 
     class Sink: SinkLayer {
+        let name: String?
+        let id = NSUUID()
         var inputSize: Int
         var batchSize: Int
 
-        init(inputSize: Int, batchSize: Int) {
+        init(name: String, inputSize: Int, batchSize: Int) {
+            self.name = name
             self.inputSize = inputSize
             self.batchSize = batchSize
         }
@@ -42,32 +48,19 @@ class TrainerTests: MetalTestCase {
     }
 
     func testTwoInputOneOutputActivationForwardBackward() {
-        let net = Net()
-
-        let source = Source(data: [1, 1, 2, 2], batchSize: 2)
-        let labels = Source(data: [1, 2], batchSize: 2)
+        let source = Source(name: "source", data: [1, 1, 2, 2], batchSize: 2)
+        let labels = Source(name: "labels", data: [1, 2], batchSize: 2)
         let weights = Matrix<Float>(rows: 2, columns: 1, elements: [2, 4])
         let biases = ValueArray<Float>([1])
 
-        let ip = InnerProductLayer(weights: weights, biases: biases)
-        let loss = L2LossLayer(size: 1)
+        let ip = InnerProductLayer(weights: weights, biases: biases, name: "ip")
+        let loss = L2LossLayer(size: 1, name: "loss")
+        let sink = Sink(name: "sink", inputSize: 1, batchSize: 2)
 
-        let sourceLayer = net.addLayer(source, name: "source")
-        let labelsLayer = net.addLayer(labels, name: "labels")
-        let ipBuffer = net.addBufferWithName("ip buff")
-        let ipLayer = net.addLayer(ip, name: "ip")
-        let lossBuffer = net.addBufferWithName("source buff")
-        let lossLayer = net.addLayer(loss, name: "loss")
-        let sinkBuffer = net.addBufferWithName("sink buff")
-        let sinkLayer = net.addLayer(Sink(inputSize: 1, batchSize: 2), name: "sink")
-
-        net.connectLayer(sourceLayer, toBuffer: ipBuffer)
-        net.connectBuffer(ipBuffer, toLayer: ipLayer)
-        net.connectLayer(ipLayer, toBuffer: lossBuffer)
-        net.connectLayer(labelsLayer, toBuffer: lossBuffer, atOffset: ip.outputSize)
-        net.connectBuffer(lossBuffer, toLayer: lossLayer)
-        net.connectLayer(lossLayer, toBuffer: sinkBuffer)
-        net.connectBuffer(sinkBuffer, toLayer: sinkLayer)
+        let net = Net.build({
+            source => ip
+            [ip, labels] => loss => sink
+        })
 
         let expecation = expectationWithDescription("Net forward/backward pass")
         var ipInputDiff = [Float]()
@@ -76,7 +69,7 @@ class TrainerTests: MetalTestCase {
 
         let trainer = try! Trainer(net: net, device: device, batchSize: 2)
         trainer.run() { snapshot in
-            ipInputDiff = [Float](snapshot.backwardContentsOfBuffer(ipBuffer))
+            ipInputDiff = [Float](snapshot.inputDeltasOfLayer(ip)!)
             ipWeightsDiff = arrayFromBuffer(ip.weightDiff!)
             ipBiasDiff = arrayFromBuffer(ip.biasDiff!)
 

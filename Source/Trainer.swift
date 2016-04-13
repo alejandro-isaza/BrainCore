@@ -29,6 +29,8 @@ public class Trainer {
     public init(net: Net, device: MTLDevice, batchSize: Int) throws {
         self.batchSize = batchSize
         self.net = net
+        self.net.insertTransposeLayers()
+        
         self.device = device
 
         commandQueue = device.newCommandQueue()
@@ -39,7 +41,7 @@ public class Trainer {
         }
         library = try device.newLibraryWithFile(path)
 
-        for node in net.nodes {
+        for node in net.nodes.values {
             if let forwardLayer = node.layer as? ForwardLayer {
                 try forwardLayer.setupInLibrary(library)
             }
@@ -71,11 +73,13 @@ public class Trainer {
         commandQueue.insertDebugCaptureBoundary()
 
         // Collect all data
-        for n in net.dataNodes {
+        for n in net.dataNodes.values {
             let dataLayer = n.layer as! DataLayer
 
             if let netBuffer = n.outputBuffer {
-                let buffer = forwardInstance.buffers[netBuffer.id]
+                guard let buffer = forwardInstance.buffers[netBuffer.id] else {
+                    fatalError("Output buffer for \(dataLayer.name) not found.")
+                }
                 fillBuffer(buffer, start: batchSize * n.outputOffset, withElements: dataLayer.nextBatch(batchSize))
             }
             forwardInstance.closeNode(n)
@@ -102,11 +106,15 @@ public class Trainer {
             }
 
             guard let input = node.inputBuffer, output = node.outputBuffer else {
-                preconditionFailure("Layer '\(node.name)' is missing a buffer")
+                preconditionFailure("Layer '\(node.layer.name)' is missing a buffer")
             }
 
-            let inputBuffer = forwardInstance.buffers[input.id]
-            let outputBuffer = forwardInstance.buffers[output.id]
+            guard let inputBuffer = forwardInstance.buffers[input.id] else {
+                fatalError("Layer '\(node.layer.name)'s input buffer was not created")
+            }
+            guard let outputBuffer = forwardInstance.buffers[output.id] else {
+                fatalError("Layer '\(node.layer.name)'s output buffer was not created")
+            }
 
             let buffer = commandQueue.commandBuffer()
             forwardLayer.encodeForwardInBuffer(buffer,
@@ -147,15 +155,21 @@ public class Trainer {
             }
 
             guard let input = node.inputBuffer, output = node.outputBuffer else {
-                preconditionFailure("Layer '\(node.name)' is missing a buffer")
+                preconditionFailure("Layer '\(node.layer.name)' is missing a buffer")
             }
 
-            let inputBuffer = forwardInstance.buffers[input.id]
-            let inputDiffBuffer = backwardInstance.buffers[input.id]
+            guard let inputBuffer = forwardInstance.buffers[input.id] else {
+                fatalError("Layer '\(node.layer.name)'s input buffer was not created")
+            }
+            guard let inputDiffBuffer = backwardInstance.buffers[input.id] else {
+                fatalError("Layer '\(node.layer.name)'s input difference buffer was not created")
+            }
 
             let buffer = commandQueue.commandBuffer()
             if let backwardLayer = node.layer as? BackwardLayer {
-                let outputDiffBuffer = backwardInstance.buffers[output.id]
+                guard let outputDiffBuffer = backwardInstance.buffers[output.id] else {
+                    fatalError("Layer '\(node.layer.name)'s output difference buffer was not created")
+                }
 
                 backwardLayer.encodeBackwardInBuffer(buffer,
                                                      batchSize: batchSize,

@@ -32,6 +32,9 @@ public class LSTMLayer: ForwardLayer {
     }
 
     var parameters: Parameters
+    public let name: String?
+    public let id = NSUUID()
+
     public let weights: Matrix<Float>
     public let biases: ValueArray<Float>
     
@@ -52,12 +55,13 @@ public class LSTMLayer: ForwardLayer {
         return 2 * Int(parameters.unitCount)
     }
 
-    public init(weights: Matrix<Float>, biases: ValueArray<Float>, clipTo: Float? = nil) {
+    public init(weights: Matrix<Float>, biases: ValueArray<Float>, batchSize: Int, name: String? = nil, clipTo: Float? = nil) {
+        self.name = name
         self.weights = weights
         self.biases = biases
 
         let unitCount = biases.count / 4
-        parameters = Parameters(batchSize: 1, unitCount: unitCount, inputSize: weights.rows - unitCount, clipTo: clipTo)
+        parameters = Parameters(batchSize: batchSize, unitCount: unitCount, inputSize: weights.rows - unitCount, clipTo: clipTo)
 
         precondition(weights.rows == inputSize + unitCount)
         precondition(weights.columns == 4 * unitCount)
@@ -71,35 +75,18 @@ public class LSTMLayer: ForwardLayer {
         let function = library.newFunctionWithName(LSTMLayer.forwardFunctionName)!
         forwardFunction = try library.device.newComputePipelineStateWithFunction(function)
 
-        withPointer(weights) { pointer in
-            weightsBuffer = library.device.newBufferWithBytes(pointer, length: weights.count * sizeof(Float), options: .CPUCacheModeDefaultCache)
-        }
-        weightsBuffer.label = "LSTMWeights"
+        self.weightsBuffer = createBuffer(inDevice: library.device, fromTensor: weights, withLabel: "LSTMWeights")
+        self.biasesBuffer = createBuffer(inDevice: library.device, fromTensor: biases, withLabel: "LSTMBiases")
 
-        withPointer(biases) { pointer in
-            biasesBuffer = library.device.newBufferWithBytes(pointer, length: biases.count * sizeof(Float), options: .CPUCacheModeDefaultCache)
-        }
-        biasesBuffer.label = "LSTMBiases"
-        
         let state = Matrix<Float>(rows: Int(parameters.batchSize), columns: stateSize, repeatedValue: 0.0)
-        withPointer(state) { pointer in
-            self.stateBuffer = library.device.newBufferWithBytes(pointer, length: Int(parameters.batchSize) * stateSize * sizeof(Float), options: .CPUCacheModeDefaultCache)
-            self.stateBuffer.label = "LSTMState"
-        }
+        self.stateBuffer = createBuffer(inDevice: library.device, fromTensor: state, withLabel: "LSTMState")
     }
 
     /// Run one step of LSTM.
     public func encodeForwardInBuffer(buffer: MTLCommandBuffer, batchSize: Int, input: MTLBuffer, offset inputOffset: Int, output: MTLBuffer, offset outputOffset: Int) {
         parameters.batchSize = UInt16(batchSize)
-        self.parametersBuffer = buffer.device.newBufferWithBytes(&parameters, length: sizeof(Parameters), options: .CPUCacheModeDefaultCache)
-        self.parametersBuffer.label = "LSTMParameters"
+        parametersBuffer = createBuffer(inDevice: buffer.device, fromPointer: &parameters, ofSize: sizeof(Parameters), withLabel: "LSTMParameters")
 
-        let state = Matrix<Float>(rows: batchSize, columns: stateSize, repeatedValue: 0.0)
-        withPointer(state) { pointer in
-            self.stateBuffer = buffer.device.newBufferWithBytes(pointer, length: state.count * sizeof(Float), options: .CPUCacheModeDefaultCache)
-            self.stateBuffer.label = "LSTMState"
-        }
-        
         let encoder = buffer.computeCommandEncoder()
         encoder.label = "LSTMForward"
         encoder.setComputePipelineState(forwardFunction)
@@ -120,8 +107,8 @@ public class LSTMLayer: ForwardLayer {
 
     /// Reset the internal LSTM state
     public func reset() {
-        let pointer = UnsafeMutablePointer<Float>(stateBuffer.contents())
-        for i in 0..<stateBuffer.length / sizeof(Float) {
+        let pointer = UnsafeMutablePointer<Float>(stateBuffer!.contents())
+        for i in 0..<stateBuffer!.length / sizeof(Float) {
             pointer[i] = 0.0
         }
     }

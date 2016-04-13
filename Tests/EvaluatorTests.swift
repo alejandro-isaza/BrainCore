@@ -11,14 +11,19 @@ import Upsurge
 
 class EvaluatorTests: MetalTestCase {
     class Source: DataLayer {
+        let name: String?
+        let id = NSUUID()
         var data: Blob
+        var batchSize: Int
 
         var outputSize: Int {
-            return data.count
+            return data.count / batchSize
         }
 
-        init(data: Blob) {
+        init(name: String, data: Blob, batchSize: Int) {
+            self.name = name
             self.data = data
+            self.batchSize = batchSize
         }
 
         func nextBatch(batchSize: Int) -> Blob {
@@ -27,31 +32,39 @@ class EvaluatorTests: MetalTestCase {
     }
 
     class Sink: SinkLayer {
-        var data: Blob = []
+        let name: String?
+        let id = NSUUID()
         var inputSize: Int
+        var batchSize: Int
 
-        init(inputSize: Int) {
+        var data: Blob = []
+
+        init(name: String, inputSize: Int, batchSize: Int) {
+            self.name = name
             self.inputSize = inputSize
+            self.batchSize = batchSize
         }
 
         func consume(input: Blob) {
-            data = input
+            self.data = input
         }
     }
 
     func testSplitAndJoin() {
         let data = Matrix<Float>(rows: 1, columns: 4, elements: [1, 1, 2, 2])
-        let source1 = Source(data: [1, 1])
-        let source2 = Source(data: [2, 2])
+        let source1 = Source(name: "source1", data: [1, 1], batchSize: 1)
+        let source2 = Source(name: "source2", data: [2, 2], batchSize: 1)
 
         let weights = Matrix<Float>(rows: 4, columns: 10, initializer: { 2 * Float(arc4random()) / Float(UINT32_MAX) - 1.0 })
         let biases = ValueArray<Float>(count: 10, repeatedValue: 1.0)
-        let ip = InnerProductLayer(weights: weights, biases: biases)
+        let ip = InnerProductLayer(weights: weights, biases: biases, name: "ip")
 
-        let sink1 = Sink(inputSize: 6)
-        let sink2 = Sink(inputSize: 4)
+        let sink1 = Sink(name: "sink1", inputSize: 6, batchSize: 1)
+        let sink2 = Sink(name: "sink2", inputSize: 4, batchSize: 1)
 
-        let net = [source1, source2] => ip => [(sink1, 0), (sink2, 6)]
+        let net = Net.build({
+            [source1, source2] => ip => [sink1, sink2]
+        })
 
         let expecation = expectationWithDescription("Net forward pass")
         let evaluator = try! Evaluator(net: net, device: device)
@@ -75,14 +88,16 @@ class EvaluatorTests: MetalTestCase {
     }
 
     func testTwoInputOneOutputActivation() {
-        let source = Source(data: [1, 2])
+        let source = Source(name: "source", data: [1, 2], batchSize: 1)
         let weights = Matrix<Float>(rows: 2, columns: 1, elements: [2, 4])
         let biases = ValueArray<Float>([1])
 
-        let ip = InnerProductLayer(weights: weights, biases: biases)
-        let sink = Sink(inputSize: 1)
+        let ip = InnerProductLayer(weights: weights, biases: biases, name: "ip")
+        let sink = Sink(name: "sink", inputSize: 1, batchSize: 1)
 
-        let net = source => ip => sink
+        let net = Net.build({
+            source => ip => sink
+        })
 
         let expecation = expectationWithDescription("Net forward pass")
         let evaluator = try! Evaluator(net: net, device: device)
@@ -99,31 +114,17 @@ class EvaluatorTests: MetalTestCase {
     }
 
     func testTwoInputOneOutputNoActivation() {
-        let device = self.device
-        let net = Net()
-
-        let source = Source(data: [1, 1])
+        let source = Source(name: "source", data: [1, 1], batchSize: 1)
         let weights = Matrix<Float>(rows: 2, columns: 1, elements: [2, -4])
         let biases = ValueArray<Float>([1])
 
-        let ip = InnerProductLayer(weights: weights, biases: biases)
-        let sink = Sink(inputSize: 1)
+        let ip = InnerProductLayer(weights: weights, biases: biases, name: "ip")
+        let relu = ReLULayer(size: 1, name: "relu")
+        let sink = Sink(name: "sink", inputSize: 1, batchSize: 1)
 
-        let inputBuffer = net.addBufferWithName("input")
-        let ipBuffer = net.addBufferWithName("IP")
-        let outputBuffer = net.addBufferWithName("output")
-
-        let sourceLayer = net.addLayer(source, name: "source")
-        let ipLayer = net.addLayer(ip, name: "inner product")
-        let reluLayer = net.addLayer(ReLULayer(size: 1), name: "ReLU")
-        let sinkLayer = net.addLayer(sink, name: "sink")
-
-        net.connectLayer(sourceLayer, toBuffer: inputBuffer)
-        net.connectBuffer(inputBuffer, toLayer: ipLayer)
-        net.connectLayer(ipLayer, toBuffer: ipBuffer)
-        net.connectBuffer(ipBuffer, toLayer: reluLayer)
-        net.connectLayer(reluLayer, toBuffer: outputBuffer)
-        net.connectBuffer(outputBuffer, toLayer: sinkLayer)
+        let net = Net.build({
+            source => ip => relu => sink
+        })
 
         let expecation = expectationWithDescription("Net forward pass")
         let evaluator = try! Evaluator(net: net, device: device)

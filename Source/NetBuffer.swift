@@ -7,11 +7,14 @@
 
 
 class NetBuffer: Hashable {
-    let id: Int
-    let name: String
+    /// Buffer unique identifier
+    let id = NSUUID()
 
-    var size: Int {
-        let inputSize = inputNodes.reduce(0) { currentValue, node in
+    /// Optional buffer name
+    let name: String?
+
+    var inputSize: Int {
+        return inputNodes.reduce(0) { currentValue, node in
             if let forwardLayer = node.layer as? ForwardLayer {
                 return currentValue + forwardLayer.outputSize
             } else if let dataLayer = node.layer as? DataLayer {
@@ -19,8 +22,10 @@ class NetBuffer: Hashable {
             }
             preconditionFailure("Cannot costruct buffer from \(node.layer.dynamicType).")
         }
+    }
 
-        let outputSize = outputNodes.reduce(0) { currentValue, node in
+    var outputSize: Int {
+        return outputNodes.reduce(0) { currentValue, node in
             if let forwardLayer = node.layer as? ForwardLayer {
                 return currentValue + forwardLayer.inputSize
             } else if let sinkLayer = node.layer as? SinkLayer {
@@ -28,21 +33,22 @@ class NetBuffer: Hashable {
             }
             preconditionFailure("Cannot costruct buffer from \(node.layer.dynamicType).")
         }
+    }
 
-        precondition(inputSize == outputSize, "Incompatible input and output sizes.")
+    var size: Int {
+        precondition(inputSize == outputSize, "Incompatible input (\(inputSize)) and output (\(outputSize)) sizes.")
         return inputSize
     }
 
     var inputNodes = [NetNode]()
     var outputNodes = [NetNode]()
     
-    init(id: Int, name: String) {
-        self.id = id
+    init(name: String? = nil) {
         self.name = name
     }
 
     var hashValue: Int {
-        return id
+        return id.hashValue
     }
 }
 
