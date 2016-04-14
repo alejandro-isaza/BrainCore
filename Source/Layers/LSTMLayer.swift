@@ -40,8 +40,9 @@ public class LSTMLayer: ForwardLayer {
     
     public var weightsBuffer: MTLBuffer!
     public var biasesBuffer: MTLBuffer!
-    public var stateBuffer: MTLBuffer!
-    public var parametersBuffer: MTLBuffer!
+    public var state0Buffer: MTLBuffer!
+    public var state1Buffer: MTLBuffer!
+    var currentState = 0
 
     public var inputSize: Int {
         return Int(parameters.inputSize)
@@ -79,13 +80,24 @@ public class LSTMLayer: ForwardLayer {
         self.biasesBuffer = createBuffer(inDevice: library.device, fromTensor: biases, withLabel: "LSTMBiases")
 
         let state = Matrix<Float>(rows: Int(parameters.batchSize), columns: stateSize, repeatedValue: 0.0)
-        self.stateBuffer = createBuffer(inDevice: library.device, fromTensor: state, withLabel: "LSTMState")
+        self.state0Buffer = createBuffer(inDevice: library.device, fromTensor: state, withLabel: "LSTMState")
+        self.state1Buffer = createBuffer(inDevice: library.device, fromTensor: state, withLabel: "LSTMState")
     }
 
     /// Run one step of LSTM.
     public func encodeForwardInBuffer(buffer: MTLCommandBuffer, batchSize: Int, input: MTLBuffer, offset inputOffset: Int, output: MTLBuffer, offset outputOffset: Int) {
-        parameters.batchSize = UInt16(batchSize)
-        parametersBuffer = createBuffer(inDevice: buffer.device, fromPointer: &parameters, ofSize: sizeof(Parameters), withLabel: "LSTMParameters")
+        precondition(batchSize == Int(parameters.batchSize))
+
+        let oldState: MTLBuffer
+        let newState: MTLBuffer
+        if currentState == 0 {
+            oldState = state0Buffer!
+            newState = state1Buffer!
+        } else {
+            oldState = state1Buffer!
+            newState = state0Buffer!
+        }
+        currentState = (currentState + 1) % 2
 
         let encoder = buffer.computeCommandEncoder()
         encoder.label = "LSTMForward"
@@ -94,8 +106,9 @@ public class LSTMLayer: ForwardLayer {
         encoder.setBuffer(weightsBuffer, offset: 0, atIndex: 1)
         encoder.setBuffer(biasesBuffer, offset: 0, atIndex: 2)
         encoder.setBuffer(output, offset: outputOffset * sizeof(Float), atIndex: 3)
-        encoder.setBuffer(stateBuffer, offset: 0, atIndex: 4)
-        encoder.setBuffer(parametersBuffer, offset: 0, atIndex: 5)
+        encoder.setBuffer(oldState, offset: 0, atIndex: 4)
+        encoder.setBuffer(newState, offset: 0, atIndex: 5)
+        encoder.setBytes(&parameters, length: sizeof(Parameters), atIndex: 6)
 
         let count = Int(parameters.unitCount)
         let threadsPerGroup = MTLSize(width: forwardFunction.threadExecutionWidth, height: 1, depth: 1)
@@ -107,9 +120,14 @@ public class LSTMLayer: ForwardLayer {
 
     /// Reset the internal LSTM state
     public func reset() {
-        let pointer = UnsafeMutablePointer<Float>(stateBuffer!.contents())
-        for i in 0..<stateBuffer!.length / sizeof(Float) {
-            pointer[i] = 0.0
+        let pointer0 = UnsafeMutablePointer<Float>(state0Buffer!.contents())
+        for i in 0..<state0Buffer!.length / sizeof(Float) {
+            pointer0[i] = 0.0
         }
+        let pointer1 = UnsafeMutablePointer<Float>(state1Buffer!.contents())
+        for i in 0..<state1Buffer!.length / sizeof(Float) {
+            pointer1[i] = 0.0
+        }
+        currentState = 0
     }
 }

@@ -100,8 +100,8 @@ class SGDSolverTests: MetalTestCase {
             let ip1ExpectedWeights: [Float] = [0.149780716, 0.24975114, 0.19956143, 0.29950229]
             let ip2ExpectedWeights: [Float] = [0.35891648, 0.511301270, 0.408666186, 0.561370121]
 
-            let ip1ActualWeights: [Float] = arrayFromBuffer(ip1.weightsBuffer)
-            let ip2ActualWeights = arrayFromBuffer(ip2.weightsBuffer)
+            let ip1ActualWeights: [Float] = arrayFromBuffer(ip1.weightsBuffer!)
+            let ip2ActualWeights: [Float] = arrayFromBuffer(ip2.weightsBuffer!)
 
             for i in 0..<4 {
                 XCTAssertEqualWithAccuracy(ip1ExpectedWeights[i], ip1ActualWeights[i], accuracy: 0.0001)

@@ -22,48 +22,51 @@ kernel void lstm_forward(const device float* input [[ buffer(0) ]],
                          const device float* weights [[ buffer(1) ]],
                          const device float* biases [[ buffer(2) ]],
                          device float* output [[ buffer(3) ]],
-                         device float* state [[ buffer(4) ]],
-                         constant LSTMParameters& params [[ buffer(5) ]],
+                         const device float* old_state [[ buffer(4) ]],
+                         device float* new_state [[ buffer(5) ]],
+                         constant LSTMParameters& params [[ buffer(6) ]],
                          uint2 id [[ thread_position_in_grid ]])
 {
     const auto unit = id.x;
-    const auto batchElement = id.y;
+    const auto batch_element = id.y;
 
-    if (unit >= params.unit_count || batchElement >= params.batch_size)
+    if (unit >= params.unit_count || batch_element >= params.batch_size)
         return;
 
-    const auto inputGateIndex  = 0 * params.unit_count + unit;
-    const auto newInputIndex   = 1 * params.unit_count + unit;
-    const auto forgetGateIndex = 2 * params.unit_count + unit;
-    const auto outputGateIndex = 3 * params.unit_count + unit;
+    const auto input_gate_index  = 0 * params.unit_count + unit;
+    const auto new_input_index   = 1 * params.unit_count + unit;
+    const auto forget_gate_index = 2 * params.unit_count + unit;
+    const auto output_gate_index = 3 * params.unit_count + unit;
 
-    auto inputGate  = biases[inputGateIndex];
-    auto newInput   = biases[newInputIndex];
-    auto forgetGate = biases[forgetGateIndex];
-    auto outputGate = biases[outputGateIndex];
+    auto input_gate  = biases[input_gate_index];
+    auto new_input   = biases[new_input_index];
+    auto forget_gate = biases[forget_gate_index];
+    auto output_gate = biases[output_gate_index];
 
     for (uint i = 0; i < params.input_size; i += 1) {
-        inputGate  += weights[inputGateIndex  + i * 4 * params.unit_count] * input[batchElement + i * params.batch_size];
-        newInput   += weights[newInputIndex   + i * 4 * params.unit_count] * input[batchElement + i * params.batch_size];
-        forgetGate += weights[forgetGateIndex + i * 4 * params.unit_count] * input[batchElement + i * params.batch_size];
-        outputGate += weights[outputGateIndex + i * 4 * params.unit_count] * input[batchElement + i * params.batch_size];
+        const auto input_value = input[batch_element + i * params.batch_size];
+        input_gate  += weights[input_gate_index  + i * 4 * params.unit_count] * input_value;
+        new_input   += weights[new_input_index   + i * 4 * params.unit_count] * input_value;
+        forget_gate += weights[forget_gate_index + i * 4 * params.unit_count] * input_value;
+        output_gate += weights[output_gate_index + i * 4 * params.unit_count] * input_value;
     }
     for (uint i = 0; i < params.unit_count; i += 1) {
         const auto j = i + params.input_size;
-        inputGate  += weights[inputGateIndex  + j * 4 * params.unit_count] * state[params.unit_count * (1 + batchElement * 2) + i];
-        newInput   += weights[newInputIndex   + j * 4 * params.unit_count] * state[params.unit_count * (1 + batchElement * 2) + i];
-        forgetGate += weights[forgetGateIndex + j * 4 * params.unit_count] * state[params.unit_count * (1 + batchElement * 2) + i];
-        outputGate += weights[outputGateIndex + j * 4 * params.unit_count] * state[params.unit_count * (1 + batchElement * 2) + i];
+        const auto old_out = old_state[params.unit_count * (1 + batch_element * 2) + i];
+        input_gate  += weights[input_gate_index  + j * 4 * params.unit_count] * old_out;
+        new_input   += weights[new_input_index   + j * 4 * params.unit_count] * old_out;
+        forget_gate += weights[forget_gate_index + j * 4 * params.unit_count] * old_out;
+        output_gate += weights[output_gate_index + j * 4 * params.unit_count] * old_out;
     }
 
-    const auto previousActivation = state[unit + batchElement * 2 * params.unit_count];
-    auto activation = bc::sigmoid(forgetGate + 1) * previousActivation + bc::sigmoid(inputGate) * bc::tanh(newInput);
+    const auto old_activation = old_state[unit + batch_element * 2 * params.unit_count];
+    auto activation = bc::sigmoid(forget_gate + 1) * old_activation + bc::sigmoid(input_gate) * bc::tanh(new_input);
     if (params.clip_to > 0) {
         activation = clamp(activation, -params.clip_to, params.clip_to);
     }
-    const auto out = bc::sigmoid(outputGate) * bc::tanh(activation);
+    const auto out = bc::sigmoid(output_gate) * bc::tanh(activation);
 
-    output[batchElement + unit * params.batch_size] = out;
-    state[unit + batchElement * 2 * params.unit_count] = activation;
-    state[unit + params.unit_count * (1 + batchElement * 2)] = out;
+    output[batch_element + unit * params.batch_size] = out;
+    new_state[unit + batch_element * 2 * params.unit_count] = activation;
+    new_state[unit + params.unit_count * (1 + batch_element * 2)] = out;
 }

@@ -61,12 +61,12 @@ class LSTMLayerTests: MetalTestCase {
         XCTAssertEqualWithAccuracy(result[0], expectedOutput, accuracy: 0.001)
     }
 
-    func testForwardLargeBatchSize() {
+    func testForwardLarge() {
         let device = self.device
 
         let batchSize = 64
         let inputSize = 64
-        let unitCount = 64
+        let unitCount = 128
 
         let input = Matrix<Float>(rows: inputSize, columns: batchSize)
         for i in 0..<input.rows {
@@ -98,7 +98,7 @@ class LSTMLayerTests: MetalTestCase {
         let outputBuffer = device.newBufferWithLength(batchSize * unitCount * sizeof(Float), options: .CPUCacheModeDefaultCache)
         measureBlock {
             layer.reset()
-            
+
             let commandBuffer = queue.commandBuffer()
             layer.encodeForwardInBuffer(commandBuffer, batchSize: batchSize, input: inputBuffer, offset: 0, output: outputBuffer, offset: 0)
             commandBuffer.commit()
@@ -107,7 +107,7 @@ class LSTMLayerTests: MetalTestCase {
 
         let result = arrayFromBuffer(outputBuffer)
         XCTAssertEqual(result.count, batchSize * unitCount)
-        
+
         for i in 0..<batchSize {
             for j in 0..<unitCount {
                 var inputGate: Float = 0.0
@@ -125,5 +125,4 @@ class LSTMLayerTests: MetalTestCase {
             }
         }
     }
-
 }
