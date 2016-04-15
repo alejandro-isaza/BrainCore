@@ -30,7 +30,7 @@ class L2LossLayerTests: MetalTestCase {
             }
         }
 
-        let lossLayer = L2LossLayer(size: labelSize)
+        let lossLayer = L2LossLayer(size: labelSize, name: "lossLayer")
         try! lossLayer.setupInLibrary(library)
 
         let queue = device.newCommandQueue()
@@ -77,7 +77,7 @@ class L2LossLayerTests: MetalTestCase {
             }
         }
         
-        let lossLayer = L2LossLayer(size: labelSize)
+        let lossLayer = L2LossLayer(size: labelSize, name: "lossLayer")
         try! lossLayer.setupInLibrary(library)
 
         let queue = device.newCommandQueue()

@@ -34,7 +34,7 @@ class LSTMLayerTests: MetalTestCase {
 
         let biases = ValueArray<Float>(count: 4 * unitCount, repeatedValue: 0.0)
 
-        let layer = LSTMLayer(weights: weights, biases: biases)
+        let layer = LSTMLayer(weights: weights, biases: biases, batchSize: 1, name: "layer")
         try! layer.setupInLibrary(library)
 
         let queue = device.newCommandQueue()
@@ -87,7 +87,7 @@ class LSTMLayerTests: MetalTestCase {
 
         let biases = ValueArray<Float>(count: 4 * unitCount, repeatedValue: 0.0)
 
-        let layer = LSTMLayer(weights: weights, biases: biases)
+        let layer = LSTMLayer(weights: weights, biases: biases, batchSize: batchSize, name: "layer")
         try! layer.setupInLibrary(library)
 
         let queue = device.newCommandQueue()

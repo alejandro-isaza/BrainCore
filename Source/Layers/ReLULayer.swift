@@ -16,6 +16,8 @@ public class ReLULayer: ForwardLayer, BackwardLayer {
 
     /// The size of each batch element
     public let size: Int
+    public let name: String?
+    public let id = NSUUID()
 
     public var outputSize: Int {
         return size
@@ -25,7 +27,8 @@ public class ReLULayer: ForwardLayer, BackwardLayer {
         return size
     }
 
-    public init(size: Int) {
+    public init(size: Int, name: String? = nil) {
+        self.name = name
         self.size = size
     }
 
@@ -45,8 +48,8 @@ public class ReLULayer: ForwardLayer, BackwardLayer {
 
     public func encodeForwardInBuffer(buffer: MTLCommandBuffer, batchSize: Int, input: MTLBuffer, offset inputOffset: Int, output: MTLBuffer, offset outputOffset: Int) {
         var dimensions = Parameters(batchSize: UInt32(batchSize), inputSize: UInt32(inputSize))
-        let dimensionsBuffer = buffer.device.newBufferWithBytes(&dimensions, length: sizeof(Parameters), options: .CPUCacheModeWriteCombined)
-        dimensionsBuffer.label = "ReluDimensions"
+        let dimensionsBuffer = createBuffer(inDevice: buffer.device, fromPointer: &dimensions, ofSize: sizeof(Parameters), withLabel: "ReluDimensions")
+
 
         let encoder = buffer.computeCommandEncoder()
         encoder.label = "ReLUForward"
@@ -65,8 +68,7 @@ public class ReLULayer: ForwardLayer, BackwardLayer {
 
     public func encodeBackwardInBuffer(buffer: MTLCommandBuffer, batchSize: Int, outputDiff: MTLBuffer, input: MTLBuffer, inputDiff: MTLBuffer) {
         var dimensions = Parameters(batchSize: UInt32(batchSize), inputSize: UInt32(inputSize))
-        let dimensionsBuffer = buffer.device.newBufferWithBytes(&dimensions, length: sizeof(Parameters), options: .CPUCacheModeWriteCombined)
-        dimensionsBuffer.label = "ReluDimensions"
+        let dimensionsBuffer = createBuffer(inDevice: buffer.device, fromPointer: &dimensions, ofSize: sizeof(Parameters), withLabel: "ReluDimensions")
 
         let encoder = buffer.computeCommandEncoder()
         encoder.label = "ReLUBackward"

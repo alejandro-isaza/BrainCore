@@ -9,8 +9,15 @@ import Foundation
 import Metal
 
 public class SigmoidLayer: ForwardLayer, BackwardLayer {
+    struct Parameters {
+        let batchSize: UInt32
+        let size: UInt32
+    }
+
     /// The size of each batch element
     public let size: Int
+    public let name: String?
+    public let id = NSUUID()
 
     public var outputSize: Int {
         return size
@@ -20,13 +27,9 @@ public class SigmoidLayer: ForwardLayer, BackwardLayer {
         return size
     }
 
-    public init(size: Int) {
+    public init(size: Int, name: String? = nil) {
+        self.name = name
         self.size = size
-    }
-
-    struct SigmoidDimensions {
-        let batchSize: UInt32
-        let size: UInt32
     }
 
     static let forwardFunctionName = "sigmoid_forward"
@@ -44,9 +47,9 @@ public class SigmoidLayer: ForwardLayer, BackwardLayer {
     }
 
     public func encodeForwardInBuffer(buffer: MTLCommandBuffer, batchSize: Int, input: MTLBuffer, offset inputOffset: Int, output: MTLBuffer, offset outputOffset: Int) {
-        var dimensions = SigmoidDimensions(batchSize: UInt32(batchSize), size: UInt32(size))
-        let dimensionsBuffer = buffer.device.newBufferWithBytes(&dimensions, length: sizeof(SigmoidDimensions), options: .CPUCacheModeWriteCombined)
-        dimensionsBuffer.label = "SigmoidDimensions"
+        var dimensions = Parameters(batchSize: UInt32(batchSize), size: UInt32(size))
+        let dimensionsBuffer = createBuffer(inDevice: buffer.device, fromPointer: &dimensions, ofSize: sizeof(Parameters), withLabel: "SigmoidDimensions")
+
 
         let encoder = buffer.computeCommandEncoder()
         encoder.label = "SigmoidForward"
@@ -64,9 +67,8 @@ public class SigmoidLayer: ForwardLayer, BackwardLayer {
     }
 
     public func encodeBackwardInBuffer(buffer: MTLCommandBuffer, batchSize: Int, outputDiff: MTLBuffer, input: MTLBuffer, inputDiff: MTLBuffer) {
-        var dimensions = SigmoidDimensions(batchSize: UInt32(batchSize), size: UInt32(size))
-        let dimensionsBuffer = buffer.device.newBufferWithBytes(&dimensions, length: sizeof(SigmoidDimensions), options: .CPUCacheModeWriteCombined)
-        dimensionsBuffer.label = "SigmoidDimensions"
+        var dimensions = Parameters(batchSize: UInt32(batchSize), size: UInt32(size))
+        let dimensionsBuffer = createBuffer(inDevice: buffer.device, fromPointer: &dimensions, ofSize: sizeof(Parameters), withLabel: "SigmoidDimensions")
 
         let encoder = buffer.computeCommandEncoder()
         encoder.label = "SigmoidBackward"

@@ -16,7 +16,7 @@ class ReLULayerTests: MetalTestCase {
         let dataSize = 1024 * 1024
 
         let device = self.device
-        let layer = ReLULayer(size: dataSize)
+        let layer = ReLULayer(size: dataSize, name: "ReLU")
         try! layer.setupInLibrary(library)
 
         var data = [Float](count: dataSize, repeatedValue: 0.0)
@@ -50,7 +50,7 @@ class ReLULayerTests: MetalTestCase {
         let dataSize = 1024 * 1024
 
         let device = self.device
-        let layer = ReLULayer(size: dataSize)
+        let layer = ReLULayer(size: dataSize, name: "ReLU")
         try! layer.setupInLibrary(library)
 
         var input = [Float](count: dataSize, repeatedValue: 0.0)
@@ -94,7 +94,7 @@ class ReLULayerTests: MetalTestCase {
         let dataSize = 16 * 1024
         
         let device = self.device
-        let layer = ReLULayer(size: dataSize)
+        let layer = ReLULayer(size: dataSize, name: "ReLU")
         try! layer.setupInLibrary(library)
         
         var data = [Float](count: batchSize * dataSize, repeatedValue: 0.0)

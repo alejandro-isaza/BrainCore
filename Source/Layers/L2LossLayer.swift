@@ -15,8 +15,9 @@ public class L2LossLayer: LossLayer {
     }
 
     public let size: Int
-    public var loss: Double = 0.0
-    
+    public let name: String?
+    public let id = NSUUID()
+
     public var outputSize: Int {
         return 1
     }
@@ -24,7 +25,8 @@ public class L2LossLayer: LossLayer {
         return 2 * size
     }
     
-    public init(size: Int) {
+    public init(size: Int, name: String? = nil) {
+        self.name = name
         self.size = size
     }
 
@@ -44,8 +46,7 @@ public class L2LossLayer: LossLayer {
     
     public func encodeForwardInBuffer(buffer: MTLCommandBuffer, batchSize: Int, input: MTLBuffer, offset inputOffset: Int, output: MTLBuffer, offset outputOffset: Int) {
         var dimensions = Parameters(batchSize: UInt16(batchSize), inputSize: UInt16(inputSize / 2))
-        let dimensionsBuffer = buffer.device.newBufferWithBytes(&dimensions, length: sizeof(Parameters), options: .CPUCacheModeWriteCombined)
-        dimensionsBuffer.label = "L2LossDimensions"
+        let dimensionsBuffer = createBuffer(inDevice: buffer.device, fromPointer: &dimensions, ofSize: sizeof(Parameters), withLabel: "L2LossDimensions")
 
         let encoder = buffer.computeCommandEncoder()
         encoder.label = "L2LossForward"
@@ -63,8 +64,7 @@ public class L2LossLayer: LossLayer {
 
     public func encodeBackwardLossInBuffer(buffer: MTLCommandBuffer, batchSize: Int, input: MTLBuffer, deltas: MTLBuffer) {
         var dimensions = Parameters(batchSize: UInt16(batchSize), inputSize: UInt16(inputSize / 2))
-        let dimensionsBuffer = buffer.device.newBufferWithBytes(&dimensions, length: sizeof(Parameters), options: .CPUCacheModeWriteCombined)
-        dimensionsBuffer.label = "L2LossDimensions"
+        let dimensionsBuffer = createBuffer(inDevice: buffer.device, fromPointer: &dimensions, ofSize: sizeof(Parameters), withLabel: "L2LossDimensions")
 
         let encoder = buffer.computeCommandEncoder()
         encoder.label = "L2LossBackward"

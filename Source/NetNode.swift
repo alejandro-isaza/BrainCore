@@ -6,9 +6,7 @@
 // tree.
 
 class NetNode: Hashable {
-    let id: Int
     let layer: Layer
-    let name: String
 
     weak var inputBuffer: NetBuffer?
     var inputOffset = 0
@@ -16,17 +14,15 @@ class NetNode: Hashable {
     weak var outputBuffer: NetBuffer?
     var outputOffset = 0
 
-    init(id: Int, name: String, layer: Layer) {
-        self.id = id
-        self.name = name
+    init(layer: Layer) {
         self.layer = layer
     }
 
     var hashValue: Int {
-        return id
+        return layer.id.hashValue
     }
 }
 
 func ==(lhs: NetNode, rhs: NetNode) -> Bool {
-    return lhs.id == rhs.id
+    return lhs.layer.id == rhs.layer.id
 }

@@ -18,7 +18,7 @@ class TransposeLayerTests: MetalTestCase {
         let dataSize = 64 * 64
 
         let device = self.device
-        let layer = TransposeLayer(size: dataSize)
+        let layer = TransposeLayer(size: dataSize, name: "Transpose")
         try! layer.setupInLibrary(library)
 
         let data = Matrix<Float>(rows: batchSize, columns: dataSize)

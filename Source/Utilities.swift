@@ -38,3 +38,32 @@ public func fillBuffer<Collection: CollectionType where Collection.Generator.Ele
         pointer[i] = v
     }
 }
+
+/// Create a Metal buffer from a tensor
+public func createBuffer<T: TensorType where T.Element == Float>(inDevice device: MTLDevice, fromTensor tensor: T, withLabel label: String) -> MTLBuffer {
+    return withPointer(tensor) { pointer in
+        let tempBuffer = device.newBufferWithBytes(pointer, length: tensor.count * sizeof(Float), options: .CPUCacheModeDefaultCache)
+        precondition(tempBuffer.length == tensor.count * sizeof(Float), "Failed to allocate \(tensor.count * sizeof(Float))B")
+        tempBuffer.label = label
+
+        return tempBuffer
+    }
+}
+
+/// Create a Metal buffer from a pointer
+public func createBuffer(inDevice device: MTLDevice, fromPointer pointer: UnsafePointer<Void>, ofSize size: Int, withLabel label: String) -> MTLBuffer {
+    let buffer = device.newBufferWithBytes(pointer, length: size, options: .CPUCacheModeDefaultCache)
+    precondition(buffer.length == size, "Failed to allocate \(size)B")
+    buffer.label = label
+
+    return buffer
+}
+
+/// Create an empty Metal buffer with specific size
+public func createBuffer(inDevice device: MTLDevice, ofSize size: Int, withLabel label: String) -> MTLBuffer {
+    let buffer = device.newBufferWithLength(size, options: .CPUCacheModeDefaultCache)
+    precondition(buffer.length == size, "Failed to allocate \(size)B")
+    buffer.label = label
+
+    return buffer
+}

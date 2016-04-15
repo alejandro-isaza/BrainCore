@@ -26,6 +26,8 @@ public class Evaluator {
 
     public init(net: Net, device: MTLDevice) throws {
         self.net = net
+        self.net.insertTransposeLayers()
+
         self.device = device
 
         commandQueue = device.newCommandQueue()
@@ -41,7 +43,7 @@ public class Evaluator {
             instances.append(forwardInstance)
         }
 
-        for node in net.nodes {
+        for node in net.nodes.values {
             if let forwardLayer = node.layer as? ForwardLayer {
                 try forwardLayer.setupInLibrary(library)
             }
@@ -64,11 +66,13 @@ public class Evaluator {
         commandQueue.insertDebugCaptureBoundary()
 
         // Collect all data
-        for n in net.dataNodes {
+        for n in net.dataNodes.values {
             let dataLayer = n.layer as! DataLayer
 
             if let netBuffer = n.outputBuffer {
-                let buffer = instance.buffers[netBuffer.id]
+                guard let buffer = instance.buffers[netBuffer.id] else {
+                    fatalError("Output buffer for \(dataLayer.name) not found.")
+                }
                 fillBuffer(buffer, start: n.outputOffset, withElements: dataLayer.nextBatch(1))
             }
             instance.closeNode(n)
@@ -93,11 +97,15 @@ public class Evaluator {
             }
 
             guard let input = node.inputBuffer, output = node.outputBuffer else {
-                preconditionFailure("Layer '\(node.name)' is missing a buffer")
+                preconditionFailure("Layer '\(node.layer.name)' is missing a buffer")
             }
 
-            let inputBuffer = instance.buffers[input.id]
-            let outputBuffer = instance.buffers[output.id]
+            guard let inputBuffer = instance.buffers[input.id] else {
+                fatalError("Layer '\(node.layer.name)'s input buffer was not found")
+            }
+            guard let outputBuffer = instance.buffers[output.id] else {
+                fatalError("Layer '\(node.layer.name)'s output buffer was not found")
+            }
 
             let buffer = commandQueue.commandBuffer()
             forwardLayer.encodeForwardInBuffer(buffer,
@@ -122,10 +130,13 @@ public class Evaluator {
     }
 
     func finishInstance(instance: Instance, completion: ((Snapshot) -> Void)) {
-        for n in net.sinkNodes {
+        for n in net.sinkNodes.values {
             let sinkLayer = n.layer as! SinkLayer
             if let netBuffer = n.inputBuffer {
-                let buffer = instance.buffers[netBuffer.id]
+                guard let buffer = instance.buffers[netBuffer.id] else {
+                    fatalError("Layer '\(n.layer.name)'s input buffer was not found.")
+                }
+
                 sinkLayer.consume(valueArrayFromBuffer(buffer, start: n.inputOffset))
             }
         }

@@ -10,8 +10,15 @@ import Metal
 
 /// TransposeLayer transposes input data so that elements in consecutive batches are contiguous in memory. We do this so that concatenation of layer outputs becomes concatenation of memory blocks removing the need of concat and split layers. This class does not perform matrix transposition in the general sense and therefore is an internal class to avoid confusion.
 internal class TransposeLayer: ForwardLayer {
+    struct Parameters {
+        let batchSize: UInt32
+        let inputSize: UInt32
+    }
+
     /// The size of each batch element
     let size: Int
+    let name: String?
+    let id = NSUUID()
 
     var outputSize: Int {
         return size
@@ -21,13 +28,9 @@ internal class TransposeLayer: ForwardLayer {
         return size
     }
 
-    init(size: Int) {
+    init(size: Int, name: String? = nil) {
+        self.name = name
         self.size = size
-    }
-
-    struct TransposeDimensions {
-        let batchSize: UInt32
-        let inputSize: UInt32
     }
 
     static let metalFunctionName = "transpose"
@@ -39,9 +42,8 @@ internal class TransposeLayer: ForwardLayer {
     }
 
     func encodeForwardInBuffer(buffer: MTLCommandBuffer, batchSize: Int, input: MTLBuffer, offset inputOffset: Int, output: MTLBuffer, offset outputOffset: Int) {
-        var dimensions = TransposeDimensions(batchSize: UInt32(batchSize), inputSize: UInt32(inputSize))
-        let dimensionsBuffer = buffer.device.newBufferWithBytes(&dimensions, length: sizeof(TransposeDimensions), options: .CPUCacheModeWriteCombined)
-        dimensionsBuffer.label = "TransposeDimensions"
+        var dimensions = Parameters(batchSize: UInt32(batchSize), inputSize: UInt32(inputSize))
+        let dimensionsBuffer = createBuffer(inDevice: buffer.device, fromPointer: &dimensions, ofSize: sizeof(Parameters), withLabel: "TransposeDimensions")
 
         let encoder = buffer.computeCommandEncoder()
         encoder.label = "TransposeForward"

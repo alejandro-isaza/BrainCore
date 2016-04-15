@@ -11,22 +11,21 @@ import Metal
 class Instance {
     let batchSize: Int
 
-    var buffers: [MTLBuffer]
+    var buffers: [NSUUID: MTLBuffer]
 
     var openNodes = [NetNode]()
     var closedNodes = Set<NetNode>()
     var finishedNodes = Set<NetNode>()
 
-    init(buffers: [NetBuffer], device: MTLDevice, batchSize: Int) {
+    init(buffers: [NSUUID: NetBuffer], device: MTLDevice, batchSize: Int) {
         self.batchSize = batchSize
 
-        self.buffers = [MTLBuffer]()
-        self.buffers.reserveCapacity(buffers.count)
+        self.buffers = [NSUUID: MTLBuffer]()
 
-        for buffer in buffers {
+        for (id, buffer) in buffers {
             let mtlForwardBuffer = device.newBufferWithLength(buffer.size * batchSize * sizeof(Float), options: .CPUCacheModeDefaultCache)
             mtlForwardBuffer.label = "\(buffer.name)Buffer"
-            self.buffers.append(mtlForwardBuffer)
+            self.buffers[id] = mtlForwardBuffer
         }
     }
 

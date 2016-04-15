@@ -20,7 +20,7 @@ class SigmoidLayerTests: MetalTestCase {
         let dataSize = 512 * 512
 
         let device = self.device
-        let layer = SigmoidLayer(size: dataSize)
+        let layer = SigmoidLayer(size: dataSize, name: "layer")
         try! layer.setupInLibrary(library)
 
         var data = [Float](count: dataSize, repeatedValue: 0.0)
@@ -51,7 +51,7 @@ class SigmoidLayerTests: MetalTestCase {
         let dataSize = 1024 * 1024
 
         let device = self.device
-        let layer = SigmoidLayer(size: dataSize)
+        let layer = SigmoidLayer(size: dataSize, name: "layer")
         try! layer.setupInLibrary(library)
 
         var input = [Float](count: dataSize, repeatedValue: 0.0)
@@ -91,7 +91,7 @@ class SigmoidLayerTests: MetalTestCase {
         let dataSize = 64 * 1024
 
         let device = self.device
-        let layer = SigmoidLayer(size: dataSize)
+        let layer = SigmoidLayer(size: dataSize, name: "layer")
         try! layer.setupInLibrary(library)
 
         var data = [Float](count: batchSize * dataSize, repeatedValue: 0.0)

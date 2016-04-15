@@ -91,6 +91,8 @@
 		8CB933111CB43DF900C4D6BE /* SigmoidLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CB933051CB43DE100C4D6BE /* SigmoidLayer.swift */; };
 		8CFE89A91CBC41AE001EE501 /* SGDSolverTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CFE89A71CBC41AA001EE501 /* SGDSolverTests.swift */; };
 		8CFE89AA1CBC41AF001EE501 /* SGDSolverTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CFE89A71CBC41AA001EE501 /* SGDSolverTests.swift */; };
+		8CFE89B41CBEF04E001EE501 /* NetUtilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CFE89B31CBEF04E001EE501 /* NetUtilities.swift */; };
+		8CFE89B51CBEF04E001EE501 /* NetUtilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CFE89B31CBEF04E001EE501 /* NetUtilities.swift */; };
 		A98135561CBC167E00D69D0B /* TrainerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A98135531CBC148900D69D0B /* TrainerTests.swift */; };
 		A98135571CBC167E00D69D0B /* TrainerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A98135531CBC148900D69D0B /* TrainerTests.swift */; };
 		A981355F1CBC2C1400D69D0B /* Evaluator.swift in Sources */ = {isa = PBXBuildFile; fileRef = A981355B1CBC2C1400D69D0B /* Evaluator.swift */; };
@@ -162,6 +164,7 @@
 		8CB933071CB43DE700C4D6BE /* Sigmoid.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = Sigmoid.metal; sourceTree = "<group>"; };
 		8CB933091CB43DEC00C4D6BE /* SigmoidLayerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SigmoidLayerTests.swift; sourceTree = "<group>"; };
 		8CFE89A71CBC41AA001EE501 /* SGDSolverTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SGDSolverTests.swift; sourceTree = "<group>"; };
+		8CFE89B31CBEF04E001EE501 /* NetUtilities.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NetUtilities.swift; sourceTree = "<group>"; };
 		A98135531CBC148900D69D0B /* TrainerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TrainerTests.swift; sourceTree = "<group>"; };
 		A981355B1CBC2C1400D69D0B /* Evaluator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Evaluator.swift; sourceTree = "<group>"; };
 		A981355C1CBC2C1400D69D0B /* Trainer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Trainer.swift; sourceTree = "<group>"; };
@@ -337,6 +340,7 @@
 				6159F89C1BD1F5CE0010F83C /* Net.swift */,
 				6141B1A91C6BFEBE0074BD8C /* NetBuffer.swift */,
 				6141B1AA1C6BFEBE0074BD8C /* NetNode.swift */,
+				8CFE89B31CBEF04E001EE501 /* NetUtilities.swift */,
 			);
 			name = Net;
 			sourceTree = "<group>";
@@ -523,6 +527,7 @@
 				6159F8A41BD1F5CE0010F83C /* Layer.swift in Sources */,
 				8C6E7B9F1CBC3D4D003B8074 /* SGDSolver.swift in Sources */,
 				8CB932EC1CB42F5F00C4D6BE /* L2LossLayer.swift in Sources */,
+				8CFE89B41CBEF04E001EE501 /* NetUtilities.swift in Sources */,
 				6119AC331C61486D0020E0E6 /* LSTM.metal in Sources */,
 				615C96261C5BF91500A1CFD4 /* ReLU.metal in Sources */,
 				A98135621CBC2C1400D69D0B /* Snapshot.swift in Sources */,
@@ -579,6 +584,7 @@
 				8CB932F11CB42F7000C4D6BE /* L2Loss.metal in Sources */,
 				8C6E7BA51CBC3D5C003B8074 /* SGDSolver.swift in Sources */,
 				A98135661CBC30EB00D69D0B /* Trainer.swift in Sources */,
+				8CFE89B51CBEF04E001EE501 /* NetUtilities.swift in Sources */,
 				615C96271C5BF91500A1CFD4 /* ReLU.metal in Sources */,
 				8CB932ED1CB42F6400C4D6BE /* L2LossLayer.swift in Sources */,
 				6119AC351C61486D0020E0E6 /* LSTM.metal in Sources */,

@@ -11,6 +11,21 @@ import Upsurge
 public typealias Blob = ValueArray<Float>
 
 public protocol Layer {
+    /// Unique layer identifier
+    var id: NSUUID { get }
+
+    /// Optional layer name
+    var name: String? { get }
+}
+
+public extension Layer {
+    public var descritpion: String {
+        return name ?? id.UUIDString
+    }
+
+    public var debugDescription: String {
+        return name ?? id.UUIDString
+    }
 }
 
 public protocol DataLayer: Layer {
@@ -45,7 +60,7 @@ public protocol TrainableLayer {
 }
 
 public protocol LossLayer: ForwardLayer {
-    /// Compute the loss input deltas based on labels and actual values. The labels should be contained in the first half of the input buffer and the actual values on the second half.
+    /// Compute the loss input deltas based on labels and actual values. The data should be contained in the first half of the input buffer and the labels on the second half.
     func encodeBackwardLossInBuffer(buffer: MTLCommandBuffer, batchSize: Int, input: MTLBuffer, deltas: MTLBuffer)
 }
 
