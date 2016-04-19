@@ -6,122 +6,117 @@
 // tree.
 
 import XCTest
-import BrainCore
+@testable import BrainCore
 import Metal
 import Upsurge
 
 class ReLULayerTests: MetalTestCase {
 
     func testForward() {
-        let dataSize = 1024 * 1024
-
         let device = self.device
-        let layer = ReLULayer(size: dataSize, name: "ReLU")
-        try! layer.setupInLibrary(library)
+        let dataSize = 1024 * 1024
+        let batchSize = 1
 
-        var data = [Float](count: dataSize, repeatedValue: 0.0)
+        let data = ValueArray<Float>(count: dataSize, repeatedValue: 0.0)
         for i in 0..<dataSize {
             data[i] = 2 * Float(arc4random()) / Float(UINT32_MAX) - 1.0
         }
-        let buffer = data.withUnsafeBufferPointer { pointer in
-            return device.newBufferWithBytes(pointer.baseAddress, length: dataSize * sizeof(Float), options: .CPUCacheModeDefaultCache)
+
+        let dataLayer = Source(name: "input", data: data, batchSize: batchSize)
+        let layer = ReLULayer(size: dataSize, name: "ReLU")
+        let sinkLayer = Sink(name: "output", inputSize: dataSize, batchSize: batchSize)
+        let net = Net.build {
+            dataLayer => layer => sinkLayer
         }
 
-        let queue = device.newCommandQueue()
-
-        measureBlock {
-            let commandBuffer = queue.commandBuffer()
-            layer.encodeForwardInBuffer(commandBuffer, batchSize: 1, input: buffer, offset: 0, output: buffer, offset: 0)
-            commandBuffer.commit()
-            commandBuffer.waitUntilCompleted()
+        let expecation = expectationWithDescription("Net forward pass")
+        let evaluator = try! Evaluator(net: net, device: device)
+        evaluator.evaluate() { snapshot in
+            expecation.fulfill()
         }
-        
-        let result = UnsafeBufferPointer<Float>(start: UnsafeMutablePointer(buffer.contents()), count: dataSize)
-        for i in 0..<dataSize {
-            if data[i] >= 0 {
-                XCTAssertEqualWithAccuracy(result[i], data[i], accuracy: 0.001)
-            } else {
-                XCTAssertEqual(result[i], 0.0)
+
+        waitForExpectationsWithTimeout(5) { error in
+            let result = sinkLayer.data
+            for i in 0..<dataSize {
+                if data[i] >= 0 {
+                    XCTAssertEqualWithAccuracy(result[i], data[i], accuracy: 0.001)
+                } else {
+                    XCTAssertEqual(result[i], 0.0)
+                }
             }
         }
     }
 
     func testBackward() {
-        let dataSize = 1024 * 1024
-
         let device = self.device
-        let layer = ReLULayer(size: dataSize, name: "ReLU")
-        try! layer.setupInLibrary(library)
+        let dataSize = 1024 * 1024
+        let batchSize = 1
 
-        var input = [Float](count: dataSize, repeatedValue: 0.0)
-        var outputDiff = [Float](count: dataSize, repeatedValue: 0.0)
-        let inputDiff = [Float](count: dataSize, repeatedValue: 0.0)
+        let input = ValueArray<Float>(count: dataSize, repeatedValue: 0.0)
         for i in 0..<dataSize {
             input[i] = 2 * Float(arc4random()) / Float(UINT32_MAX) - 1.0
-            outputDiff[i] = 2 * Float(arc4random()) / Float(UINT32_MAX) - 1.0
-        }
-        let outputDiffBuffer = outputDiff.withUnsafeBufferPointer { pointer in
-            return device.newBufferWithBytes(pointer.baseAddress, length: dataSize * sizeof(Float), options: .CPUCacheModeDefaultCache)
-        }
-        let inputBuffer = input.withUnsafeBufferPointer { pointer in
-            return device.newBufferWithBytes(pointer.baseAddress, length: dataSize * sizeof(Float), options: .CPUCacheModeDefaultCache)
-        }
-        let inputDiffBuffer = inputDiff.withUnsafeBufferPointer { pointer in
-            return device.newBufferWithBytes(pointer.baseAddress, length: dataSize * sizeof(Float), options: .CPUCacheModeDefaultCache)
         }
 
-        let queue = device.newCommandQueue()
-
-        measureBlock {
-            let commandBuffer = queue.commandBuffer()
-            layer.encodeBackwardInBuffer(commandBuffer, batchSize: 1, outputDiff: outputDiffBuffer, input: inputBuffer, inputDiff: inputDiffBuffer)
-            commandBuffer.commit()
-            commandBuffer.waitUntilCompleted()
+        let dataLayer = Source(name: "input", data: input, batchSize: batchSize)
+        let layer = ReLULayer(size: dataSize, name: "ReLU")
+        let lossLayer = L2LossLayer(size: dataSize)
+        let net = Net.build {
+            dataLayer => layer => lossLayer
         }
 
-        let result = UnsafeBufferPointer<Float>(start: UnsafeMutablePointer(inputDiffBuffer.contents()), count: dataSize)
-        for i in 0..<dataSize {
-            if input[i] >= 0 {
-                XCTAssertEqualWithAccuracy(result[i], outputDiff[i], accuracy: 0.001)
-            } else {
-                XCTAssertEqual(result[i], 0.0)
+        let expecation = expectationWithDescription("Net backward pass")
+        let trainer = try! Trainer(net: net, device: device, batchSize: batchSize)
+        var inputDeltas = [Float]()
+        var outputDeltas = [Float]()
+        trainer.run() { snapshot in
+            inputDeltas = [Float](snapshot.inputDeltasOfLayer(layer)!)
+            outputDeltas = [Float](snapshot.outputDeltasOfLayer(layer)!)
+            expecation.fulfill()
+        }
+
+        waitForExpectationsWithTimeout(5) { error in
+            for i in 0..<dataSize {
+                if input[i] >= 0 {
+                    XCTAssertEqualWithAccuracy(inputDeltas[i], outputDeltas[i], accuracy: 0.001)
+                } else {
+                    XCTAssertEqual(inputDeltas[i], 0.0)
+                }
             }
         }
     }
     
     func testForwardLargeBatchSize() {
-        let batchSize = 64
-        let dataSize = 16 * 1024
-        
         let device = self.device
-        let layer = ReLULayer(size: dataSize, name: "ReLU")
-        try! layer.setupInLibrary(library)
-        
-        var data = [Float](count: batchSize * dataSize, repeatedValue: 0.0)
-        for i in 0..<batchSize * dataSize {
+        let dataSize = 16 * 1024
+        let batchSize = 64
+
+        let data = ValueArray<Float>(count: dataSize, repeatedValue: 0.0)
+        for i in 0..<dataSize {
             data[i] = 2 * Float(arc4random()) / Float(UINT32_MAX) - 1.0
         }
-        let buffer = data.withUnsafeBufferPointer { pointer in
-            return device.newBufferWithBytes(pointer.baseAddress, length: batchSize * dataSize * sizeof(Float), options: .CPUCacheModeDefaultCache)
+
+        let dataLayer = Source(name: "input", data: data, batchSize: batchSize)
+        let layer = ReLULayer(size: dataSize, name: "ReLU")
+        let sinkLayer = Sink(name: "output", inputSize: dataSize, batchSize: batchSize)
+        let net = Net.build {
+            dataLayer => layer => sinkLayer
         }
-        
-        let queue = device.newCommandQueue()
-        
-        measureBlock {
-            let commandBuffer = queue.commandBuffer()
-            layer.encodeForwardInBuffer(commandBuffer, batchSize: batchSize, input: buffer, offset: 0, output: buffer, offset: 0)
-            commandBuffer.commit()
-            commandBuffer.waitUntilCompleted()
+
+        let expecation = expectationWithDescription("Net forward pass")
+        let evaluator = try! Evaluator(net: net, device: device)
+        evaluator.evaluate() { snapshot in
+            expecation.fulfill()
         }
-        
-        let result = UnsafeBufferPointer<Float>(start: UnsafeMutablePointer(buffer.contents()), count: batchSize * dataSize)
-        for i in 0..<batchSize * dataSize {
-            if data[i] >= 0 {
-                XCTAssertEqualWithAccuracy(result[i], data[i], accuracy: 0.001)
-            } else {
-                XCTAssertEqual(result[i], 0.0)
+
+        waitForExpectationsWithTimeout(5) { error in
+            let result = sinkLayer.data
+            for i in 0..<dataSize {
+                if data[i] >= 0 {
+                    XCTAssertEqualWithAccuracy(result[i], data[i], accuracy: 0.001)
+                } else {
+                    XCTAssertEqual(result[i], 0.0)
+                }
             }
         }
     }
-
 }

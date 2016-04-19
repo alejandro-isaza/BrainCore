@@ -13,9 +13,9 @@ import Upsurge
 class LSTMLayerTests: MetalTestCase {
     func testForward() {
         let device = self.device
-
         let inputSize = 1
         let unitCount = 1
+        let batchSize = 1
 
         let input = Matrix<Float>(rows: 1, columns: inputSize)
         for i in 0..<inputSize {
@@ -34,36 +34,32 @@ class LSTMLayerTests: MetalTestCase {
 
         let biases = ValueArray<Float>(count: 4 * unitCount, repeatedValue: 0.0)
 
+        let dataLayer = Source(name: "input", data: input.elements, batchSize: batchSize)
         let layer = LSTMLayer(weights: weights, biases: biases, batchSize: 1, name: "layer")
-        try! layer.setupInLibrary(library)
-
-        let queue = device.newCommandQueue()
-
-        let inputBuffer = withPointer(input) { pointer in
-            return device.newBufferWithBytes(pointer, length: inputSize * sizeof(Float), options: .CPUCacheModeDefaultCache)
-        }
-        let outputBuffer = device.newBufferWithLength(unitCount * sizeof(Float), options: .CPUCacheModeDefaultCache)
-        measureBlock {
-            layer.reset()
-
-            let commandBuffer = queue.commandBuffer()
-            layer.encodeForwardInBuffer(commandBuffer, batchSize: 1, input: inputBuffer, offset: 0, output: outputBuffer, offset: 0)
-            commandBuffer.commit()
-            commandBuffer.waitUntilCompleted()
+        let sinkLayer = Sink(name: "output", inputSize: unitCount, batchSize: batchSize)
+        let net = Net.build {
+            dataLayer => layer => sinkLayer
         }
 
-        let result = arrayFromBuffer(outputBuffer)
-        XCTAssertEqual(result.count, unitCount)
+        let expecation = expectationWithDescription("Net forward pass")
+        let evaluator = try! Evaluator(net: net, device: device)
+        evaluator.evaluate() { snapshot in
+            expecation.fulfill()
+        }
 
-        let inputValue = input[0, 0]
-        let expectedActivation = sigmoid(weights[0, 0] * inputValue) * tanh(weights[0, 1] * inputValue)
-        let expectedOutput = sigmoid(weights[0, 3] * inputValue) * tanh(expectedActivation)
-        XCTAssertEqualWithAccuracy(result[0], expectedOutput, accuracy: 0.001)
+        waitForExpectationsWithTimeout(5) { error in
+            let result = sinkLayer.data
+            XCTAssertEqual(result.count, unitCount)
+
+            let inputValue = input[0, 0]
+            let expectedActivation = sigmoid(weights[0, 0] * inputValue) * tanh(weights[0, 1] * inputValue)
+            let expectedOutput = sigmoid(weights[0, 3] * inputValue) * tanh(expectedActivation)
+            XCTAssertEqualWithAccuracy(result[0], expectedOutput, accuracy: 0.001)
+        }
     }
 
     func testForwardLarge() {
         let device = self.device
-
         let batchSize = 64
         let inputSize = 64
         let unitCount = 128
@@ -87,41 +83,38 @@ class LSTMLayerTests: MetalTestCase {
 
         let biases = ValueArray<Float>(count: 4 * unitCount, repeatedValue: 0.0)
 
+        let dataLayer = Source(name: "input", data: input.elements, batchSize: batchSize)
         let layer = LSTMLayer(weights: weights, biases: biases, batchSize: batchSize, name: "layer")
-        try! layer.setupInLibrary(library)
-
-        let queue = device.newCommandQueue()
-
-        let inputBuffer = withPointer(input) { pointer in
-            return device.newBufferWithBytes(pointer, length: input.count * sizeof(Float), options: .CPUCacheModeDefaultCache)
-        }
-        let outputBuffer = device.newBufferWithLength(batchSize * unitCount * sizeof(Float), options: .CPUCacheModeDefaultCache)
-        measureBlock {
-            layer.reset()
-
-            let commandBuffer = queue.commandBuffer()
-            layer.encodeForwardInBuffer(commandBuffer, batchSize: batchSize, input: inputBuffer, offset: 0, output: outputBuffer, offset: 0)
-            commandBuffer.commit()
-            commandBuffer.waitUntilCompleted()
+        let sinkLayer = Sink(name: "output", inputSize: unitCount, batchSize: batchSize)
+        let net = Net.build {
+            dataLayer => layer => sinkLayer
         }
 
-        let result = arrayFromBuffer(outputBuffer)
-        XCTAssertEqual(result.count, batchSize * unitCount)
+        let expecation = expectationWithDescription("Net forward pass")
+        let evaluator = try! Evaluator(net: net, device: device)
+        evaluator.evaluate() { snapshot in
+            expecation.fulfill()
+        }
 
-        for i in 0..<batchSize {
-            for j in 0..<unitCount {
-                var inputGate: Float = 0.0
-                var newInput: Float = 0.0
-                var outputGate: Float = 0.0
-                for k in 0..<inputSize {
-                    let inputValue = input[k, i]
-                    inputGate += weights[k, j] * inputValue
-                    newInput += weights[k, j + unitCount] * inputValue
-                    outputGate += weights[k, j + 3 * unitCount] * inputValue
+        waitForExpectationsWithTimeout(5) { error in
+            let result = sinkLayer.data
+            XCTAssertEqual(result.count, batchSize * unitCount)
+
+            for i in 0..<batchSize {
+                for j in 0..<unitCount {
+                    var inputGate: Float = 0.0
+                    var newInput: Float = 0.0
+                    var outputGate: Float = 0.0
+                    for k in 0..<inputSize {
+                        let inputValue = input[k, i]
+                        inputGate += weights[k, j] * inputValue
+                        newInput += weights[k, j + unitCount] * inputValue
+                        outputGate += weights[k, j + 3 * unitCount] * inputValue
+                    }
+                    let expectedActivation = sigmoid(inputGate) * tanh(newInput)
+                    let expectedOutput = sigmoid(outputGate) * tanh(expectedActivation)
+                    XCTAssertEqualWithAccuracy(result[i + j * batchSize], expectedOutput, accuracy: 0.001)
                 }
-                let expectedActivation = sigmoid(inputGate) * tanh(newInput)
-                let expectedOutput = sigmoid(outputGate) * tanh(expectedActivation)
-                XCTAssertEqualWithAccuracy(result[i + j * batchSize], expectedOutput, accuracy: 0.001)
             }
         }
     }

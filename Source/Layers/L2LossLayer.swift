@@ -24,59 +24,50 @@ public class L2LossLayer: LossLayer {
     public var inputSize: Int {
         return 2 * size
     }
+
+    var forwardInvocation: Invocation?
+    var backwardInvocation: Invocation?
+
+    public var forwardInvocations: [Invocation] {
+        return [forwardInvocation!]
+    }
+
+    public var backwardLossInvocations: [Invocation] {
+        return [backwardInvocation!]
+    }
     
     public init(size: Int, name: String? = nil) {
         self.name = name
         self.size = size
     }
 
-    static let forwardFunctionName = "sigmoid_forward"
-    static let backwardFunctionName = "sigmoid_backward"
+    public func initializeForward(builder builder: ForwardInvocationBuilder, batchSize: Int) throws {
+        let buffers = [
+            builder.inputBuffer,
+            builder.outputBuffer
+        ]
 
-    var forwardFunction: MTLComputePipelineState!
-    var backwardFunction: MTLComputePipelineState!
-    
-    public func setupInLibrary(library: MTLLibrary) throws {
-        let forwardLibraryFunction = library.newFunctionWithName("l2_loss_forward")!
-        forwardFunction = try library.device.newComputePipelineStateWithFunction(forwardLibraryFunction)
-        
-        let backwardLibraryFunction = library.newFunctionWithName("l2_loss_backward")!
-        backwardFunction = try library.device.newComputePipelineStateWithFunction(backwardLibraryFunction)
-    }
-    
-    public func encodeForwardInBuffer(buffer: MTLCommandBuffer, batchSize: Int, input: MTLBuffer, offset inputOffset: Int, output: MTLBuffer, offset outputOffset: Int) {
-        var dimensions = Parameters(batchSize: UInt16(batchSize), inputSize: UInt16(inputSize / 2))
-        let dimensionsBuffer = createBuffer(inDevice: buffer.device, fromPointer: &dimensions, ofSize: sizeof(Parameters), withLabel: "L2LossDimensions")
-
-        let encoder = buffer.computeCommandEncoder()
-        encoder.label = "L2LossForward"
-        encoder.setComputePipelineState(forwardFunction)
-        encoder.setBuffer(input, offset: inputOffset * sizeof(Float), atIndex: 0)
-        encoder.setBuffer(output, offset: outputOffset * sizeof(Float), atIndex: 1)
-        encoder.setBuffer(dimensionsBuffer, offset: 0, atIndex: 2)
-
-        let threadsPerGroup = MTLSize(width: forwardFunction.threadExecutionWidth, height: 1, depth: 1)
-        let numThreadgroups = MTLSize(width: (batchSize - 1) / forwardFunction.threadExecutionWidth + 1, height: 1, depth:1)
-        encoder.dispatchThreadgroups(numThreadgroups, threadsPerThreadgroup: threadsPerGroup)
-        
-        encoder.endEncoding()
+        let params = Parameters(batchSize: UInt16(batchSize), inputSize: UInt16(size))
+        forwardInvocation = try builder.createInvocation(
+            functionName: "l2_loss_forward",
+            buffers: buffers,
+            values: [params],
+            width: batchSize)
     }
 
-    public func encodeBackwardLossInBuffer(buffer: MTLCommandBuffer, batchSize: Int, input: MTLBuffer, deltas: MTLBuffer) {
-        var dimensions = Parameters(batchSize: UInt16(batchSize), inputSize: UInt16(inputSize / 2))
-        let dimensionsBuffer = createBuffer(inDevice: buffer.device, fromPointer: &dimensions, ofSize: sizeof(Parameters), withLabel: "L2LossDimensions")
+    public func initializeBackward(builder builder: BackwardInvocationBuilder, batchSize: Int) throws {
+        let params = Parameters(batchSize: UInt16(batchSize), inputSize: UInt16(size))
 
-        let encoder = buffer.computeCommandEncoder()
-        encoder.label = "L2LossBackward"
-        encoder.setComputePipelineState(backwardFunction)
-        encoder.setBuffer(input, offset: 0, atIndex: 0)
-        encoder.setBuffer(deltas, offset: 0, atIndex: 1)
-        encoder.setBuffer(dimensionsBuffer, offset: 0, atIndex: 2)
-
-        let threadsPerGroup = MTLSize(width: backwardFunction.threadExecutionWidth, height: 1, depth: 1)
-        let numThreadgroups = MTLSize(width: ((inputSize / 2) - 1) / backwardFunction.threadExecutionWidth + 1, height: batchSize, depth: 1)
-        encoder.dispatchThreadgroups(numThreadgroups, threadsPerThreadgroup: threadsPerGroup)
-        
-        encoder.endEncoding()
+        let buffers = [
+            builder.inputBuffer,
+            builder.inputDeltasBuffer
+        ]
+        backwardInvocation = try builder.createInvocation(
+            functionName: "l2_loss_backward",
+            buffers: buffers,
+            values: [params],
+            width: size,
+            height: batchSize
+        )
     }
 }

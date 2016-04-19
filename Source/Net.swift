@@ -29,7 +29,7 @@ public class Net {
     }
 
     public func addBuffer(name name: String? = nil) -> BufferID {
-        let buffer = NetBuffer(name: name)
+        let buffer = NetBuffer(type: .Forward, name: name)
         buffers[buffer.id] = buffer
         return buffer.id
     }

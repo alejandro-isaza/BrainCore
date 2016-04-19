@@ -32,6 +32,10 @@
 		614198041C600BA900FB6770 /* InnerProduct.metal in Sources */ = {isa = PBXBuildFile; fileRef = 614197FF1C5FEFB700FB6770 /* InnerProduct.metal */; };
 		6141B1AD1C6BFEBE0074BD8C /* NetBuffer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6141B1A91C6BFEBE0074BD8C /* NetBuffer.swift */; };
 		6141B1AE1C6BFEBE0074BD8C /* NetNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6141B1AA1C6BFEBE0074BD8C /* NetNode.swift */; };
+		6150CA341CC5947300C2D4C4 /* InvocationBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6150CA331CC5947300C2D4C4 /* InvocationBuilder.swift */; };
+		6150CA351CC5947300C2D4C4 /* InvocationBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6150CA331CC5947300C2D4C4 /* InvocationBuilder.swift */; };
+		6150CA371CC5CE9F00C2D4C4 /* Runner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6150CA361CC5CE9F00C2D4C4 /* Runner.swift */; };
+		6150CA381CC5CE9F00C2D4C4 /* Runner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6150CA361CC5CE9F00C2D4C4 /* Runner.swift */; };
 		6159F86A1BD1F55D0010F83C /* BrainCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6159F85F1BD1F55D0010F83C /* BrainCore.framework */; };
 		6159F8881BD1F59F0010F83C /* BrainCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6159F87E1BD1F59F0010F83C /* BrainCore.framework */; };
 		6159F8A21BD1F5CE0010F83C /* BrainCore.h in Headers */ = {isa = PBXBuildFile; fileRef = 6159F8971BD1F5CE0010F83C /* BrainCore.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -49,6 +53,8 @@
 		615C96261C5BF91500A1CFD4 /* ReLU.metal in Sources */ = {isa = PBXBuildFile; fileRef = 615C96251C5BF91500A1CFD4 /* ReLU.metal */; };
 		615C96271C5BF91500A1CFD4 /* ReLU.metal in Sources */ = {isa = PBXBuildFile; fileRef = 615C96251C5BF91500A1CFD4 /* ReLU.metal */; };
 		615C96281C5C1C6F00A1CFD4 /* ReLU.metal in Sources */ = {isa = PBXBuildFile; fileRef = 615C96251C5BF91500A1CFD4 /* ReLU.metal */; };
+		619F2E801CC1990E0017E90E /* Invocation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 619F2E7F1CC1990E0017E90E /* Invocation.swift */; };
+		619F2E811CC1990E0017E90E /* Invocation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 619F2E7F1CC1990E0017E90E /* Invocation.swift */; };
 		61CE4BCB1BED6F7F000E0D34 /* Upsurge.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 61CE4BC51BED6F7F000E0D34 /* Upsurge.framework */; };
 		61CE4BCE1BED6F90000E0D34 /* Upsurge.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 61CE4BC21BED6F7F000E0D34 /* Upsurge.framework */; };
 		61CE4BCF1BED703B000E0D34 /* Upsurge.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 61CE4BC21BED6F7F000E0D34 /* Upsurge.framework */; };
@@ -133,6 +139,8 @@
 		614197FF1C5FEFB700FB6770 /* InnerProduct.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = InnerProduct.metal; sourceTree = "<group>"; };
 		6141B1A91C6BFEBE0074BD8C /* NetBuffer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NetBuffer.swift; sourceTree = "<group>"; };
 		6141B1AA1C6BFEBE0074BD8C /* NetNode.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NetNode.swift; sourceTree = "<group>"; };
+		6150CA331CC5947300C2D4C4 /* InvocationBuilder.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InvocationBuilder.swift; sourceTree = "<group>"; };
+		6150CA361CC5CE9F00C2D4C4 /* Runner.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Runner.swift; sourceTree = "<group>"; };
 		6159F85F1BD1F55D0010F83C /* BrainCore.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = BrainCore.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		6159F8691BD1F55D0010F83C /* BrainCoreTests.OSX.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BrainCoreTests.OSX.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		6159F87E1BD1F59F0010F83C /* BrainCore.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = BrainCore.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -146,6 +154,7 @@
 		6159F89F1BD1F5CE0010F83C /* EvaluatorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EvaluatorTests.swift; sourceTree = "<group>"; };
 		6159F8A01BD1F5CE0010F83C /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		615C96251C5BF91500A1CFD4 /* ReLU.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = ReLU.metal; sourceTree = "<group>"; };
+		619F2E7F1CC1990E0017E90E /* Invocation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Invocation.swift; sourceTree = "<group>"; };
 		61CE4BC21BED6F7F000E0D34 /* Upsurge.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Upsurge.framework; sourceTree = "<group>"; };
 		61CE4BC31BED6F7F000E0D34 /* Upsurge.framework.dSYM */ = {isa = PBXFileReference; lastKnownFileType = wrapper.dsym; path = Upsurge.framework.dSYM; sourceTree = "<group>"; };
 		61CE4BC51BED6F7F000E0D34 /* Upsurge.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Upsurge.framework; sourceTree = "<group>"; };
@@ -246,6 +255,9 @@
 				6159F8971BD1F5CE0010F83C /* BrainCore.h */,
 				A981355B1CBC2C1400D69D0B /* Evaluator.swift */,
 				A981355D1CBC2C1400D69D0B /* Instance.swift */,
+				619F2E7F1CC1990E0017E90E /* Invocation.swift */,
+				6150CA331CC5947300C2D4C4 /* InvocationBuilder.swift */,
+				6150CA361CC5CE9F00C2D4C4 /* Runner.swift */,
 				A981355E1CBC2C1400D69D0B /* Snapshot.swift */,
 				A981355C1CBC2C1400D69D0B /* Trainer.swift */,
 				6119AC291C6041D20020E0E6 /* Utilities.swift */,
@@ -523,7 +535,9 @@
 				614198001C5FEFB700FB6770 /* InnerProduct.metal in Sources */,
 				8C6E7BA31CBC3D59003B8074 /* NetBuffer.metal in Sources */,
 				8CB932EF1CB42F6B00C4D6BE /* L2Loss.metal in Sources */,
+				6150CA341CC5947300C2D4C4 /* InvocationBuilder.swift in Sources */,
 				8C6E7BA41CBC3D59003B8074 /* SGDSolver.metal in Sources */,
+				619F2E801CC1990E0017E90E /* Invocation.swift in Sources */,
 				6159F8A41BD1F5CE0010F83C /* Layer.swift in Sources */,
 				8C6E7B9F1CBC3D4D003B8074 /* SGDSolver.swift in Sources */,
 				8CB932EC1CB42F5F00C4D6BE /* L2LossLayer.swift in Sources */,
@@ -536,6 +550,7 @@
 				6141B1AD1C6BFEBE0074BD8C /* NetBuffer.swift in Sources */,
 				6159F8A31BD1F5CE0010F83C /* InnerProductLayer.swift in Sources */,
 				A98135611CBC2C1400D69D0B /* Instance.swift in Sources */,
+				6150CA371CC5CE9F00C2D4C4 /* Runner.swift in Sources */,
 				6119AC2A1C6041D20020E0E6 /* Utilities.swift in Sources */,
 				6141B1AE1C6BFEBE0074BD8C /* NetNode.swift in Sources */,
 				8CB933081CB43DE700C4D6BE /* Sigmoid.metal in Sources */,
@@ -580,7 +595,9 @@
 				8CB933111CB43DF900C4D6BE /* SigmoidLayer.swift in Sources */,
 				8C6E7BA91CBC3D66003B8074 /* NetBuffer.metal in Sources */,
 				614198011C5FEFB700FB6770 /* InnerProduct.metal in Sources */,
+				6150CA351CC5947300C2D4C4 /* InvocationBuilder.swift in Sources */,
 				8C6E7BAA1CBC3D66003B8074 /* SGDSolver.metal in Sources */,
+				619F2E811CC1990E0017E90E /* Invocation.swift in Sources */,
 				8CB932F11CB42F7000C4D6BE /* L2Loss.metal in Sources */,
 				8C6E7BA51CBC3D5C003B8074 /* SGDSolver.swift in Sources */,
 				A98135661CBC30EB00D69D0B /* Trainer.swift in Sources */,
@@ -593,6 +610,7 @@
 				612CE8C21CA9AF2700C260EC /* NetBuffer.swift in Sources */,
 				A98135651CBC30E800D69D0B /* Snapshot.swift in Sources */,
 				A98135641CBC30E200D69D0B /* Instance.swift in Sources */,
+				6150CA381CC5CE9F00C2D4C4 /* Runner.swift in Sources */,
 				6119AC2B1C6041D20020E0E6 /* Utilities.swift in Sources */,
 				6159F8AC1BD1F5E60010F83C /* Net.swift in Sources */,
 				8CB9330E1CB43DF600C4D6BE /* Sigmoid.metal in Sources */,

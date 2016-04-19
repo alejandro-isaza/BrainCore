@@ -9,48 +9,24 @@ import Foundation
 import Metal
 
 /// Evaluator runs a network forward. It is optimized for running a single pass at a time (batch size of one). It maximizes GPU parallelism by enqueing sequential runs a few at a time.
-public class Evaluator {
-    public let net: Net
-
-    let device: MTLDevice
-    var library: MTLLibrary!
-    var commandQueue: MTLCommandQueue
+public class Evaluator: Runner {
 
     /// Maximum number of instances to enqueue to the GPU at a time
     let instanceCount = 3
+    var instances = [Instance]()
+    var nextInstanceIndex = 0
     var inflightSemaphore: dispatch_semaphore_t
     var queue: dispatch_queue_t
 
-    var instances = [Instance]()
-    var nextInstanceIndex = 0
-
     public init(net: Net, device: MTLDevice) throws {
-        self.net = net
-        self.net.insertTransposeLayers()
-
-        self.device = device
-
-        commandQueue = device.newCommandQueue()
-        commandQueue.label = "BrainCore.Runner"
-
-        guard let path = NSBundle(forClass: self.dynamicType).pathForResource("default", ofType: "metallib") else {
-            fatalError("Metal library not found")
-        }
-        library = try device.newLibraryWithFile(path)
+        queue = dispatch_queue_create("BrainCore.Evaluator", DISPATCH_QUEUE_SERIAL)
+        inflightSemaphore = dispatch_semaphore_create(instanceCount)
+        try super.init(net: net, device: device, batchSize: 1)
 
         for _ in 0..<instanceCount {
             let forwardInstance = Instance(buffers: net.buffers, device: device, batchSize: 1)
             instances.append(forwardInstance)
         }
-
-        for node in net.nodes.values {
-            if let forwardLayer = node.layer as? ForwardLayer {
-                try forwardLayer.setupInLibrary(library)
-            }
-        }
-        
-        inflightSemaphore = dispatch_semaphore_create(instanceCount)
-        queue = dispatch_queue_create("BrainCore.Evaluator", DISPATCH_QUEUE_SERIAL)
     }
 
     /// Perform a forward pass on the network. Always call this method from the same serial queue.
@@ -96,24 +72,20 @@ public class Evaluator {
                 continue
             }
 
-            guard let input = node.inputBuffer, output = node.outputBuffer else {
+            guard let _ = node.inputBuffer, _ = node.outputBuffer else {
                 preconditionFailure("Layer '\(node.layer.name)' is missing a buffer")
             }
 
-            guard let inputBuffer = instance.buffers[input.id] else {
-                fatalError("Layer '\(node.layer.name)'s input buffer was not found")
-            }
-            guard let outputBuffer = instance.buffers[output.id] else {
-                fatalError("Layer '\(node.layer.name)'s output buffer was not found")
-            }
-
             let buffer = commandQueue.commandBuffer()
-            forwardLayer.encodeForwardInBuffer(buffer,
-                                               batchSize: 1,
-                                               input: inputBuffer,
-                                               offset: node.inputOffset,
-                                               output: outputBuffer,
-                                               offset: node.outputOffset)
+            for invocation in forwardLayer.forwardInvocations {
+                for buffer in invocation.buffers {
+                    guard let netBuffer = buffer.netBuffer else { continue }
+                    if let metalBuffer = instance.buffers[netBuffer.id] {
+                        buffer.metalBuffer = metalBuffer
+                    }
+                }
+                try! encode(invocation: invocation, forNode: node, commandBuffer: buffer)
+            }
 
             buffer.addCompletedHandler() { commandBuffer in
                 dispatch_async(self.queue) {
