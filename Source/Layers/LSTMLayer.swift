@@ -42,6 +42,14 @@ public class LSTMLayer: ForwardLayer {
     public var biasesBuffer: MTLBuffer!
     public var state0Buffer: MTLBuffer!
     public var state1Buffer: MTLBuffer!
+    public var stateBuffer: MTLBuffer {
+        if currentState == 0 {
+            return state0Buffer!
+        } else {
+            return state1Buffer!
+        }
+    }
+
     var currentState = 0
 
     public var inputSize: Int {
