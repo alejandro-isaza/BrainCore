@@ -12,8 +12,8 @@ using namespace metal;
 
 
 struct L2LossDimensions {
-    ushort batch_size;
-    ushort input_size;
+    uint batch_size;
+    uint input_size;
 };
 
 kernel void l2_loss_forward(const device float* input [[ buffer(0) ]],
@@ -25,7 +25,7 @@ kernel void l2_loss_forward(const device float* input [[ buffer(0) ]],
         return;
     }
 
-    for (auto inputElement = 0; inputElement < dims.input_size; inputElement += 1) {
+    for (auto inputElement = uint(0); inputElement < dims.input_size; inputElement += 1) {
         const auto dataIndex = batchElement + inputElement * dims.batch_size;
         const auto labelIndex = dataIndex + dims.batch_size * dims.input_size;
 
