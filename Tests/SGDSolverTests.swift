@@ -11,46 +11,6 @@ import Accelerate
 import Upsurge
 
 class SGDSolverTests: MetalTestCase {
-    class Source: DataLayer {
-        let name: String?
-        let id = NSUUID()
-        var data: Blob
-        var batchSize: Int
-
-        var outputSize: Int {
-            return data.count / batchSize
-        }
-
-        init(name: String, data: Blob, batchSize: Int) {
-            self.name = name
-            self.data = data
-            self.batchSize = batchSize
-        }
-
-        func nextBatch(batchSize: Int) -> Blob {
-            return data
-        }
-    }
-
-    class Sink: SinkLayer {
-        let name: String?
-        let id = NSUUID()
-        var inputSize: Int
-        var batchSize: Int
-
-        var data: Blob = []
-
-        init(name: String, inputSize: Int, batchSize: Int) {
-            self.name = name
-            self.inputSize = inputSize
-            self.batchSize = batchSize
-        }
-
-        func consume(input: Blob) {
-            self.data = input
-        }
-    }
-
     func testSimpleTrain() {
         let inputSize = 2
         let ip1OutputSize = 2
@@ -100,8 +60,8 @@ class SGDSolverTests: MetalTestCase {
             let ip1ExpectedWeights: [Float] = [0.149780716, 0.24975114, 0.19956143, 0.29950229]
             let ip2ExpectedWeights: [Float] = [0.35891648, 0.511301270, 0.408666186, 0.561370121]
 
-            let ip1ActualWeights: [Float] = arrayFromBuffer(ip1.weightsBuffer!)
-            let ip2ActualWeights: [Float] = arrayFromBuffer(ip2.weightsBuffer!)
+            let ip1ActualWeights: [Float] = arrayFromBuffer(ip1.weightsBuffer!.metalBuffer!)
+            let ip2ActualWeights: [Float] = arrayFromBuffer(ip2.weightsBuffer!.metalBuffer!)
 
             for i in 0..<4 {
                 XCTAssertEqualWithAccuracy(ip1ExpectedWeights[i], ip1ActualWeights[i], accuracy: 0.0001)

@@ -15,10 +15,11 @@ internal class TransposeLayer: ForwardLayer {
         let inputSize: UInt32
     }
 
+    let id = NSUUID()
+    let name: String?
+
     /// The size of each batch element
     let size: Int
-    let name: String?
-    let id = NSUUID()
 
     var outputSize: Int {
         return size
@@ -28,34 +29,30 @@ internal class TransposeLayer: ForwardLayer {
         return size
     }
 
+    var forwardInvocation: Invocation?
+
+    var forwardInvocations: [Invocation] {
+        return [forwardInvocation!]
+    }
+
     init(size: Int, name: String? = nil) {
         self.name = name
         self.size = size
     }
 
-    static let metalFunctionName = "transpose"
-    var metalFunction: MTLComputePipelineState!
+    func initializeForward(builder builder: ForwardInvocationBuilder, batchSize: Int) throws {
+        let buffers = [
+            builder.inputBuffer,
+            builder.outputBuffer
+        ]
 
-    func setupInLibrary(library: MTLLibrary) throws {
-        let forwardFunction = library.newFunctionWithName(TransposeLayer.metalFunctionName)!
-        metalFunction = try library.device.newComputePipelineStateWithFunction(forwardFunction)
-    }
-
-    func encodeForwardInBuffer(buffer: MTLCommandBuffer, batchSize: Int, input: MTLBuffer, offset inputOffset: Int, output: MTLBuffer, offset outputOffset: Int) {
-        var dimensions = Parameters(batchSize: UInt32(batchSize), inputSize: UInt32(inputSize))
-        let dimensionsBuffer = createBuffer(inDevice: buffer.device, fromPointer: &dimensions, ofSize: sizeof(Parameters), withLabel: "TransposeDimensions")
-
-        let encoder = buffer.computeCommandEncoder()
-        encoder.label = "TransposeForward"
-        encoder.setComputePipelineState(metalFunction)
-        encoder.setBuffer(input, offset: inputOffset * sizeof(Float), atIndex: 0)
-        encoder.setBuffer(output, offset: outputOffset * sizeof(Float), atIndex: 1)
-        encoder.setBuffer(dimensionsBuffer, offset: 0, atIndex: 2)
-
-        let threadsPerGroup = MTLSize(width: metalFunction.threadExecutionWidth, height: 1, depth: 1)
-        let numThreadgroups = MTLSize(width: (size - 1) / metalFunction.threadExecutionWidth + 1, height: batchSize, depth:1)
-        encoder.dispatchThreadgroups(numThreadgroups, threadsPerThreadgroup: threadsPerGroup)
-
-        encoder.endEncoding()
+        let params = Parameters(batchSize: UInt32(batchSize), inputSize: UInt32(inputSize))
+        forwardInvocation = try builder.createInvocation(
+            functionName: "transpose",
+            buffers: buffers,
+            values: [params],
+            width: size,
+            height: batchSize
+        )
     }
 }

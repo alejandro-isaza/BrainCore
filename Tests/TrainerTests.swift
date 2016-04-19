@@ -10,43 +10,6 @@ import XCTest
 import Upsurge
 
 class TrainerTests: MetalTestCase {
-    class Source: DataLayer {
-        let name: String?
-        let id = NSUUID()
-        var data: Blob
-        var batchSize: Int
-
-        var outputSize: Int {
-            return data.count / batchSize
-        }
-
-        init(name: String, data: Blob, batchSize: Int) {
-            self.name = name
-            self.data = data
-            self.batchSize = batchSize
-        }
-
-        func nextBatch(batchSize: Int) -> Blob {
-            return data
-        }
-    }
-
-    class Sink: SinkLayer {
-        let name: String?
-        let id = NSUUID()
-        var inputSize: Int
-        var batchSize: Int
-
-        init(name: String, inputSize: Int, batchSize: Int) {
-            self.name = name
-            self.inputSize = inputSize
-            self.batchSize = batchSize
-        }
-
-        func consume(input: Blob) {
-        }
-    }
-
     func testTwoInputOneOutputActivationForwardBackward() {
         let source = Source(name: "source", data: [1, 1, 2, 2], batchSize: 2)
         let labels = Source(name: "labels", data: [1, 2], batchSize: 2)
@@ -70,8 +33,8 @@ class TrainerTests: MetalTestCase {
         let trainer = try! Trainer(net: net, device: device, batchSize: 2)
         trainer.run() { snapshot in
             ipInputDiff = [Float](snapshot.inputDeltasOfLayer(ip)!)
-            ipWeightsDiff = arrayFromBuffer(ip.weightDiff!)
-            ipBiasDiff = arrayFromBuffer(ip.biasDiff!)
+            ipWeightsDiff = arrayFromBuffer(ip.weightDeltasBuffer!.metalBuffer!)
+            ipBiasDiff = arrayFromBuffer(ip.biasDeltasBuffer!.metalBuffer!)
 
             expecation.fulfill()
         }

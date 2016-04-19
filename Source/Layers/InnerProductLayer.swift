@@ -30,12 +30,25 @@ public class InnerProductLayer: BackwardLayer, TrainableLayer {
         return weights.columns
     }
 
-    public var weightsBuffer: MTLBuffer!
-    public var biasesBuffer: MTLBuffer!
-    public var dimensionsBuffer: MTLBuffer!
+    var weightsBuffer: Buffer?
+    var weightDeltasBuffer: Buffer?
+    var biasesBuffer: Buffer?
+    var biasDeltasBuffer: Buffer?
 
-    public var weightDiff: MTLBuffer?
-    public var biasDiff: MTLBuffer?
+    var forwardInvocation: Invocation?
+    var backwardParameterUpdateInvocation: Invocation?
+    var backwardInputUpdateInvocation: Invocation?
+
+    public var forwardInvocations: [Invocation] {
+        return [forwardInvocation!]
+    }
+
+    public var backwardInvocations: [Invocation] {
+        return [
+            backwardParameterUpdateInvocation!,
+            backwardInputUpdateInvocation!
+        ]
+    }
 
     public init(weights: Matrix<Float>, biases: ValueArray<Float>, name: String? = nil) {
         self.name = name
@@ -44,111 +57,62 @@ public class InnerProductLayer: BackwardLayer, TrainableLayer {
         precondition(biases.count == outputSize)
     }
 
-    static let forwardFunctionName = "inner_product_forward"
-    static let backwardParamsFunctionName = "inner_product_backward_params"
-    static let backwardInputFunctionName = "inner_product_backward_input"
-
-    var forwardFunction: MTLComputePipelineState!
-    var backwardParamsFunction: MTLComputePipelineState!
-    var backwardInputFunction: MTLComputePipelineState!
-    var updateFunction: MTLComputePipelineState!
-
-    public func setupInLibrary(library: MTLLibrary, updateFunction: MTLComputePipelineState) throws {
-        self.updateFunction = updateFunction
-        try setupInLibrary(library)
-    }
-    
-    public func setupInLibrary(library: MTLLibrary) throws {
-        let forwardLibraryFunction = library.newFunctionWithName(InnerProductLayer.forwardFunctionName)!
-        forwardFunction = try library.device.newComputePipelineStateWithFunction(forwardLibraryFunction)
-
-        let backwardParamsLibraryFunction = library.newFunctionWithName(InnerProductLayer.backwardParamsFunctionName)!
-        backwardParamsFunction = try library.device.newComputePipelineStateWithFunction(backwardParamsLibraryFunction)
-
-        let backwardInputLibraryFunction = library.newFunctionWithName(InnerProductLayer.backwardInputFunctionName)!
-        backwardInputFunction = try library.device.newComputePipelineStateWithFunction(backwardInputLibraryFunction)
-
-        weightsBuffer = createBuffer(inDevice: library.device, fromTensor: weights, withLabel: "InnerProductWeights")
-        biasesBuffer = createBuffer(inDevice: library.device, fromTensor: biases, withLabel: "InnerProductBiases")
-    }
-
-    public func encodeForwardInBuffer(buffer: MTLCommandBuffer, batchSize: Int, input: MTLBuffer, offset inputOffset: Int, output: MTLBuffer, offset outputOffset: Int) {
-        var dimensions = Parameters(batchSize: UInt16(batchSize), inputSize: UInt16(inputSize), outputSize: UInt16(outputSize))
-        dimensionsBuffer = createBuffer(inDevice: buffer.device, fromPointer: &dimensions, ofSize: sizeof(Parameters), withLabel: "InnerProductDimensions")
-
-        
-        let encoder = buffer.computeCommandEncoder()
-        encoder.label = "InnerProductForward"
-        encoder.setComputePipelineState(forwardFunction)
-        encoder.setBuffer(input, offset: inputOffset * sizeof(Float), atIndex: 0)
-        encoder.setBuffer(weightsBuffer, offset: 0, atIndex: 1)
-        encoder.setBuffer(biasesBuffer, offset: 0, atIndex: 2)
-        encoder.setBuffer(output, offset: outputOffset * sizeof(Float), atIndex: 3)
-        encoder.setBuffer(dimensionsBuffer, offset: 0, atIndex: 4)
-
-        let threadsPerGroup = MTLSize(width: forwardFunction.threadExecutionWidth, height: 1, depth: 1)
-        let numThreadgroups = MTLSize(width: (outputSize - 1) / forwardFunction.threadExecutionWidth + 1, height: batchSize, depth:1)
-        encoder.dispatchThreadgroups(numThreadgroups, threadsPerThreadgroup: threadsPerGroup)
-
-        encoder.endEncoding()
-    }
-
-    public func encodeBackwardInBuffer(buffer: MTLCommandBuffer, batchSize: Int, outputDiff: MTLBuffer, input: MTLBuffer, inputDiff: MTLBuffer) {
-        var dimensions = Parameters(batchSize: UInt16(batchSize), inputSize: UInt16(inputSize), outputSize: UInt16(outputSize))
-        dimensionsBuffer = createBuffer(inDevice: buffer.device, fromPointer: &dimensions, ofSize: sizeof(Parameters), withLabel: "InnerProductDimensions")
-
-        
-        if weightDiff == nil {
-            weightDiff = createBuffer(inDevice: buffer.device, ofSize: inputSize * outputSize * sizeof(Float), withLabel: "InnerProductWeightDiffs")
+    public func initializeForward(builder builder: ForwardInvocationBuilder, batchSize: Int) throws {
+        if weightsBuffer == nil {
+            weightsBuffer = builder.createBuffer(name: "weights", elements: weights)
         }
-        if biasDiff == nil {
-            biasDiff = createBuffer(inDevice: buffer.device, ofSize: outputSize * sizeof(Float), withLabel: "InnerProductBiasDiffs")
-
+        if biasesBuffer == nil {
+            biasesBuffer = builder.createBuffer(name: "biases", elements: biases)
         }
 
-        do {
-            let encoder = buffer.computeCommandEncoder()
-            encoder.label = "InnerProductBackwardParams"
-            encoder.setComputePipelineState(backwardParamsFunction)
-            encoder.setBuffer(outputDiff, offset: 0, atIndex: 0)
-            encoder.setBuffer(input, offset: 0, atIndex: 1)
-            encoder.setBuffer(weightDiff, offset: 0, atIndex: 2)
-            encoder.setBuffer(biasDiff, offset: 0, atIndex: 3)
-            encoder.setBuffer(dimensionsBuffer, offset: 0, atIndex: 4)
+        let buffers = [
+            builder.inputBuffer,
+            builder.outputBuffer,
+            weightsBuffer!,
+            biasesBuffer!
+        ]
 
-            let threadsPerGroup = MTLSize(width: forwardFunction.threadExecutionWidth, height: 1, depth: 1)
-            let numThreadgroups = MTLSize(width: (outputSize - 1) / forwardFunction.threadExecutionWidth + 1, height: 1, depth:1)
-            encoder.dispatchThreadgroups(numThreadgroups, threadsPerThreadgroup: threadsPerGroup)
-
-            encoder.endEncoding()
-        }
-
-        do {
-            let encoder = buffer.computeCommandEncoder()
-            encoder.label = "InnerProductBackwardState"
-            encoder.setComputePipelineState(backwardInputFunction)
-            encoder.setBuffer(outputDiff, offset: 0, atIndex: 0)
-            encoder.setBuffer(weightsBuffer, offset: 0, atIndex: 1)
-            encoder.setBuffer(inputDiff, offset: 0, atIndex: 2)
-            encoder.setBuffer(dimensionsBuffer, offset: 0, atIndex: 3)
-
-            let threadsPerGroup = MTLSize(width: forwardFunction.threadExecutionWidth, height: 1, depth: 1)
-            let numThreadgroups = MTLSize(width: (inputSize - 1) / forwardFunction.threadExecutionWidth + 1, height: batchSize, depth:1)
-            encoder.dispatchThreadgroups(numThreadgroups, threadsPerThreadgroup: threadsPerGroup)
-
-            encoder.endEncoding()
-        }
+        let params = Parameters(batchSize: UInt16(batchSize), inputSize: UInt16(inputSize), outputSize: UInt16(outputSize))
+        forwardInvocation = try builder.createInvocation(functionName: "inner_product_forward", buffers: buffers, values: [params], width: outputSize, height: batchSize)
     }
 
-    public func encodeParametersUpdate(encodeAction: (values: MTLBuffer, deltas: MTLBuffer) -> Void) {
-        guard let weightDiff = weightDiff else {
+    public func initializeBackward(builder builder: BackwardInvocationBuilder, batchSize: Int) throws {
+        let params = Parameters(batchSize: UInt16(batchSize), inputSize: UInt16(inputSize), outputSize: UInt16(outputSize))
+        if weightsBuffer == nil {
+            weightsBuffer = builder.createBuffer(name: "weights", elements: weights)
+        }
+        if weightDeltasBuffer == nil {
+            weightDeltasBuffer = builder.createBuffer(name: "weightDeltas", size: weights.count * sizeof(Float))
+        }
+        if biasDeltasBuffer == nil {
+            biasDeltasBuffer = builder.createBuffer(name: "biasDeltas", size: biases.count * sizeof(Float))
+        }
+
+        let paramUpdateBuffers = [
+            builder.outputDeltasBuffer,
+            builder.inputBuffer,
+            weightDeltasBuffer!,
+            biasDeltasBuffer!
+        ]
+        backwardParameterUpdateInvocation = try builder.createInvocation(functionName: "inner_product_backward_params", buffers: paramUpdateBuffers, values: [params], width: outputSize)
+
+        let inputUpdateBuffers = [
+            builder.outputDeltasBuffer,
+            builder.inputDeltasBuffer,
+            weightsBuffer!,
+        ]
+        backwardInputUpdateInvocation = try builder.createInvocation(functionName: "inner_product_backward_input", buffers: inputUpdateBuffers, values: [params], width: inputSize, height: batchSize)
+    }
+
+    public func encodeParametersUpdate(encodeAction: (values: Buffer, deltas: Buffer) -> Void) {
+        guard let weightDeltasBuffer = weightDeltasBuffer else {
             fatalError("Inner Product weights were not initialized")
         }
-        guard let biasDiff = biasDiff else {
+        guard let biasDeltasBuffer = biasDeltasBuffer else {
             fatalError("Inner Product biases were not initialized")
         }
 
-        encodeAction(values: weightsBuffer!, deltas: weightDiff)
-        encodeAction(values: biasesBuffer!, deltas: biasDiff)
+        encodeAction(values: weightsBuffer!, deltas: weightDeltasBuffer)
+        encodeAction(values: biasesBuffer!, deltas: biasDeltasBuffer)
     }
 }

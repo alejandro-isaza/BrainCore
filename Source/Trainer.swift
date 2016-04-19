@@ -8,63 +8,29 @@
 import Foundation
 import Metal
 
-public class Trainer {
-    public let batchSize: Int
-    public let net: Net
-
-    let device: MTLDevice
-    var library: MTLLibrary!
-    var commandQueue: MTLCommandQueue
-
-    var resetFunction: MTLComputePipelineState!
+public class Trainer: Runner {
+    var forwardInstance: Instance!
+    var backwardInstance: Instance!
 
     /// Maximum number of instances to enqueue to the GPU at a time
-    let instanceCount = 1
+    let instanceCount = 3
     var inflightSemaphore: dispatch_semaphore_t
     var queue: dispatch_queue_t
-
-    var forwardInstance: Instance
-    var backwardInstance: Instance
     
-    public init(net: Net, device: MTLDevice, batchSize: Int) throws {
-        self.batchSize = batchSize
-        self.net = net
-        self.net.insertTransposeLayers()
-        
-        self.device = device
-
-        commandQueue = device.newCommandQueue()
-        commandQueue.label = "BrainCore.Trainer"
-
-        guard let path = NSBundle(forClass: self.dynamicType).pathForResource("default", ofType: "metallib") else {
-            fatalError("Metal library not found")
-        }
-        library = try device.newLibraryWithFile(path)
-
-        for node in net.nodes.values {
-            if let forwardLayer = node.layer as? ForwardLayer {
-                try forwardLayer.setupInLibrary(library)
-            }
-        }
-
+    public override init(net: Net, device: MTLDevice, batchSize: Int) throws {
+        queue = dispatch_queue_create("BrainCore.Evaluator", DISPATCH_QUEUE_SERIAL)
         inflightSemaphore = dispatch_semaphore_create(instanceCount)
-        queue = dispatch_queue_create("BrainCore.Trainer", DISPATCH_QUEUE_SERIAL)
+
+        try super.init(net: net, device: device, batchSize: batchSize)
+
         forwardInstance = Instance(buffers: net.buffers, device: device, batchSize: batchSize)
         backwardInstance = Instance(buffers: net.buffers, device: device, batchSize: batchSize)
-
-        try! setupInLibrary()
-    }
-
-    public func setupInLibrary() throws {
-        let resetBuffer = library.newFunctionWithName("reset_buffer")!
-        resetFunction = try library.device.newComputePipelineStateWithFunction(resetBuffer)
-
     }
 
     /// Perform a forward-backward pass on the network. Always call this method from the same serial queue. It may block if there is another run executing.
     ///
     /// - parameter completion: Invoked when the run finishes. It gets passed a snapshot of the network results.
-    func run(completion: ((Snapshot) -> Void)) {
+    public func run(completion: ((Snapshot) -> Void)) {
         dispatch_semaphore_wait(inflightSemaphore, DISPATCH_TIME_FOREVER)
 
         forwardInstance.reset()
@@ -105,24 +71,15 @@ public class Trainer {
                 continue
             }
 
-            guard let input = node.inputBuffer, output = node.outputBuffer else {
+            guard let _ = node.inputBuffer, _ = node.outputBuffer else {
                 preconditionFailure("Layer '\(node.layer.name)' is missing a buffer")
             }
 
-            guard let inputBuffer = forwardInstance.buffers[input.id] else {
-                fatalError("Layer '\(node.layer.name)'s input buffer was not created")
-            }
-            guard let outputBuffer = forwardInstance.buffers[output.id] else {
-                fatalError("Layer '\(node.layer.name)'s output buffer was not created")
-            }
-
             let buffer = commandQueue.commandBuffer()
-            forwardLayer.encodeForwardInBuffer(buffer,
-                                               batchSize: batchSize,
-                                               input: inputBuffer,
-                                               offset: batchSize * node.inputRange.startIndex,
-                                               output: outputBuffer,
-                                               offset: batchSize * node.outputRange.startIndex)
+            for invocation in forwardLayer.forwardInvocations {
+                initializeBuffers(invocation.buffers)
+                try! encode(invocation: invocation, forNode: node, commandBuffer: buffer)
+            }
 
             buffer.addCompletedHandler() { commandBuffer in
                 dispatch_async(self.queue) {
@@ -154,33 +111,16 @@ public class Trainer {
                 continue
             }
 
-            guard let input = node.inputBuffer, output = node.outputBuffer else {
+            guard let _ = node.inputBuffer, _ = node.outputBuffer else {
                 preconditionFailure("Layer '\(node.layer.name)' is missing a buffer")
-            }
-
-            guard let inputBuffer = forwardInstance.buffers[input.id] else {
-                fatalError("Layer '\(node.layer.name)'s input buffer was not created")
-            }
-            guard let inputDiffBuffer = backwardInstance.buffers[input.id] else {
-                fatalError("Layer '\(node.layer.name)'s input difference buffer was not created")
             }
 
             let buffer = commandQueue.commandBuffer()
             if let backwardLayer = node.layer as? BackwardLayer {
-                guard let outputDiffBuffer = backwardInstance.buffers[output.id] else {
-                    fatalError("Layer '\(node.layer.name)'s output difference buffer was not created")
+                for invocation in backwardLayer.backwardInvocations {
+                    initializeBuffers(invocation.buffers)
+                    try! encode(invocation: invocation, forNode: node, commandBuffer: buffer)
                 }
-
-                backwardLayer.encodeBackwardInBuffer(buffer,
-                                                     batchSize: batchSize,
-                                                     outputDiff: outputDiffBuffer,
-                                                     input: inputBuffer,
-                                                     inputDiff: inputDiffBuffer)
-            } else if let lossLayer = node.layer as? LossLayer {
-                lossLayer.encodeBackwardLossInBuffer(buffer,
-                                                     batchSize: batchSize,
-                                                     input: inputBuffer,
-                                                     deltas: inputDiffBuffer)
             }
 
             buffer.addCompletedHandler() { commandBuffer in
@@ -196,6 +136,25 @@ public class Trainer {
             
             backwardInstance.closeNode(node)
             backwardInstance.openInputsOf(node)
+        }
+    }
+
+    func initializeBuffers(buffers: [Buffer]) {
+        for buffer in buffers {
+            guard let netBuffer = buffer.netBuffer else { continue }
+            switch netBuffer.type {
+            case .Forward:
+                if let metalBuffer = forwardInstance.buffers[netBuffer.id] {
+                    buffer.metalBuffer = metalBuffer
+                }
+
+            case .Deltas:
+                if let metalBuffer = backwardInstance.buffers[netBuffer.id] {
+                    buffer.metalBuffer = metalBuffer
+                }
+
+            default: break
+            }
         }
     }
 }
