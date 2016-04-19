@@ -73,7 +73,7 @@ public class Evaluator {
                 guard let buffer = instance.buffers[netBuffer.id] else {
                     fatalError("Output buffer for \(dataLayer.name) not found.")
                 }
-                fillBuffer(buffer, start: n.outputOffset, withElements: dataLayer.nextBatch(1))
+                fillBuffer(buffer, start: n.outputRange.startIndex, withElements: dataLayer.nextBatch(1))
             }
             instance.closeNode(n)
             instance.openOutputsOf(n)
@@ -111,9 +111,9 @@ public class Evaluator {
             forwardLayer.encodeForwardInBuffer(buffer,
                                                batchSize: 1,
                                                input: inputBuffer,
-                                               offset: node.inputOffset,
+                                               offset: node.inputRange.startIndex,
                                                output: outputBuffer,
-                                               offset: node.outputOffset)
+                                               offset: node.outputRange.startIndex)
 
             buffer.addCompletedHandler() { commandBuffer in
                 dispatch_async(self.queue) {
@@ -137,7 +137,7 @@ public class Evaluator {
                     fatalError("Layer '\(n.layer.name)'s input buffer was not found.")
                 }
 
-                sinkLayer.consume(valueArrayFromBuffer(buffer, start: n.inputOffset))
+                sinkLayer.consume(valueArrayFromBuffer(buffer, start: n.inputRange.startIndex))
             }
         }
 

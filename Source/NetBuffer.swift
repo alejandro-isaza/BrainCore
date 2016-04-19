@@ -15,10 +15,8 @@ class NetBuffer: Hashable {
 
     var inputSize: Int {
         return inputNodes.reduce(0) { currentValue, node in
-            if let forwardLayer = node.layer as? ForwardLayer {
-                return currentValue + forwardLayer.outputSize
-            } else if let dataLayer = node.layer as? DataLayer {
-                return currentValue + dataLayer.outputSize
+            if node.outputSize > 0 {
+                return currentValue + node.outputRange.count
             }
             preconditionFailure("Cannot costruct buffer from \(node.layer.dynamicType).")
         }
@@ -26,10 +24,8 @@ class NetBuffer: Hashable {
 
     var outputSize: Int {
         return outputNodes.reduce(0) { currentValue, node in
-            if let forwardLayer = node.layer as? ForwardLayer {
-                return currentValue + forwardLayer.inputSize
-            } else if let sinkLayer = node.layer as? SinkLayer {
-                return currentValue + sinkLayer.inputSize
+            if node.inputSize > 0 {
+                return currentValue + node.inputRange.count
             }
             preconditionFailure("Cannot costruct buffer from \(node.layer.dynamicType).")
         }

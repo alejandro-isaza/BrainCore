@@ -60,8 +60,8 @@ public class Snapshot {
                 return nil
         }
         let pointer = UnsafeMutablePointer<Float>(buffer.contents())
-        let count = buffer.length / sizeof(Float) - node.outputOffset
-        return UnsafeMutableBufferPointer(start: pointer + node.outputOffset, count: count)
+        let count = buffer.length / sizeof(Float) - node.outputRange.startIndex
+        return UnsafeMutableBufferPointer(start: pointer + node.outputRange.startIndex, count: count)
     }
 
     /// Return a pointer to the forward-pass input of a layer. The pointer is short-lived, you should copy any contents that you want preserve.
@@ -72,8 +72,8 @@ public class Snapshot {
                 return nil
         }
         let pointer = UnsafeMutablePointer<Float>(buffer.contents())
-        let count = buffer.length / sizeof(Float) - node.inputOffset
-        return UnsafeMutableBufferPointer(start: pointer + node.inputOffset, count: count)
+        let count = buffer.length / sizeof(Float) - node.inputRange.startIndex
+        return UnsafeMutableBufferPointer(start: pointer + node.inputRange.startIndex, count: count)
     }
 
     /// Return a pointer to the backward-pass input deltas of a layer. The pointer is short-lived, you should copy any contents that you want preserve.
@@ -84,8 +84,8 @@ public class Snapshot {
                 return nil
         }
         let pointer = UnsafeMutablePointer<Float>(buffer.contents())
-        let count = buffer.length / sizeof(Float) - node.inputOffset
-        return UnsafeMutableBufferPointer(start: pointer + node.inputOffset, count: count)
+        let count = buffer.length / sizeof(Float) - node.inputRange.startIndex
+        return UnsafeMutableBufferPointer(start: pointer + node.inputRange.startIndex, count: count)
     }
 
     /// Return a pointer to the backward-pass output deltas of a layer. The pointer is short-lived, you should copy any contents that you want preserve.
@@ -96,7 +96,7 @@ public class Snapshot {
                 return nil
         }
         let pointer = UnsafeMutablePointer<Float>(buffer.contents())
-        let count = buffer.length / sizeof(Float) - node.outputOffset
-        return UnsafeMutableBufferPointer(start: pointer + node.outputOffset, count: count)
+        let count = buffer.length / sizeof(Float) - node.outputRange.startIndex
+        return UnsafeMutableBufferPointer(start: pointer + node.outputRange.startIndex, count: count)
     }
 }
