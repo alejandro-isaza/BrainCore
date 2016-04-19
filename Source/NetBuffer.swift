@@ -14,21 +14,15 @@ class NetBuffer: Hashable {
     let name: String?
 
     var inputSize: Int {
-        return inputNodes.reduce(0) { currentValue, node in
-            if node.outputSize > 0 {
-                return currentValue + node.outputRange.count
-            }
-            preconditionFailure("Cannot costruct buffer from \(node.layer.dynamicType).")
-        }
+        return inputNodes.reduce(0, combine: { currentValue, node in
+            return max(currentValue, node.outputRange.endIndex)
+        })
     }
 
     var outputSize: Int {
-        return outputNodes.reduce(0) { currentValue, node in
-            if node.inputSize > 0 {
-                return currentValue + node.inputRange.count
-            }
-            preconditionFailure("Cannot costruct buffer from \(node.layer.dynamicType).")
-        }
+        return outputNodes.reduce(0, combine: { currentValue, node in
+            return max(currentValue, node.inputRange.endIndex)
+        })
     }
 
     var size: Int {
