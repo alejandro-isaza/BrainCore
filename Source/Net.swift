@@ -71,7 +71,7 @@ public class Net {
             addLayer(transposeLayer)
             let transposeNode = nodes[transposeLayer.id]!
             transposeNode.outputBuffer = dataNode.outputBuffer
-            transposeNode.outputOffset = dataNode.outputOffset
+            transposeNode.outputRange = dataNode.outputRange
 
             let dataNodeIndex = dataOutputBuffer.inputNodes.indexOf(dataNode)!
             dataOutputBuffer.inputNodes.removeAtIndex(dataNodeIndex)
@@ -122,7 +122,7 @@ public class Net {
 
     func connectNode(node: NetNode, toBuffer buffer: NetBuffer) {
         node.outputBuffer = buffer
-        node.outputOffset = buffer.inputSize
+        node.outputRange = buffer.inputSize..<buffer.inputSize + node.outputSize
         buffer.inputNodes.append(node)
     }
 
@@ -145,7 +145,7 @@ public class Net {
 
     func connectSplitBuffer(buffer: NetBuffer, toNode node: NetNode) {
         node.inputBuffer = buffer
-        node.inputOffset = buffer.outputSize
+        node.inputRange = buffer.outputSize..<buffer.outputSize + node.inputSize
         buffer.outputNodes.append(node)
     }
 
@@ -168,7 +168,7 @@ public class Net {
 
     func connectWholeBuffer(buffer: NetBuffer, toNode node: NetNode) {
         node.inputBuffer = buffer
-        node.inputOffset = 0
+        node.inputRange = 0..<node.inputSize
         buffer.outputNodes.append(node)
     }
 }

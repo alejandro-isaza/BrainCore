@@ -80,7 +80,7 @@ public class Trainer {
                 guard let buffer = forwardInstance.buffers[netBuffer.id] else {
                     fatalError("Output buffer for \(dataLayer.name) not found.")
                 }
-                fillBuffer(buffer, start: batchSize * n.outputOffset, withElements: dataLayer.nextBatch(batchSize))
+                fillBuffer(buffer, start: batchSize * n.outputRange.startIndex, withElements: dataLayer.nextBatch(batchSize))
             }
             forwardInstance.closeNode(n)
             forwardInstance.openOutputsOf(n)
@@ -120,9 +120,9 @@ public class Trainer {
             forwardLayer.encodeForwardInBuffer(buffer,
                                                batchSize: batchSize,
                                                input: inputBuffer,
-                                               offset: batchSize * node.inputOffset,
+                                               offset: batchSize * node.inputRange.startIndex,
                                                output: outputBuffer,
-                                               offset: batchSize * node.outputOffset)
+                                               offset: batchSize * node.outputRange.startIndex)
 
             buffer.addCompletedHandler() { commandBuffer in
                 dispatch_async(self.queue) {

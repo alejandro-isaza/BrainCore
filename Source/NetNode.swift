@@ -9,10 +9,28 @@ class NetNode: Hashable {
     let layer: Layer
 
     weak var inputBuffer: NetBuffer?
-    var inputOffset = 0
+    var inputRange = 0...0
 
     weak var outputBuffer: NetBuffer?
-    var outputOffset = 0
+    var outputRange = 0...0
+
+    var inputSize: Int {
+        if let forwardLayer = layer as? ForwardLayer {
+            return forwardLayer.inputSize
+        } else if let sinkLayer = layer as? SinkLayer {
+            return sinkLayer.inputSize
+        }
+        return 0
+    }
+
+    var outputSize: Int {
+        if let forwardLayer = layer as? ForwardLayer {
+            return forwardLayer.outputSize
+        } else if let dataLayer = layer as? DataLayer {
+            return dataLayer.outputSize
+        }
+        return 0
+    }
 
     init(layer: Layer) {
         self.layer = layer
