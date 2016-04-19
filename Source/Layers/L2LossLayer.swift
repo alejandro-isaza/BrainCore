@@ -10,8 +10,8 @@ import Metal
 
 public class L2LossLayer: LossLayer {
     struct Parameters {
-        let batchSize: UInt16
-        let inputSize: UInt16
+        let batchSize: UInt32
+        let inputSize: UInt32
     }
 
     public let size: Int
@@ -47,7 +47,7 @@ public class L2LossLayer: LossLayer {
             builder.outputBuffer
         ]
 
-        let params = Parameters(batchSize: UInt16(batchSize), inputSize: UInt16(size))
+        let params = Parameters(batchSize: UInt32(batchSize), inputSize: UInt32(size))
         forwardInvocation = try builder.createInvocation(
             functionName: "l2_loss_forward",
             buffers: buffers,
@@ -56,7 +56,7 @@ public class L2LossLayer: LossLayer {
     }
 
     public func initializeBackward(builder builder: BackwardInvocationBuilder, batchSize: Int) throws {
-        let params = Parameters(batchSize: UInt16(batchSize), inputSize: UInt16(size))
+        let params = Parameters(batchSize: UInt32(batchSize), inputSize: UInt32(size))
 
         let buffers = [
             builder.inputBuffer,
