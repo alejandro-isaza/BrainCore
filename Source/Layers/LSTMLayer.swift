@@ -10,7 +10,7 @@ import Metal
 import Upsurge
 
 /// Long short-term memory unit (LSTM) recurrent network cell.
-public class LSTMLayer: ForwardLayer {
+public class LSTMLayer: BackwardLayer {
     struct Parameters {
         let batchSize: UInt16
         let unitCount: UInt16
@@ -25,8 +25,19 @@ public class LSTMLayer: ForwardLayer {
     public let biases: ValueArray<Float>
     public let clipTo: Float
 
+    var stateBuffers: [Buffer]?
+    var stateDeltasBuffers: [Buffer]?
+    var activationBuffers: [Buffer]?
+    var activationDeltasBuffers: [Buffer]?
+    var weightsBuffer: Buffer?
+    var weightDeltasBuffers: [Buffer]?
+    var biasesBuffer: Buffer?
+    var biasDeltasBuffers: [Buffer]?
+
+
     public let unitCount: Int
     public let inputSize: Int
+    public let timeSteps: Int
 
     public var outputSize: Int {
         return unitCount
@@ -36,92 +47,194 @@ public class LSTMLayer: ForwardLayer {
         return 2 * unitCount
     }
 
-    var currentState = 0
+    var T = 0
 
-    var forwardInvocation0: Invocation?
-    var forwardInvocation1: Invocation?
-
-    var weightsBuffer: Buffer?
-    var biasesBuffer: Buffer?
-    var state0Buffer: Buffer?
-    var state1Buffer: Buffer?
-
-    public var stateBuffer: Buffer? {
-        if currentState == 0 {
-            return state0Buffer
-        } else {
-            return state1Buffer
-        }
-    }
+    var forwardInvocationsOverTime: [Invocation]?
 
     public var forwardInvocations: [Invocation] {
-        guard let forwardInvocation0 = forwardInvocation0, forwardInvocation1 = forwardInvocation1 else {
+        guard let invocation = forwardInvocationsOverTime?[T] else {
             fatalError("initializeForward needs to be called first")
         }
-        let invocation = currentState == 0 ? forwardInvocation0 : forwardInvocation1
-        currentState = (currentState + 1) % 2
+        T = (T + 1) % timeSteps
         return [invocation]
     }
 
-    public init(weights: Matrix<Float>, biases: ValueArray<Float>, batchSize: Int, name: String? = nil, clipTo: Float? = nil) {
+    var backwardActivationsInvocationsOverTime: [Invocation]?
+    var backwardWeightsInvocationsOverTime: [Invocation]?
+    var backwardInputsInvocationsOverTime: [Invocation]?
+
+    public var backwardInvocations: [Invocation] {
+        guard let activationsInvocation = backwardActivationsInvocationsOverTime?[T] else {
+            fatalError("initializeBackward needs to be called first")
+        }
+        guard let weightsInvocation = backwardWeightsInvocationsOverTime?[T] else {
+            fatalError("initializeBackward needs to be called first")
+        }
+        guard let inputsInvocation = backwardInputsInvocationsOverTime?[T] else {
+            fatalError("initializeBackward needs to be called first")
+        }
+        T = (T + 1) % timeSteps
+        return [activationsInvocation, weightsInvocation, inputsInvocation]
+    }
+
+    public init(weights: Matrix<Float>, biases: ValueArray<Float>, batchSize: Int, timeSteps: Int = 1, name: String? = nil, clipTo: Float? = nil) {
         self.name = name
         self.weights = weights
         self.biases = biases
         self.clipTo = clipTo ?? 0
         self.unitCount = biases.count / 4
         self.inputSize = weights.rows - unitCount
+        self.timeSteps = timeSteps
         precondition(weights.columns == 4 * unitCount)
     }
 
     public func initializeForward(builder builder: ForwardInvocationBuilder, batchSize: Int) throws {
         let params = Parameters(batchSize: UInt16(batchSize), unitCount: UInt16(unitCount), inputSize: UInt16(inputSize), clipTo: clipTo)
-        weightsBuffer = builder.createBuffer(name: "weights", elements: weights)
-        biasesBuffer = builder.createBuffer(name: "biases", elements: biases)
-        state0Buffer = builder.createBuffer(name: "state0", size: batchSize * stateSize * sizeof(Float))
-        state1Buffer = builder.createBuffer(name: "state1", size: batchSize * stateSize * sizeof(Float))
+        if weightsBuffer == nil {
+            weightsBuffer = builder.createBuffer(name: "weights", elements: weights)
+        }
+        if biasesBuffer == nil {
+            biasesBuffer = builder.createBuffer(name: "biases", elements: biases)
+        }
+        if stateBuffers == nil {
+            stateBuffers = [Buffer]()
+            for time in 0..<timeSteps {
+                stateBuffers!.append(builder.createBuffer(name: "state\(time)", size: batchSize * stateSize * sizeof(Float)))
+            }
+        }
+        if activationBuffers == nil {
+            activationBuffers = [Buffer]()
+            for time in 0..<timeSteps {
+                activationBuffers!.append(builder.createBuffer(name: "activation\(time)", size: batchSize * unitCount * sizeof(Float)))
+            }
+        }
 
-        let buffers0 = [
-            builder.inputBuffer,
-            builder.outputBuffer,
-            weightsBuffer!,
-            biasesBuffer!,
-            state0Buffer!,
-            state1Buffer!
-        ]
-        forwardInvocation0 = try builder.createInvocation(
-            functionName: "lstm_forward",
-            buffers: buffers0,
-            values: [params],
-            width: unitCount,
-            height: batchSize
-        )
+        forwardInvocationsOverTime = [Invocation]()
 
-        let buffers1 = [
-            builder.inputBuffer,
-            builder.outputBuffer,
-            weightsBuffer!,
-            biasesBuffer!,
-            state1Buffer!,
-            state0Buffer!
-        ]
-        forwardInvocation1 = try builder.createInvocation(
-            functionName: "lstm_forward",
-            buffers: buffers1,
-            values: [params],
-            width: unitCount,
-            height: batchSize)
+        for timeStep in 0..<timeSteps {
+            let previousTimestep = timeStep - 1 >= 0 ? timeStep - 1 : timeSteps - 1
+
+            let buffers = [
+                builder.inputBuffer,
+                weightsBuffer!,
+                biasesBuffer!,
+                builder.outputBuffer,
+                activationBuffers![timeStep],
+                stateBuffers![previousTimestep],
+                stateBuffers![timeStep]
+            ]
+            forwardInvocationsOverTime!.append(try builder.createInvocation(
+                functionName: "lstm_forward",
+                buffers: buffers,
+                values: [params],
+                width: unitCount,
+                height: batchSize
+            ))
+        }
     }
 
-    /// Reset the internal LSTM state
-    public func reset() {
-        let pointer0 = UnsafeMutablePointer<Float>(state0Buffer!.metalBuffer!.contents())
-        for i in 0..<state0Buffer!.metalBuffer!.length / sizeof(Float) {
-            pointer0[i] = 0.0
+    public func initializeBackward(builder builder: BackwardInvocationBuilder, batchSize: Int) throws {
+        let params = Parameters(batchSize: UInt16(batchSize), unitCount: UInt16(unitCount), inputSize: UInt16(inputSize), clipTo: clipTo)
+        if weightsBuffer == nil {
+            weightsBuffer = builder.createBuffer(name: "weights", elements: weights)
         }
-        let pointer1 = UnsafeMutablePointer<Float>(state1Buffer!.metalBuffer!.contents())
-        for i in 0..<state1Buffer!.metalBuffer!.length / sizeof(Float) {
-            pointer1[i] = 0.0
+        if biasesBuffer == nil {
+            biasesBuffer = builder.createBuffer(name: "biases", elements: biases)
         }
-        currentState = 0
+        if stateBuffers == nil {
+            stateBuffers = [Buffer]()
+            for time in 0..<timeSteps {
+                stateBuffers!.append(builder.createBuffer(name: "state\(time)", size: batchSize * stateSize * sizeof(Float)))
+            }
+        }
+        if stateDeltasBuffers == nil {
+            stateDeltasBuffers = [Buffer]()
+            for time in 0..<timeSteps {
+                stateDeltasBuffers!.append(builder.createBuffer(name: "state\(time)", size: batchSize * stateSize * sizeof(Float)))
+            }
+        }
+        if activationBuffers == nil {
+            activationBuffers = [Buffer]()
+            for time in 0..<timeSteps {
+                activationBuffers!.append(builder.createBuffer(name: "activation\(time)", size: batchSize * unitCount * sizeof(Float)))
+            }
+        }
+        if activationDeltasBuffers == nil {
+            activationDeltasBuffers = [Buffer]()
+            for time in 0..<timeSteps {
+                activationDeltasBuffers!.append(builder.createBuffer(name: "activation\(time)", size: batchSize * unitCount * sizeof(Float)))
+            }
+        }
+        if weightDeltasBuffers == nil {
+            weightDeltasBuffers = [Buffer]()
+            for time in 0..<timeSteps {
+                weightDeltasBuffers!.append(builder.createBuffer(name: "weightDeltas\(time)", size: weights.count * sizeof(Float)))
+            }
+        }
+        if biasDeltasBuffers == nil {
+            biasDeltasBuffers = [Buffer]()
+            for time in 0..<timeSteps {
+                biasDeltasBuffers!.append(builder.createBuffer(name: "biasDeltas\(time)", size: biases.count * sizeof(Float)))
+            }
+        }
+
+        backwardActivationsInvocationsOverTime = [Invocation]()
+        backwardWeightsInvocationsOverTime = [Invocation]()
+        backwardInputsInvocationsOverTime = [Invocation]()
+
+        for timeStep in (0..<timeSteps).reverse() {
+            let previousTimestep = timeStep - 1 >= 0 ? timeStep - 1 : timeSteps - 1
+            let nextTimestep = timeStep + 1 < timeSteps ? timeStep + 1 : 0
+
+            var buffers = [
+                builder.outputDeltasBuffer,
+                weightsBuffer!,
+                activationBuffers![timeStep],
+                activationBuffers![nextTimestep],
+                activationDeltasBuffers![timeStep],
+                activationDeltasBuffers![nextTimestep],
+                stateBuffers![timeStep],
+                stateDeltasBuffers![timeStep],
+                stateBuffers![previousTimestep],
+                stateDeltasBuffers![nextTimestep],
+            ]
+            backwardActivationsInvocationsOverTime!.append(try builder.createInvocation(
+                functionName: "lstm_backward_activations",
+                buffers: buffers,
+                values: [params],
+                width: unitCount,
+                height: batchSize
+            ))
+
+            buffers = [
+                builder.inputBuffer,
+                stateBuffers![timeStep],
+                weightDeltasBuffers![timeStep],
+                biasDeltasBuffers![timeStep],
+                activationBuffers![timeStep],
+                activationBuffers![nextTimestep],
+            ]
+            backwardWeightsInvocationsOverTime!.append(try builder.createInvocation(
+                functionName: "lstm_backward_weights",
+                buffers: buffers,
+                values: [params],
+                width: unitCount,
+                height: batchSize
+            ))
+
+            buffers = [
+                builder.inputDeltasBuffer,
+                weightsBuffer!,
+                activationDeltasBuffers![timeStep],
+            ]
+            backwardInputsInvocationsOverTime!.append(try builder.createInvocation(
+                functionName: "lstm_backward_inputs",
+                buffers: buffers,
+                values: [params],
+                width: inputSize,
+                height: batchSize
+            ))
+        }
+
     }
 }

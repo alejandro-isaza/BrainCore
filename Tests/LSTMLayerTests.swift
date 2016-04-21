@@ -84,7 +84,7 @@ class LSTMLayerTests: MetalTestCase {
         let biases = ValueArray<Float>(count: 4 * unitCount, repeatedValue: 0.0)
 
         let dataLayer = Source(name: "input", data: input.elements, batchSize: batchSize)
-        let layer = LSTMLayer(weights: weights, biases: biases, batchSize: batchSize, name: "layer")
+        let layer = LSTMLayer(weights: weights, biases: biases, batchSize: batchSize, timeSteps: 2, name: "layer")
         let sinkLayer = Sink(name: "output", inputSize: unitCount, batchSize: batchSize)
         let net = Net.build {
             dataLayer => layer => sinkLayer
