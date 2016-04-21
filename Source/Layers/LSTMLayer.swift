@@ -61,8 +61,8 @@ public class LSTMLayer: ForwardLayer {
         let params = Parameters(batchSize: UInt16(batchSize), unitCount: UInt16(unitCount), inputSize: UInt16(inputSize), clipTo: clipTo)
         let weightsBuffer = builder.createBuffer(name: "weights", elements: weights)
         let biasesBuffer = builder.createBuffer(name: "biases", elements: biases)
-        let state0 = builder.createBuffer(name: "state0", size: stateSize * sizeof(Float))
-        let state1 = builder.createBuffer(name: "state1", size: stateSize * sizeof(Float))
+        let state0 = builder.createBuffer(name: "state0", size: batchSize * stateSize * sizeof(Float))
+        let state1 = builder.createBuffer(name: "state1", size: batchSize * stateSize * sizeof(Float))
 
         let buffers0 = [
             builder.inputBuffer,

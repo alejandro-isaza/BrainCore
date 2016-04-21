@@ -9,8 +9,8 @@ import Foundation
 import Metal
 
 public class Trainer: Runner {
-    var forwardInstance: Instance
-    var backwardInstance: Instance
+    var forwardInstance: Instance!
+    var backwardInstance: Instance!
 
     /// Maximum number of instances to enqueue to the GPU at a time
     let instanceCount = 3
@@ -18,11 +18,13 @@ public class Trainer: Runner {
     var queue: dispatch_queue_t
     
     public override init(net: Net, device: MTLDevice, batchSize: Int) throws {
-        forwardInstance = Instance(buffers: net.buffers, device: device, batchSize: batchSize)
-        backwardInstance = Instance(buffers: net.buffers, device: device, batchSize: batchSize)
         queue = dispatch_queue_create("BrainCore.Evaluator", DISPATCH_QUEUE_SERIAL)
         inflightSemaphore = dispatch_semaphore_create(instanceCount)
+
         try super.init(net: net, device: device, batchSize: batchSize)
+
+        forwardInstance = Instance(buffers: net.buffers, device: device, batchSize: batchSize)
+        backwardInstance = Instance(buffers: net.buffers, device: device, batchSize: batchSize)
     }
 
     /// Perform a forward-backward pass on the network. Always call this method from the same serial queue. It may block if there is another run executing.

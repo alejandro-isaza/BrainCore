@@ -34,7 +34,8 @@ public class Runner {
         for node in net.nodes.values {
             if let forwardLayer = node.layer as? ForwardLayer {
                 try initializeForwardNode(node, layer: forwardLayer)
-            } else if let backwardLayer = node.layer as? BackwardLayer {
+            }
+            if let backwardLayer = node.layer as? BackwardLayer {
                 try initializeBackwardNode(node, layer: backwardLayer)
             }
         }
@@ -47,21 +48,21 @@ public class Runner {
 
         let inputBuffer = Buffer(
             name: inputNetBuffer.name ?? "input",
-            size: 0,
+            size: inputNetBuffer.size,
             netBuffer: inputNetBuffer,
-            offset: node.inputOffset)
+            offset: node.inputOffset * sizeof(Float))
 
         guard let outputNetBuffer = node.outputBuffer else {
             fatalError("Output buffer for \(layer.name) not found.")
         }
         let outputBuffer = Buffer(
             name: outputNetBuffer.name ?? "output",
-            size: 0,
+            size: outputNetBuffer.size,
             netBuffer: outputNetBuffer,
-            offset: node.outputOffset)
+            offset: node.outputOffset * sizeof(Float))
 
         let invocationBuilder = ForwardInvocationBuilder(device: device, library: library, inputBuffer: inputBuffer, outputBuffer: outputBuffer)
-        try layer.initializeForward(builder: invocationBuilder, batchSize: 1)
+        try layer.initializeForward(builder: invocationBuilder, batchSize: batchSize)
     }
 
     func initializeBackwardNode(node: NetNode, layer: BackwardLayer) throws {
@@ -71,61 +72,29 @@ public class Runner {
 
         let inputBuffer = Buffer(
             name: inputNetBuffer.name ?? "input",
-            size: 0,
+            size: inputNetBuffer.size,
             netBuffer: inputNetBuffer,
-            offset: node.inputOffset)
+            offset: node.inputOffset * sizeof(Float))
 
         let inputDeltasNetBuffer = NetBuffer(id: inputNetBuffer.id, type: .Deltas, name: inputNetBuffer.name)
         let inputDeltasBuffer = Buffer(
-            name: inputNetBuffer.name ?? "input deltas",
-            size: 0,
+            name: inputDeltasNetBuffer.name ?? "input deltas",
+            size: inputDeltasNetBuffer.size,
             netBuffer: inputDeltasNetBuffer,
-            offset: node.inputOffset)
+            offset: node.inputOffset * sizeof(Float))
 
         guard let outputNetBuffer = node.outputBuffer else {
             fatalError("Output buffer for \(layer.name) not found.")
         }
         let outputDeltasNetBuffer = NetBuffer(id: outputNetBuffer.id, type: .Deltas, name: outputNetBuffer.name)
         let outputDeltasBuffer = Buffer(
-            name: outputNetBuffer.name ?? "output deltas",
-            size: 0,
+            name: outputDeltasNetBuffer.name ?? "output deltas",
+            size: outputDeltasNetBuffer.size,
             netBuffer: outputDeltasNetBuffer,
-            offset: node.outputOffset)
+            offset: node.outputOffset * sizeof(Float))
 
         let invocationBuilder = BackwardInvocationBuilder(device: device, library: library, inputBuffer: inputBuffer, outputDeltasBuffer: outputDeltasBuffer, inputDeltasBuffer: inputDeltasBuffer)
-        try layer.initializeBackward(builder: invocationBuilder, batchSize: 1)
-    }
-
-    func initializeLossNode(node: NetNode, layer: LossLayer) throws {
-        guard let inputNetBuffer = node.inputBuffer else {
-            fatalError("Input buffer for \(layer.name) not found.")
-        }
-
-        let inputBuffer = Buffer(
-            name: inputNetBuffer.name ?? "input",
-            size: 0,
-            netBuffer: inputNetBuffer,
-            offset: node.inputOffset)
-
-        let inputDeltasNetBuffer = NetBuffer(id: inputNetBuffer.id, type: .Deltas, name: inputNetBuffer.name)
-        let inputDeltasBuffer = Buffer(
-            name: inputNetBuffer.name ?? "input deltas",
-            size: 0,
-            netBuffer: inputDeltasNetBuffer,
-            offset: node.inputOffset)
-
-        guard let outputNetBuffer = node.outputBuffer else {
-            fatalError("Output buffer for \(layer.name) not found.")
-        }
-        let outputDeltasNetBuffer = NetBuffer(id: outputNetBuffer.id, type: .Deltas, name: outputNetBuffer.name)
-        let outputDeltasBuffer = Buffer(
-            name: outputNetBuffer.name ?? "output deltas",
-            size: 0,
-            netBuffer: outputDeltasNetBuffer,
-            offset: node.outputOffset)
-
-        let invocationBuilder = BackwardInvocationBuilder(device: device, library: library, inputBuffer: inputBuffer, outputDeltasBuffer: outputDeltasBuffer, inputDeltasBuffer: inputDeltasBuffer)
-        try layer.initializeBackward(builder: invocationBuilder, batchSize: 1)
+        try layer.initializeBackward(builder: invocationBuilder, batchSize: batchSize)
     }
 
     /// Encode an invocation
