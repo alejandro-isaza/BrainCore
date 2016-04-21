@@ -32,11 +32,17 @@ public class ReLULayer: ForwardLayer, BackwardLayer {
     var backwardInvocation: Invocation?
 
     public var forwardInvocations: [Invocation] {
-        return [forwardInvocation!]
+        guard let forwardInvocation = forwardInvocation else {
+            fatalError("initializeForward needs to be called first")
+        }
+        return [forwardInvocation]
     }
 
     public var backwardInvocations: [Invocation] {
-        return [backwardInvocation!]
+        guard let backwardInvocation = backwardInvocation else {
+            fatalError("initializeBackward needs to be called first")
+        }
+        return [backwardInvocation]
     }
 
 

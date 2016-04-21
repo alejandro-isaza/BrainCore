@@ -40,13 +40,20 @@ public class InnerProductLayer: BackwardLayer, TrainableLayer {
     var backwardInputUpdateInvocation: Invocation?
 
     public var forwardInvocations: [Invocation] {
-        return [forwardInvocation!]
+        guard let forwardInvocation = forwardInvocation else {
+            fatalError("initializeForward needs to be called first")
+        }
+        return [forwardInvocation]
     }
 
     public var backwardInvocations: [Invocation] {
+        guard let backwardParameterUpdateInvocation = backwardParameterUpdateInvocation,
+            backwardInputUpdateInvocation = backwardInputUpdateInvocation else {
+                fatalError("initializeBackward needs to be called first")
+        }
         return [
-            backwardParameterUpdateInvocation!,
-            backwardInputUpdateInvocation!
+            backwardParameterUpdateInvocation,
+            backwardInputUpdateInvocation
         ]
     }
 

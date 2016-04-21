@@ -32,7 +32,10 @@ internal class TransposeLayer: ForwardLayer {
     var forwardInvocation: Invocation?
 
     var forwardInvocations: [Invocation] {
-        return [forwardInvocation!]
+        guard let forwardInvocation = forwardInvocation else {
+            fatalError("initializeForward needs to be called first")
+        }
+        return [forwardInvocation]
     }
 
     init(size: Int, name: String? = nil) {

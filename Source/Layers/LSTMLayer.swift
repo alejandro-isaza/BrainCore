@@ -42,7 +42,10 @@ public class LSTMLayer: ForwardLayer {
     var forwardInvocation1: Invocation?
 
     public var forwardInvocations: [Invocation] {
-        let invocation = currentState == 0 ? forwardInvocation0! : forwardInvocation1!
+        guard let forwardInvocation0 = forwardInvocation0, forwardInvocation1 = forwardInvocation1 else {
+            fatalError("initializeForward needs to be called first")
+        }
+        let invocation = currentState == 0 ? forwardInvocation0 : forwardInvocation1
         currentState = (currentState + 1) % 2
         return [invocation]
     }
