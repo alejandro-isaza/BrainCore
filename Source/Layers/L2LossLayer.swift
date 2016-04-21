@@ -32,7 +32,7 @@ public class L2LossLayer: LossLayer {
         return [forwardInvocation!]
     }
 
-    public var backwardLossInvocations: [Invocation] {
+    public var backwardInvocations: [Invocation] {
         return [backwardInvocation!]
     }
     

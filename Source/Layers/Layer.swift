@@ -67,15 +67,7 @@ public protocol TrainableLayer {
     func encodeParametersUpdate(encodeAction: (values: Buffer, deltas: Buffer) -> Void)
 }
 
-public protocol LossLayer: ForwardLayer {
-    /// Initialize backward invocations and buffers
-    func initializeBackward(builder builder: BackwardInvocationBuilder, batchSize: Int) throws
-
-    /// Compute the loss input deltas based on labels and actual values. The data will be contained in the first half of the input buffer and the labels on the second half.
-    ///
-    /// The arguments to the Metal kernels should be input followed by any arguments supplied by each invocation.
-    var backwardLossInvocations: [Invocation] { get }
-}
+public protocol LossLayer: BackwardLayer { }
 
 public protocol SinkLayer: Layer {
     /// The number of input values used by this layer for each batch element. This value may not change after the layer is added to a network.

@@ -36,8 +36,6 @@ public class Runner {
                 try initializeForwardNode(node, layer: forwardLayer)
             } else if let backwardLayer = node.layer as? BackwardLayer {
                 try initializeBackwardNode(node, layer: backwardLayer)
-            } else if let lossLayer = node.layer as? LossLayer {
-                try initializeLossNode(node, layer: lossLayer)
             }
         }
     }

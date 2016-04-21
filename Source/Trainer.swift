@@ -119,11 +119,6 @@ public class Trainer: Runner {
                     initializeBuffers(invocation.buffers)
                     try! encode(invocation: invocation, forNode: node, commandBuffer: buffer)
                 }
-            } else if let lossLayer = node.layer as? LossLayer {
-                for invocation in lossLayer.backwardLossInvocations {
-                    initializeBuffers(invocation.buffers)
-                    try! encode(invocation: invocation, forNode: node, commandBuffer: buffer)
-                }
             }
 
             buffer.addCompletedHandler() { commandBuffer in
