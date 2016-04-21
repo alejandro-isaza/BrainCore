@@ -10,45 +10,6 @@ import XCTest
 import Upsurge
 
 class EvaluatorTests: MetalTestCase {
-    class Source: DataLayer {
-        let name: String?
-        let id = NSUUID()
-        var data: Blob
-        var batchSize: Int
-
-        var outputSize: Int {
-            return data.count / batchSize
-        }
-
-        init(name: String, data: Blob, batchSize: Int) {
-            self.name = name
-            self.data = data
-            self.batchSize = batchSize
-        }
-
-        func nextBatch(batchSize: Int) -> Blob {
-            return data
-        }
-    }
-
-    class Sink: SinkLayer {
-        let name: String?
-        let id = NSUUID()
-        var inputSize: Int
-        var batchSize: Int
-
-        var data: Blob = []
-
-        init(name: String, inputSize: Int, batchSize: Int) {
-            self.name = name
-            self.inputSize = inputSize
-            self.batchSize = batchSize
-        }
-
-        func consume(input: Blob) {
-            self.data = input
-        }
-    }
 
     func testSplitAndJoin() {
         let data = Matrix<Float>(rows: 1, columns: 4, elements: [1, 1, 2, 2])
@@ -68,12 +29,11 @@ class EvaluatorTests: MetalTestCase {
 
         let expecation = expectationWithDescription("Net forward pass")
         let evaluator = try! Evaluator(net: net, device: device)
-        evaluator.evaluate() { _ in
+        evaluator.evaluate() { snapshot in
             expecation.fulfill()
         }
 
         let expected = data * weights + biases.toRowMatrix()
-        print(expected)
         waitForExpectationsWithTimeout(5) { error in
             if let error = error {
                 XCTFail("Net.forward() failed: \(error)")

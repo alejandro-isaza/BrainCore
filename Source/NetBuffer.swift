@@ -7,8 +7,17 @@
 
 
 class NetBuffer: Hashable {
+    enum Type: Int {
+        case Forward
+        case Deltas
+        case Parameters
+    }
+
     /// Buffer unique identifier
-    let id = NSUUID()
+    let id: NSUUID
+
+    /// Buffer type
+    let type: Type
 
     /// Optional buffer name
     let name: String?
@@ -33,15 +42,23 @@ class NetBuffer: Hashable {
     var inputNodes = [NetNode]()
     var outputNodes = [NetNode]()
     
-    init(name: String? = nil) {
+    init(id: NSUUID, type: Type, name: String? = nil) {
+        self.id = id
+        self.type = type
+        self.name = name
+    }
+
+    init(type: Type, name: String? = nil) {
+        id = NSUUID()
+        self.type = type
         self.name = name
     }
 
     var hashValue: Int {
-        return id.hashValue
+        return id.hashValue ^ type.rawValue.hashValue
     }
 }
 
 func == (lhs: NetBuffer, rhs: NetBuffer) -> Bool {
-    return lhs.id == rhs.id
+    return lhs.id == rhs.id && lhs.type == rhs.type
 }

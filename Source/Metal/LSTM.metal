@@ -19,9 +19,9 @@ struct LSTMParameters {
 };
 
 kernel void lstm_forward(const device float* input [[ buffer(0) ]],
-                         const device float* weights [[ buffer(1) ]],
-                         const device float* biases [[ buffer(2) ]],
-                         device float* output [[ buffer(3) ]],
+                         device float* output [[ buffer(1) ]],
+                         const device float* weights [[ buffer(2) ]],
+                         const device float* biases [[ buffer(3) ]],
                          const device float* old_state [[ buffer(4) ]],
                          device float* new_state [[ buffer(5) ]],
                          constant LSTMParameters& params [[ buffer(6) ]],

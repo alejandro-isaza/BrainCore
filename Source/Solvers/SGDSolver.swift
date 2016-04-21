@@ -85,7 +85,11 @@ public class SGDSolver {
     }
 
     /// Performs a parameter update on the GPU.
-    func encodeUpdateInBuffer(buffer: MTLCommandBuffer, values: MTLBuffer, deltas: MTLBuffer) {
+    func encodeUpdateInBuffer(buffer: MTLCommandBuffer, values: Buffer, deltas: Buffer) {
+        guard let valuesBuffer = values.metalBuffer, deltasBuffer = deltas.metalBuffer else {
+            preconditionFailure("Missing values or deltas buffer for parameter update")
+        }
+
         struct Parameters {
             var learningRate: Float
             var momentum: Float
@@ -93,12 +97,12 @@ public class SGDSolver {
         var params = Parameters(learningRate: Float(learningRate), momentum: Float(momentum))
         let paramsBuffer = trainer.device.newBufferWithBytes(&params, length: sizeof(Parameters), options: .CPUCacheModeWriteCombined)
 
-        var parameterLength = UInt32(values.length / sizeof(Float32))
+        var parameterLength = UInt32(valuesBuffer.length / sizeof(Float32))
         let encoder = buffer.computeCommandEncoder()
         encoder.label = "UpdateParameter"
         encoder.setComputePipelineState(updateFunction)
-        encoder.setBuffer(values, offset: 0, atIndex: 0)
-        encoder.setBuffer(deltas, offset: 0, atIndex: 1)
+        encoder.setBuffer(valuesBuffer, offset: 0, atIndex: 0)
+        encoder.setBuffer(deltasBuffer, offset: 0, atIndex: 1)
         encoder.setBuffer(paramsBuffer, offset: 0, atIndex: 2)
         encoder.setBytes(&parameterLength, length: sizeof(parameterLength.dynamicType), atIndex: 3)
 

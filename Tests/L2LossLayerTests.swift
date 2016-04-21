@@ -30,32 +30,34 @@ class L2LossLayerTests: MetalTestCase {
             }
         }
 
+        let dataLayer = Source(name: "input", data: input.elements, batchSize: batchSize)
+        let labelLayer = Source(name: "label", data: label.elements, batchSize: batchSize)
         let lossLayer = L2LossLayer(size: labelSize, name: "lossLayer")
-        try! lossLayer.setupInLibrary(library)
-
-        let queue = device.newCommandQueue()
-
-        let inputBuffer = device.newBufferWithLength(batchSize * (inputSize + labelSize) * sizeof(Float), options: .CPUCacheModeDefaultCache)
-        let outputBuffer = device.newBufferWithLength(batchSize * sizeof(Float), options: .CPUCacheModeDefaultCache)
-
-        fillBuffer(inputBuffer, start: 0, withElements: input.elements)
-        fillBuffer(inputBuffer, start: input.count, withElements: label.elements)
-
-        let commandBuffer = queue.commandBuffer()
-        lossLayer.encodeForwardInBuffer(commandBuffer, batchSize: batchSize, input: inputBuffer, offset: 0, output: outputBuffer, offset: 0)
-        commandBuffer.commit()
-        commandBuffer.waitUntilCompleted()
-
-        var expectedResult: Float = 0.0
-        for i in 0..<inputSize {
-            for j in 0..<batchSize {
-                let diff = input[i, j] - label[i, j]
-                expectedResult += diff * diff / 2
-            }
+        let sinkLayer = Sink(name: "output", inputSize: 1, batchSize: batchSize)
+        let net = Net.build {
+            [dataLayer, labelLayer] => lossLayer => sinkLayer
         }
 
-        let result = ValueArray<Float>((0..<batchSize).map{ UnsafeMutablePointer<Float>(outputBuffer.contents())[$0] })
-        XCTAssertEqualWithAccuracy(sum(result), expectedResult, accuracy: 0.01)
+        let expecation = expectationWithDescription("Net forward pass")
+        let trainer = try! Trainer(net: net, device: device, batchSize: batchSize)
+
+        var result = [Float]()
+        trainer.run() { snapshot in
+            result = [Float](snapshot.outputOfLayer(lossLayer)!)
+            expecation.fulfill()
+        }
+
+        waitForExpectationsWithTimeout(5) { error in
+            var expectedResult: Float = 0.0
+            for i in 0..<inputSize {
+                for j in 0..<batchSize {
+                    let diff = input[i, j] - label[i, j]
+                    expectedResult += diff * diff / 2
+                }
+            }
+
+            XCTAssertEqualWithAccuracy(sum(result), expectedResult, accuracy: 0.01)
+        }
     }
 
     func testBackward() {
@@ -63,58 +65,54 @@ class L2LossLayerTests: MetalTestCase {
         let inputSize = 64
         let labelSize = 64
 
-        let input = Matrix<Float>(rows: inputSize, columns: batchSize)
+        let input = Matrix<Float>(rows: batchSize, columns: inputSize)
         for i in 0..<inputSize {
             for j in 0..<batchSize {
-                input[i, j] = 2 * Float(arc4random()) / Float(UINT32_MAX) - 1.0
+                input[j, i] = 2 * Float(arc4random()) / Float(UINT32_MAX) - 1.0
             }
         }
 
-        let label = Matrix<Float>(rows: labelSize, columns: batchSize)
+        let label = Matrix<Float>(rows: batchSize, columns: labelSize)
         for i in 0..<labelSize {
             for j in 0..<batchSize {
-                label[i, j] = 2 * Float(arc4random()) / Float(UINT32_MAX) - 1.0
+                label[j, i] = 2 * Float(arc4random()) / Float(UINT32_MAX) - 1.0
             }
         }
-        
+
+        let dataLayer = Source(name: "input", data: input.elements, batchSize: batchSize)
+        let labelLayer = Source(name: "label", data: label.elements, batchSize: batchSize)
         let lossLayer = L2LossLayer(size: labelSize, name: "lossLayer")
-        try! lossLayer.setupInLibrary(library)
-
-        let queue = device.newCommandQueue()
-
-        let inputBuffer = device.newBufferWithLength(batchSize * (2 * labelSize) * sizeof(Float), options: .CPUCacheModeDefaultCache)
-        let deltasBuffer = device.newBufferWithLength(batchSize * (2 * labelSize) * sizeof(Float), options: .CPUCacheModeDefaultCache)
-        let outputBuffer = device.newBufferWithLength(batchSize * sizeof(Float), options: .CPUCacheModeDefaultCache)
-
-        fillBuffer(inputBuffer, start: 0, withElements: input.elements)
-        fillBuffer(inputBuffer, start: input.count, withElements: label.elements)
-
-        var commandBuffer = queue.commandBuffer()
-        lossLayer.encodeForwardInBuffer(commandBuffer, batchSize: batchSize, input: inputBuffer, offset: 0, output: outputBuffer, offset: 0)
-        commandBuffer.commit()
-        commandBuffer.waitUntilCompleted()
-
-        commandBuffer = queue.commandBuffer()
-        lossLayer.encodeBackwardLossInBuffer(commandBuffer, batchSize: batchSize, input: inputBuffer, deltas: deltasBuffer)
-        commandBuffer.commit()
-        commandBuffer.waitUntilCompleted()
-
-
-        let expectedResult = Matrix<Float>(rows: 2*labelSize, columns: batchSize)
-        for i in 0..<labelSize {
-            for j in 0..<batchSize {
-                let alpha: Float = 1 / Float(batchSize);
-                let diff = input[i, j] - label[i, j];
-                expectedResult[i, j] = alpha * diff;
-                expectedResult[i+labelSize, j] = alpha * -diff;
-            }
+        let sinkLayer = Sink(name: "output", inputSize: 1, batchSize: batchSize)
+        let net = Net.build {
+            dataLayer => lossLayer => sinkLayer
+            labelLayer => lossLayer
         }
 
-        let result = (0..<batchSize*(2*labelSize)).map{ UnsafeMutablePointer<Float>(deltasBuffer.contents())[$0] }
-        for i in 0..<labelSize {
-            for j in 0..<batchSize {
-                XCTAssertEqualWithAccuracy(result[j + i * batchSize], expectedResult[i, j], accuracy: 0.0001)
-                XCTAssertEqualWithAccuracy(result[j + i * batchSize + batchSize * labelSize], expectedResult[labelSize+i, j], accuracy: 0.0001)
+        let expecation = expectationWithDescription("Net backward pass")
+        let trainer = try! Trainer(net: net, device: device, batchSize: batchSize)
+        var inputDeltas = [Float]()
+        trainer.run() { snapshot in
+            inputDeltas = [Float](snapshot.inputDeltasOfLayer(lossLayer)!)
+            expecation.fulfill()
+        }
+
+        waitForExpectationsWithTimeout(5) { error in
+            let expectedResult = Matrix<Float>(rows: 2*labelSize, columns: batchSize)
+            for i in 0..<labelSize {
+                for j in 0..<batchSize {
+                    let alpha: Float = 1 / Float(batchSize);
+                    let diff = input[j, i] - label[j, i];
+                    expectedResult[i, j] = alpha * diff;
+                    expectedResult[i+labelSize, j] = alpha * -diff;
+                }
+            }
+
+            let result = inputDeltas[0..<batchSize*(2*labelSize)]
+            for i in 0..<labelSize {
+                for j in 0..<batchSize {
+                    XCTAssertEqualWithAccuracy(result[j + i * batchSize], expectedResult[i, j], accuracy: 0.0001)
+                    XCTAssertEqualWithAccuracy(result[j + i * batchSize + batchSize * labelSize], expectedResult[labelSize+i, j], accuracy: 0.0001)
+                }
             }
         }
     }
