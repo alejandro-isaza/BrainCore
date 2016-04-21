@@ -37,7 +37,7 @@ public class InnerProductLayer: BackwardLayer, TrainableLayer {
 
     var forwardInvocation: Invocation?
     var backwardParameterUpdateInvocation: Invocation?
-    var backwardStateUpdateInvocation: Invocation?
+    var backwardInputUpdateInvocation: Invocation?
 
     public var forwardInvocations: [Invocation] {
         return [forwardInvocation!]
@@ -46,7 +46,7 @@ public class InnerProductLayer: BackwardLayer, TrainableLayer {
     public var backwardInvocations: [Invocation] {
         return [
             backwardParameterUpdateInvocation!,
-            backwardStateUpdateInvocation!
+            backwardInputUpdateInvocation!
         ]
     }
 
@@ -62,7 +62,7 @@ public class InnerProductLayer: BackwardLayer, TrainableLayer {
             weightsBuffer = builder.createBuffer(name: "weights", elements: weights)
         }
         if biasesBuffer == nil {
-            biasesBuffer = self.biasesBuffer ?? builder.createBuffer(name: "biases", elements: biases)
+            biasesBuffer = builder.createBuffer(name: "biases", elements: biases)
         }
 
         let buffers = [
@@ -73,7 +73,7 @@ public class InnerProductLayer: BackwardLayer, TrainableLayer {
         ]
 
         let params = Parameters(batchSize: UInt16(batchSize), inputSize: UInt16(inputSize), outputSize: UInt16(outputSize))
-        forwardInvocation = try builder.createInvocation(functionName: "inner_product_forward", buffers: buffers, values: [params])
+        forwardInvocation = try builder.createInvocation(functionName: "inner_product_forward", buffers: buffers, values: [params], width: outputSize, height: batchSize)
     }
 
     public func initializeBackward(builder builder: BackwardInvocationBuilder, batchSize: Int) throws {
@@ -94,14 +94,14 @@ public class InnerProductLayer: BackwardLayer, TrainableLayer {
             weightDeltasBuffer!,
             biasDeltasBuffer!
         ]
-        backwardParameterUpdateInvocation = try builder.createInvocation(functionName: "inner_product_backward_params", buffers: paramUpdateBuffers, values: [params])
+        backwardParameterUpdateInvocation = try builder.createInvocation(functionName: "inner_product_backward_params", buffers: paramUpdateBuffers, values: [params], width: outputSize)
 
-        let sateUpdateBuffers = [
+        let inputUpdateBuffers = [
             builder.outputDeltasBuffer,
             builder.inputDeltasBuffer,
             weightsBuffer!,
         ]
-        backwardStateUpdateInvocation = try builder.createInvocation(functionName: "inner_product_backward_input", buffers: sateUpdateBuffers, values: [params])
+        backwardInputUpdateInvocation = try builder.createInvocation(functionName: "inner_product_backward_input", buffers: inputUpdateBuffers, values: [params], width: inputSize, height: batchSize)
     }
 
     public func encodeParametersUpdate(encodeAction: (values: Buffer, deltas: Buffer) -> Void) {
