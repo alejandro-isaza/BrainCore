@@ -47,8 +47,6 @@ public protocol ForwardLayer: Layer {
     func initializeForward(builder builder: ForwardInvocationBuilder, batchSize: Int) throws
 
     /// Return a list of invocations to perform forward propagation.
-    ///
-    /// The arguments to the Metal kernels should be input and output followed by any arguments supplied by each invocation.
     var forwardInvocations: [Invocation] { get }
 }
 
@@ -57,8 +55,6 @@ public protocol BackwardLayer: ForwardLayer {
     func initializeBackward(builder builder: BackwardInvocationBuilder, batchSize: Int) throws
 
     /// Return a list of invocations to perform backpropagation.
-    ///
-    /// The arguments to the Metal kernels should be output_deltas and input followed by any arguments supplied by each invocation.
     var backwardInvocations: [Invocation] { get }
 }
 
