@@ -56,12 +56,19 @@ class ReLULayerTests: MetalTestCase {
         for i in 0..<dataSize {
             input[i] = 2 * Float(arc4random()) / Float(UINT32_MAX) - 1.0
         }
+        let label = ValueArray<Float>(count: dataSize, repeatedValue: 0.0)
+        for i in 0..<dataSize {
+            label[i] = 2 * Float(arc4random()) / Float(UINT32_MAX) - 1.0
+        }
 
         let dataLayer = Source(name: "input", data: input, batchSize: batchSize)
+        let labelLayer = Source(name: "label", data: label, batchSize: batchSize)
         let layer = ReLULayer(size: dataSize, name: "ReLU")
         let lossLayer = L2LossLayer(size: dataSize)
+        let sinkLayer = Sink(name: "sink", inputSize: lossLayer.outputSize, batchSize: batchSize)
         let net = Net.build {
-            dataLayer => layer => lossLayer
+            dataLayer => layer
+            [layer, labelLayer] => lossLayer => sinkLayer
         }
 
         let expecation = expectationWithDescription("Net backward pass")
@@ -90,31 +97,46 @@ class ReLULayerTests: MetalTestCase {
         let dataSize = 16 * 1024
         let batchSize = 64
 
-        let data = ValueArray<Float>(count: dataSize, repeatedValue: 0.0)
-        for i in 0..<dataSize {
-            data[i] = 2 * Float(arc4random()) / Float(UINT32_MAX) - 1.0
+        let data = Matrix<Float>(rows: batchSize, columns: dataSize)
+        for i in 0..<batchSize {
+            for j in 0..<dataSize {
+                data[i, j] = 2 * Float(arc4random()) / Float(UINT32_MAX) - 1.0
+            }
+        }
+        let label = Matrix<Float>(rows: batchSize, columns: dataSize)
+        for i in 0..<batchSize {
+            for j in 0..<dataSize {
+                label[i, j] = 2 * Float(arc4random()) / Float(UINT32_MAX) - 1.0
+            }
         }
 
-        let dataLayer = Source(name: "input", data: data, batchSize: batchSize)
+        let dataLayer = Source(name: "input", data: data.elements, batchSize: batchSize)
+        let labelLayer = Source(name: "label", data: label.elements, batchSize: batchSize)
         let layer = ReLULayer(size: dataSize, name: "ReLU")
-        let sinkLayer = Sink(name: "output", inputSize: dataSize, batchSize: batchSize)
+        let lossLayer = L2LossLayer(size: dataSize)
+        let sinkLayer = Sink(name: "output", inputSize: 1, batchSize: batchSize)
         let net = Net.build {
-            dataLayer => layer => sinkLayer
+            dataLayer => layer
+            [layer, labelLayer] => lossLayer => sinkLayer
         }
 
         let expecation = expectationWithDescription("Net forward pass")
-        let evaluator = try! Evaluator(net: net, device: device)
-        evaluator.evaluate() { snapshot in
+        let trainer = try! Trainer(net: net, device: device, batchSize: batchSize)
+
+        var result = [Float]()
+        trainer.run() { snapshot in
+            result = [Float](snapshot.outputOfLayer(layer)!)
             expecation.fulfill()
         }
 
         waitForExpectationsWithTimeout(5) { error in
-            let result = sinkLayer.data
             for i in 0..<dataSize {
-                if data[i] >= 0 {
-                    XCTAssertEqualWithAccuracy(result[i], data[i], accuracy: 0.001)
-                } else {
-                    XCTAssertEqual(result[i], 0.0)
+                for j in 0..<batchSize {
+                    if data[j, i] >= 0 {
+                        XCTAssertEqualWithAccuracy(result[j + i * batchSize], data[j, i], accuracy: 0.001)
+                    } else {
+                        XCTAssertEqual(result[j + i * batchSize], 0.0)
+                    }
                 }
             }
         }

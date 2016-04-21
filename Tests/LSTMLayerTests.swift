@@ -64,7 +64,7 @@ class LSTMLayerTests: MetalTestCase {
         let inputSize = 64
         let unitCount = 128
 
-        let input = Matrix<Float>(rows: inputSize, columns: batchSize)
+        let input = Matrix<Float>(rows: batchSize, columns: inputSize)
         for i in 0..<input.rows {
             for j in 0..<input.columns {
                 input[i, j] = 2 * Float(arc4random()) / Float(UINT32_MAX) - 1.0
@@ -91,22 +91,23 @@ class LSTMLayerTests: MetalTestCase {
         }
 
         let expecation = expectationWithDescription("Net forward pass")
-        let evaluator = try! Evaluator(net: net, device: device)
-        evaluator.evaluate() { snapshot in
+        let trainer = try! Trainer(net: net, device: device, batchSize: batchSize)
+
+        var result = [Float]()
+        trainer.run() { snapshot in
+            result = [Float](snapshot.outputOfLayer(layer)!)
+            XCTAssertEqual(result.count, batchSize * unitCount)
             expecation.fulfill()
         }
 
         waitForExpectationsWithTimeout(5) { error in
-            let result = sinkLayer.data
-            XCTAssertEqual(result.count, batchSize * unitCount)
-
             for i in 0..<batchSize {
                 for j in 0..<unitCount {
                     var inputGate: Float = 0.0
                     var newInput: Float = 0.0
                     var outputGate: Float = 0.0
                     for k in 0..<inputSize {
-                        let inputValue = input[k, i]
+                        let inputValue = input[i, k]
                         inputGate += weights[k, j] * inputValue
                         newInput += weights[k, j + unitCount] * inputValue
                         outputGate += weights[k, j + 3 * unitCount] * inputValue

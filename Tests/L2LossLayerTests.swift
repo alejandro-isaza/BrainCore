@@ -31,15 +31,19 @@ class L2LossLayerTests: MetalTestCase {
         }
 
         let dataLayer = Source(name: "input", data: input.elements, batchSize: batchSize)
+        let labelLayer = Source(name: "label", data: label.elements, batchSize: batchSize)
         let lossLayer = L2LossLayer(size: labelSize, name: "lossLayer")
         let sinkLayer = Sink(name: "output", inputSize: 1, batchSize: batchSize)
         let net = Net.build {
-            dataLayer => lossLayer => sinkLayer
+            [dataLayer, labelLayer] => lossLayer => sinkLayer
         }
 
         let expecation = expectationWithDescription("Net forward pass")
-        let evaluator = try! Evaluator(net: net, device: device)
-        evaluator.evaluate() { snapshot in
+        let trainer = try! Trainer(net: net, device: device, batchSize: batchSize)
+
+        var result = [Float]()
+        trainer.run() { snapshot in
+            result = [Float](snapshot.outputOfLayer(lossLayer)!)
             expecation.fulfill()
         }
 
@@ -52,7 +56,6 @@ class L2LossLayerTests: MetalTestCase {
                 }
             }
 
-            let result = sinkLayer.data
             XCTAssertEqualWithAccuracy(sum(result), expectedResult, accuracy: 0.01)
         }
     }
@@ -62,17 +65,17 @@ class L2LossLayerTests: MetalTestCase {
         let inputSize = 64
         let labelSize = 64
 
-        let input = Matrix<Float>(rows: inputSize, columns: batchSize)
+        let input = Matrix<Float>(rows: batchSize, columns: inputSize)
         for i in 0..<inputSize {
             for j in 0..<batchSize {
-                input[i, j] = 2 * Float(arc4random()) / Float(UINT32_MAX) - 1.0
+                input[j, i] = 2 * Float(arc4random()) / Float(UINT32_MAX) - 1.0
             }
         }
 
-        let label = Matrix<Float>(rows: labelSize, columns: batchSize)
+        let label = Matrix<Float>(rows: batchSize, columns: labelSize)
         for i in 0..<labelSize {
             for j in 0..<batchSize {
-                label[i, j] = 2 * Float(arc4random()) / Float(UINT32_MAX) - 1.0
+                label[j, i] = 2 * Float(arc4random()) / Float(UINT32_MAX) - 1.0
             }
         }
 
@@ -98,7 +101,7 @@ class L2LossLayerTests: MetalTestCase {
             for i in 0..<labelSize {
                 for j in 0..<batchSize {
                     let alpha: Float = 1 / Float(batchSize);
-                    let diff = input[i, j] - label[i, j];
+                    let diff = input[j, i] - label[j, i];
                     expectedResult[i, j] = alpha * diff;
                     expectedResult[i+labelSize, j] = alpha * -diff;
                 }

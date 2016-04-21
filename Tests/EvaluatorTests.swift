@@ -29,12 +29,11 @@ class EvaluatorTests: MetalTestCase {
 
         let expecation = expectationWithDescription("Net forward pass")
         let evaluator = try! Evaluator(net: net, device: device)
-        evaluator.evaluate() { _ in
+        evaluator.evaluate() { snapshot in
             expecation.fulfill()
         }
 
         let expected = data * weights + biases.toRowMatrix()
-        print(expected)
         waitForExpectationsWithTimeout(5) { error in
             if let error = error {
                 XCTFail("Net.forward() failed: \(error)")

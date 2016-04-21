@@ -10,6 +10,7 @@ import BrainCore
 import Metal
 import Upsurge
 
+
 func sigmoid(x: Float) -> Float {
     return 1.0 / (1.0 + exp(-x))
 }
@@ -56,12 +57,19 @@ class SigmoidLayerTests: MetalTestCase {
         for i in 0..<dataSize {
             input[i] = 2 * Float(arc4random()) / Float(UINT32_MAX) - 1.0
         }
+        let label = Blob(count: dataSize)
+        for i in 0..<dataSize {
+            label[i] = 2 * Float(arc4random()) / Float(UINT32_MAX) - 1.0
+        }
 
         let dataLayer = Source(name: "input", data: input, batchSize: batchSize)
+        let labelLayer = Source(name: "label", data: label, batchSize: batchSize)
         let layer = SigmoidLayer(size: dataSize, name: "layer")
         let lossLayer = L2LossLayer(size: dataSize)
+        let sinkLayer = Sink(name: "sink", inputSize: 1, batchSize: 1)
         let net = Net.build {
-            dataLayer => layer => lossLayer
+            dataLayer => layer
+            [layer, labelLayer] => lossLayer => sinkLayer
         }
 
         let expecation = expectationWithDescription("Net backward pass")
@@ -83,15 +91,17 @@ class SigmoidLayerTests: MetalTestCase {
 
     func testForwardLargeBatchSize() {
         let device = self.device
-        let dataSize = 64 * 1024
-        let batchSize = 64
+        let dataSize = 2
+        let batchSize = 4
 
-        let data = Blob(count: dataSize)
+        let data = Matrix<Float>(rows: batchSize, columns: dataSize)
         for i in 0..<dataSize {
-            data[i] = 2 * Float(arc4random()) / Float(UINT32_MAX) - 1.0
+            for j in 0..<batchSize {
+                data[j, i] = 2 * Float(arc4random()) / Float(UINT32_MAX) - 1.0
+            }
         }
 
-        let dataLayer = Source(name: "input", data: data, batchSize: batchSize)
+        let dataLayer = Source(name: "input", data: data.elements, batchSize: batchSize)
         let layer = SigmoidLayer(size: dataSize, name: "layer")
         let sinkLayer = Sink(name: "output", inputSize: dataSize, batchSize: batchSize)
         let net = Net.build {
@@ -99,15 +109,19 @@ class SigmoidLayerTests: MetalTestCase {
         }
 
         let expecation = expectationWithDescription("Net forward pass")
-        let evaluator = try! Evaluator(net: net, device: device)
-        evaluator.evaluate() { snapshot in
+
+        var result = [Float]()
+        let trainer = try! Trainer(net: net, device: device, batchSize: batchSize)
+        trainer.run() { snapshot in
+            result = [Float](snapshot.outputOfLayer(layer)!)
             expecation.fulfill()
         }
 
         waitForExpectationsWithTimeout(5) { error in
-            let result = sinkLayer.data
             for i in 0..<dataSize {
-                XCTAssertEqualWithAccuracy(result[i], sigmoid(data[i]), accuracy: 0.001)
+                for j in 0..<batchSize {
+                    XCTAssertEqualWithAccuracy(result[j + i * batchSize], sigmoid(data[j, i]), accuracy: 0.001)
+                }
             }
         }
     }
