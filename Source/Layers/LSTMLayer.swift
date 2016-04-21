@@ -46,6 +46,14 @@ public class LSTMLayer: ForwardLayer {
     var state0Buffer: Buffer?
     var state1Buffer: Buffer?
 
+    public var stateBuffer: Buffer? {
+        if currentState == 0 {
+            return state0Buffer
+        } else {
+            return state1Buffer
+        }
+    }
+
     public var forwardInvocations: [Invocation] {
         guard let forwardInvocation0 = forwardInvocation0, forwardInvocation1 = forwardInvocation1 else {
             fatalError("initializeForward needs to be called first")
