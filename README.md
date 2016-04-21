@@ -23,12 +23,40 @@ BrainCore is a simple but fast neural network framework written in Swift. It use
 
 ## Usage
 
-Currently **BrainCore** only supports executing pre-trained networks. Ideally you would train your network on a server using one of the well-established neural network frameworks and import the trained weights into BrainCore. We are working on implementing solvers so that you can do everything inside **BrainCore**, stay posted.
+### Net Definition Syntax
+- Square brackets (`[]`) indicate a concatenation when on the the left, and splitting when on the right.
+- `=>` indicates a connection between layers;
+  - From the first unattached output element of the left side, to the right side input.
+- `=>>` indicates a full output connection between layers; 
+  - Regardless of whether the left side's output has been attached, this will connect to the beginning of the output.
+```swift 
+let net = Net.build {
+	[dataLayer1, dataLayer2] => lstmLayer => ipLayer => reluLayer
+	reluLayer => sinkLayer1 // Here sinkLayer1 consumes reluLayer.output[0..<sinkLayer1.inputSize]
+	reluLayer => sinkLayer2 // and sinkLayer2 consumes reluLayer.output[sinkLayer1.inputSize..<sinkLayer1.inputSize + sinkLayer2.inputSize]
+}
+```
+is equivalent to:
+```swift 
+let net = Net.build {
+	[dataLayer1, dataLayer2] => lstmLayer => ipLayer => reluLayer => [sinkLayer1, sinkLayer2]
+}
+```
+is **NOT** equivalent to:
+```swift 
+let net = Net.build {
+	[dataLayer1, dataLayer2] => lstmLayer => ipLayer => reluLayer
+	reluLayer =>> sinkLayer1
+	reluLayer =>> sinkLayer2 // Here both sinkLayers consume the same data
+}
+```
 
+
+### Training
 Let's start by creating the layers.
 
 ```swift
-// Load weights and biases from a pre-trained network
+// Load weights and biases from a pre-trained network or just initialize to zeros
 let lstmWeights = ...
 let lstmBiases = ...
 let ipWeights = ...
@@ -40,40 +68,46 @@ let dataLayer2 = MyDataLayer()
 let lstmLayer = LSTMLayer(weights: lstmWeights, biases: lstmBiases)
 let ipLayer = InnerProductLayer(weights: ipWeights, biases: ipBiases)
 let reluLayer = ReLULayer(size: ipBiases.count)
-let sinkLayer = MySinkLayer()
+let sinkLayer1 = MySinkLayer()
+let sinkLayer2 = MySinkLayer()
 ```
 
-Next we'll build the net. Square brackets (`[]`) indicate a concatenation of the contained layer's outputs.
+Next we'll build the net. 
 
 ```swift
-let net = [dataLayer1, dataLayer2] => lstmLayer => ipLayer => reluLayer => sinkLayer
+let net = Net.build {
+	[dataLayer1, dataLayer2] => lstmLayer => ipLayer => reluLayer
+	reluLayer =>> sinkLayer1
+	reluLayer =>> sinkLayer2
+}
 ```
 
 And finally execute! You need to provide a Metal device to the runner which is usually just the default device. 
 
 ```swift
 let device = MTLCreateSystemDefaultDevice()!
-let runner = try! Runner(net: net, device: device)
-runner.forwardPassAction = {
-	// You will get notified here when the network is done a forward pass
+let trainer = try! Trainer(net: net, device: device, batchSize: 15)
+trainer.run = { snapshot in
+	// You will get notified here at the end of every step
 }
-runner.forward()
 ```
 
-The runner may fail to build if there is any problem creating the buffers or initializing all the Metal code, that's why there is a `try`.
-
-Calling `forward()` will execute a single forward pass, but you can call this as often as you want. In fact you will want to call `forward()` multiple times before you get any results back so that you maximise the GPU bandwidth.
-
-Your data layer will most likely want to provide new data every time you call `forward()`. So your code may look something like
+### Evaluating
+Sometimes you may have a pre-trained model that you just want to fetch output from after providing it data. This is the use-case of the `Evaluator`
 
 ```swift
+let net = Net.build {
+	data => ip => sink
+}
+let evaluator = try! Evaluator(net: net, device: device)
 while !shouldStop {
-	dataLayer.gather()
-	runner.forward()
+	data.gather()
+	evaluator.evaluate { snapshot in
+		let output = sink.data
+		// Here you can use the output data as you please
+	}
 }
 ```
-
-Also both the sink layer's `consume()` function and the `forwardPassAction` will be called from a background thread. Make sure you synchronize access to the data as needed and try not to block on either of those calls for too long.
 
 ## Contributing
 
