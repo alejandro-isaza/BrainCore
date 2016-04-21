@@ -16,8 +16,8 @@ public class Buffer {
     public let size: Int
 
     var netBuffer: NetBuffer?
-    var metalBuffer: MTLBuffer?
-    var metalBufferOffset = 0
+    public var metalBuffer: MTLBuffer?
+    public var metalBufferOffset = 0
 
     init(name: String, size: Int, netBuffer: NetBuffer, offset: Int = 0) {
         self.name = name
