@@ -5,7 +5,7 @@
 // contained in the file LICENSE at the root of the source code distribution
 // tree.
 
-import Foundation
+import Upsurge
 import Metal
 
 public class RNNLayer: TrainableLayer, BackwardLayer {
@@ -13,7 +13,7 @@ public class RNNLayer: TrainableLayer, BackwardLayer {
     public let name: String?
 
     /// The cell copies for each timestep
-    public var cells: [LSTMLayer]
+    public var cells: [LSTMNodeLayer]
 
     public var outputSize: Int {
         return cells.count * cells[0].outputSize
@@ -32,14 +32,14 @@ public class RNNLayer: TrainableLayer, BackwardLayer {
     }
 
 
-    public init(cell: LSTMLayer, sequenceLength: Int, name: String? = nil) {
+    public init(weights: Matrix<Float>, biases: ValueArray<Float>, sequenceLength: Int, name: String? = nil, clipTo: Float? = nil) {
         self.name = name
 
-        self.cells = (0..<sequenceLength).map({ LSTMLayer(weights: cell.weights, biases: cell.biases, continuous: false, time: $0, name: "\(cell.name) T\($0)", clipTo: cell.clipTo) })
+        self.cells = (0..<sequenceLength).map({ LSTMNodeLayer(weights: weights, biases: biases, time: $0, name: "\(name) T\($0)", clipTo: clipTo) })
 
         for (t, cell) in cells.enumerate() {
-            cell.previousLSTM = t-1 >= 0 ? cells[t-1] : nil
-            cell.nextLSTM = t+1 < cells.count ? cells[t+1] : nil
+            cell.previousNode = t-1 >= 0 ? cells[t-1] : nil
+            cell.nextNode = t+1 < cells.count ? cells[t+1] : nil
         }
     }
 

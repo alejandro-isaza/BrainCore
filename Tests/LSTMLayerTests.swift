@@ -35,7 +35,7 @@ class LSTMLayerTests: MetalTestCase {
         let biases = ValueArray<Float>(count: 4 * unitCount, repeatedValue: 0.0)
 
         let dataLayer = Source(name: "input", data: input.elements, batchSize: batchSize)
-        let layer = LSTMLayer(weights: weights, biases: biases, name: "layer")
+        let layer = LSTMLayer(weights: weights, biases: biases, batchSize: batchSize, name: "layer")
         let sinkLayer = Sink(name: "output", inputSize: unitCount, batchSize: batchSize)
         let net = Net.build {
             dataLayer => layer => sinkLayer
@@ -84,8 +84,7 @@ class LSTMLayerTests: MetalTestCase {
         let biases = ValueArray<Float>(count: 4 * unitCount, repeatedValue: 0.0)
 
         let dataLayer = Source(name: "input", data: input.elements, batchSize: batchSize)
-        let lstm = LSTMLayer(weights: weights, biases: biases, name: "lstm")
-        let layer = RNNLayer(cell: lstm, sequenceLength: 1, name: "lstm")
+        let layer = RNNLayer(weights: weights, biases: biases, sequenceLength: 1, name: "lstm")
         let sinkLayer = Sink(name: "output", inputSize: unitCount, batchSize: batchSize)
         let net = Net.build {
             dataLayer => layer => sinkLayer
@@ -135,8 +134,7 @@ class LSTMLayerTests: MetalTestCase {
 
         let dataLayer = Source(name: "input", data: input.elements, batchSize: batchSize)
         let labelLayer = Source(name: "input", data: labels.elements, batchSize: batchSize)
-        let lstm = LSTMLayer(weights: weights, biases: biases, name: "lstm")
-        let layer = RNNLayer(cell: lstm, sequenceLength: sequenceSize, name: "layer")
+        let layer = RNNLayer(weights: weights, biases: biases, sequenceLength: sequenceSize, name: "layer")
         let lossLayer = L2LossLayer(size: sequenceSize * unitCount, name: "loss")
         let sinkLayer = Sink(name: "output", inputSize: 1, batchSize: batchSize)
         let net = Net.build {
@@ -145,8 +143,9 @@ class LSTMLayerTests: MetalTestCase {
         }
 
         let expecation = expectationWithDescription("Net forward pass")
-        let trainer = try! Trainer(net: net, device: device, batchSize: batchSize)
-        trainer.run() { snapshot in
+        let solver = try! SGDSolver(net: net, device: device, batchSize: batchSize, stepCount: 1, learningRate: 0.1, momentum: 1)
+        solver.stepAction = { snapshot in
+            // Forward Buffers
             let output = [Float](snapshot.outputOfLayer(layer)!)
             let state0 = [Float](arrayFromBuffer(layer.cells[0].stateBuffer!.metalBuffer!))
             let state1 = [Float](arrayFromBuffer(layer.cells[1].stateBuffer!.metalBuffer!))
@@ -170,6 +169,7 @@ class LSTMLayerTests: MetalTestCase {
                 XCTAssertEqualWithAccuracy(activations1[i], expectedActivations1[i], accuracy: 0.0001)
             }
 
+            // Backward Buffers
             let outputDiff = [Float](snapshot.outputDeltasOfLayer(layer)!)
             let inputDiff = [Float](snapshot.inputDeltasOfLayer(layer)!)
             let stateDiff0 = [Float](arrayFromBuffer(layer.cells[0].stateDeltasBuffer!.metalBuffer!))
@@ -200,9 +200,24 @@ class LSTMLayerTests: MetalTestCase {
             XCTAssertEqualWithAccuracy(stateDiff0[1], expectedPreviousOutputDiff0, accuracy: 0.0001)
             XCTAssertEqualWithAccuracy(stateDiff1[1], expectedPreviousOutputDiff1, accuracy: 0.0001)
 
+            // Weight Buffers
+            let weightsBuffer = [Float](arrayFromBuffer(layer.cells[0].weightsBuffer!.metalBuffer!))
+            let biasesBuffer = [Float](arrayFromBuffer(layer.cells[0].biasesBuffer!.metalBuffer!))
+
+            let expectedWeightsBuffer: [Float] = [0.95022, 0.45267, 0.70031, 0.60259, 0.80067, 0.25922, 0.45189, 0.41626, 0.80006, 0.15104, 0.10034, 0.25297]
+            let expectedBiasesBuffer: [Float] = [0.65028, 0.20364, 0.15063, 0.10536]
+
+            for i in 0..<12 {
+                XCTAssertEqualWithAccuracy(weightsBuffer[i], expectedWeightsBuffer[i], accuracy: 0.0001)
+            }
+            for i in 0..<4 {
+                XCTAssertEqualWithAccuracy(biasesBuffer[i], expectedBiasesBuffer[i], accuracy: 0.0001)
+            }
 
             expecation.fulfill()
         }
+
+        solver.train({})
 
         waitForExpectationsWithTimeout(5) { _ in }
     }

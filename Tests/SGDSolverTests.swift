@@ -41,7 +41,7 @@ class SGDSolverTests: MetalTestCase {
             [sigmoid2, label] => loss => sink
         })
 
-        let solver = try! SGDSolver(device: device, net: net, batchSize: batchSize, stepCount: 1, learningRate: 0.5, momentum: 1.0)
+        let solver = try! SGDSolver(net: net, device: device, batchSize: batchSize, stepCount: 1, learningRate: 0.5, momentum: 1.0)
         let expecation = self.expectationWithDescription("Net forward pass 1")
         solver.stepAction = { snapshot in
             let sinkData = [Float](snapshot.inputOfLayer(sink)!)
