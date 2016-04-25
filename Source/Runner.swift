@@ -16,7 +16,7 @@ public class Runner {
     var library: MTLLibrary!
     var commandQueue: MTLCommandQueue
 
-    public init(net: Net, device: MTLDevice, batchSize: Int) throws {
+    public init(net: Net, device: MTLDevice, batchSize: Int, backwards: Bool) throws {
         self.net = net
         self.net.insertTransposeLayers()
         self.batchSize = batchSize
@@ -35,8 +35,10 @@ public class Runner {
             if let forwardLayer = node.layer as? ForwardLayer {
                 try initializeForwardNode(node, layer: forwardLayer)
             }
-            if let backwardLayer = node.layer as? BackwardLayer {
-                try initializeBackwardNode(node, layer: backwardLayer)
+            if backwards {
+                if let backwardLayer = node.layer as? BackwardLayer {
+                    try initializeBackwardNode(node, layer: backwardLayer)
+                }
             }
         }
     }
