@@ -17,11 +17,11 @@ public class Trainer: Runner {
     var inflightSemaphore: dispatch_semaphore_t
     var queue: dispatch_queue_t
     
-    public override init(net: Net, device: MTLDevice, batchSize: Int) throws {
+    public init(net: Net, device: MTLDevice, batchSize: Int) throws {
         queue = dispatch_queue_create("BrainCore.Evaluator", DISPATCH_QUEUE_SERIAL)
         inflightSemaphore = dispatch_semaphore_create(instanceCount)
 
-        try super.init(net: net, device: device, batchSize: batchSize)
+        try super.init(net: net, device: device, batchSize: batchSize, backwards: true)
 
         forwardInstance = Instance(buffers: net.buffers, device: device, batchSize: batchSize)
         backwardInstance = Instance(buffers: net.buffers, device: device, batchSize: batchSize)

@@ -23,7 +23,7 @@ public class SGDSolver {
     let updateFunctionName = "sgd_update_parameters"
     var updateFunction: MTLComputePipelineState
 
-    public init(device: MTLDevice, net: Net, batchSize: Int, stepCount: Int, learningRate: Double = 0.001, momentum: Double = 0.1) throws {
+    public init(net: Net, device: MTLDevice, batchSize: Int, stepCount: Int, learningRate: Double = 0.001, momentum: Double = 0.1) throws {
         self.net = net
         self.batchSize = batchSize
         self.learningRate = learningRate

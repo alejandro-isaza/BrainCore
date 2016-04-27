@@ -21,7 +21,7 @@ public class Evaluator: Runner {
     public init(net: Net, device: MTLDevice) throws {
         queue = dispatch_queue_create("BrainCore.Evaluator", DISPATCH_QUEUE_SERIAL)
         inflightSemaphore = dispatch_semaphore_create(instanceCount)
-        try super.init(net: net, device: device, batchSize: 1)
+        try super.init(net: net, device: device, batchSize: 1, backwards: false)
 
         for _ in 0..<instanceCount {
             let forwardInstance = Instance(buffers: net.buffers, device: device, batchSize: 1)

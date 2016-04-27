@@ -82,14 +82,14 @@ public class LSTMLayer: ForwardLayer {
 
         let buffers0 = [
             builder.inputBuffer,
-            builder.outputBuffer,
             weightsBuffer!,
             biasesBuffer!,
+            builder.outputBuffer,
             state0Buffer!,
             state1Buffer!
         ]
         forwardInvocation0 = try builder.createInvocation(
-            functionName: "lstm_forward",
+            functionName: "lstm_forward_simple",
             buffers: buffers0,
             values: [params],
             width: unitCount,
@@ -98,14 +98,14 @@ public class LSTMLayer: ForwardLayer {
 
         let buffers1 = [
             builder.inputBuffer,
-            builder.outputBuffer,
             weightsBuffer!,
             biasesBuffer!,
+            builder.outputBuffer,
             state1Buffer!,
             state0Buffer!
         ]
         forwardInvocation1 = try builder.createInvocation(
-            functionName: "lstm_forward",
+            functionName: "lstm_forward_simple",
             buffers: buffers1,
             values: [params],
             width: unitCount,
