@@ -35,7 +35,7 @@ let reluLayer = ReLULayer(size: ipBiases.count)
 let sinkLayer = MySinkLayer()
 ```
 
-**BrainCore** uses overloaded operators to make network definitions more concise. To connect layers together simply use the `=>` operator insie a `Net.build {}` closure: 
+**BrainCore** uses overloaded operators to make network definitions more concise. To connect layers together simply use the `=>` operator inside a `Net.build {}` closure: 
 
 ```swift
 let net = Net.build {
