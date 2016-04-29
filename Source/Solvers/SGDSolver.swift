@@ -10,9 +10,13 @@ import Metal
 public class SGDSolver {
     public let net: Net
     public let batchSize: Int
-    public var learningRate: Double
-    public var momentum: Double
-    
+
+    public var learningRate: Double {
+        return learningRateSchedule(initialLearningRate, currentStep)
+    }
+    public var learningRateSchedule: (Double, Int) -> Double
+    public var initialLearningRate: Double
+
     public internal(set) var currentStep: Int = 0
     public let stepCount: Int
     public var stepAction: ((Snapshot) -> Void)?
@@ -23,11 +27,11 @@ public class SGDSolver {
     let updateFunctionName = "sgd_update_parameters"
     var updateFunction: MTLComputePipelineState
 
-    public init(net: Net, device: MTLDevice, batchSize: Int, stepCount: Int, learningRate: Double = 0.001, momentum: Double = 0.1) throws {
+    public init(net: Net, device: MTLDevice, batchSize: Int, stepCount: Int, initialLearningRate: Double = 0.001, learningRateSchedule: (Double, Int) -> Double) throws {
         self.net = net
         self.batchSize = batchSize
-        self.learningRate = learningRate
-        self.momentum = momentum
+        self.learningRateSchedule = learningRateSchedule
+        self.initialLearningRate = initialLearningRate
         self.stepCount = stepCount
 
         queue = dispatch_queue_create("BrainCore.SGDSolver", DISPATCH_QUEUE_SERIAL)
@@ -54,7 +58,6 @@ public class SGDSolver {
             return
         }
 
-        learningRate = learningRate / (1 + momentum * Double(currentStep))
         currentStep += 1
 
         trainer.run({ snapshot in
@@ -92,9 +95,8 @@ public class SGDSolver {
 
         struct Parameters {
             var learningRate: Float
-            var momentum: Float
         }
-        var params = Parameters(learningRate: Float(learningRate), momentum: Float(momentum))
+        var params = Parameters(learningRate: Float(learningRate))
         let paramsBuffer = trainer.device.newBufferWithBytes(&params, length: sizeof(Parameters), options: .CPUCacheModeWriteCombined)
 
         var parameterLength = UInt32(valuesBuffer.length / sizeof(Float32))
