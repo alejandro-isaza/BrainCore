@@ -143,7 +143,7 @@ class LSTMLayerTests: MetalTestCase {
         }
 
         let expecation = expectationWithDescription("Net forward pass")
-        let solver = try! SGDSolver(net: net, device: device, batchSize: batchSize, stepCount: 1, learningRate: 0.1, momentum: 1)
+        let solver = try! SGDSolver(net: net, device: device, batchSize: batchSize, stepCount: 1, initialLearningRate: 0.1, learningRateSchedule: { $0.0 })
         solver.stepAction = { snapshot in
             // Forward Buffers
             let output = [Float](snapshot.outputOfLayer(layer)!)

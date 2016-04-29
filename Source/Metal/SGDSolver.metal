@@ -13,7 +13,6 @@ using namespace metal;
 
 struct SolverParameters {
     float learningRate;
-    float momentum;
 };
 
 kernel void sgd_update_parameters(device float* parameter [[ buffer(0) ]],
@@ -25,5 +24,5 @@ kernel void sgd_update_parameters(device float* parameter [[ buffer(0) ]],
     if (id >= *output_size)
         return;
     
-    parameter[id] = solverParams.momentum * parameter[id] - solverParams.learningRate * parameterDiff[id];
+    parameter[id] = parameter[id] - solverParams.learningRate * parameterDiff[id];
 }
