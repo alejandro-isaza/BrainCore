@@ -12,12 +12,7 @@ using namespace metal;
 
 
 kernel void reset_buffer(device float* input [[ buffer(0) ]],
-                         constant uint* count [[ buffer(1) ]],
                          uint elementIndex [[ thread_position_in_grid ]])
 {
-    if (elementIndex >= *count) {
-        return;
-    }
-    
     input[elementIndex] = 0.0;
 }

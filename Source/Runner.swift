@@ -52,7 +52,7 @@ public class Runner {
             name: inputNetBuffer.name ?? "input",
             size: inputNetBuffer.size,
             netBuffer: inputNetBuffer,
-            offset: node.inputRange.startIndex * sizeof(Float))
+            offset: batchSize * node.inputRange.startIndex * sizeof(Float))
 
         guard let outputNetBuffer = node.outputBuffer else {
             fatalError("Output buffer for \(layer.name) not found.")
@@ -61,7 +61,7 @@ public class Runner {
             name: outputNetBuffer.name ?? "output",
             size: outputNetBuffer.size,
             netBuffer: outputNetBuffer,
-            offset: node.outputRange.startIndex * sizeof(Float))
+            offset: batchSize * node.outputRange.startIndex * sizeof(Float))
 
         let invocationBuilder = ForwardInvocationBuilder(device: device, library: library, inputBuffer: inputBuffer, outputBuffer: outputBuffer)
         try layer.initializeForward(builder: invocationBuilder, batchSize: batchSize)
@@ -76,14 +76,14 @@ public class Runner {
             name: inputNetBuffer.name ?? "input",
             size: inputNetBuffer.size,
             netBuffer: inputNetBuffer,
-            offset: node.inputRange.startIndex * sizeof(Float))
+            offset: batchSize * node.inputRange.startIndex * sizeof(Float))
 
         let inputDeltasNetBuffer = NetBuffer(id: inputNetBuffer.id, type: .Deltas, name: inputNetBuffer.name)
         let inputDeltasBuffer = Buffer(
             name: inputDeltasNetBuffer.name ?? "input deltas",
             size: inputDeltasNetBuffer.size,
             netBuffer: inputDeltasNetBuffer,
-            offset: node.inputRange.startIndex * sizeof(Float))
+            offset: batchSize * node.inputRange.startIndex * sizeof(Float))
 
         guard let outputNetBuffer = node.outputBuffer else {
             fatalError("Output buffer for \(layer.name) not found.")
@@ -93,19 +93,19 @@ public class Runner {
             name: outputDeltasNetBuffer.name ?? "output deltas",
             size: outputDeltasNetBuffer.size,
             netBuffer: outputDeltasNetBuffer,
-            offset: node.outputRange.startIndex * sizeof(Float))
+            offset: batchSize * node.outputRange.startIndex * sizeof(Float))
 
         let invocationBuilder = BackwardInvocationBuilder(device: device, library: library, inputBuffer: inputBuffer, outputDeltasBuffer: outputDeltasBuffer, inputDeltasBuffer: inputDeltasBuffer)
         try layer.initializeBackward(builder: invocationBuilder, batchSize: batchSize)
     }
 
     /// Encode an invocation
-    func encode(invocation invocation: Invocation, forNode node: NetNode, commandBuffer: MTLCommandBuffer) throws {
+    public static func encode(invocation invocation: Invocation, commandBuffer: MTLCommandBuffer) throws {
         let encoder = commandBuffer.computeCommandEncoder()
         encoder.setComputePipelineState(invocation.pipelineState)
 
         for (index, buffer) in invocation.buffers.enumerate() {
-            encoder.setBuffer(buffer.metalBuffer!, offset: buffer.metalBufferOffset * batchSize, atIndex: index)
+            encoder.setBuffer(buffer.metalBuffer!, offset: buffer.metalBufferOffset, atIndex: index)
         }
 
         for (index, value) in invocation.values.enumerate() {

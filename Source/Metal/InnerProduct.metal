@@ -24,7 +24,7 @@ kernel void inner_product_forward(const device float* input [[ buffer(0) ]],
 {
     const auto outputElement = id.x;
     const auto batchElement = id.y;
-    
+
     if (outputElement >= dims.output_size || batchElement >= dims.batch_size)
         return;
     

@@ -40,6 +40,8 @@ public class LSTMLayer: ForwardLayer {
 
     var forwardInvocation0: Invocation?
     var forwardInvocation1: Invocation?
+    var reset0Invocation: Invocation?
+    var reset1Invocation: Invocation?
 
     var weightsBuffer: Buffer?
     var biasesBuffer: Buffer?
@@ -110,18 +112,21 @@ public class LSTMLayer: ForwardLayer {
             values: [params],
             width: unitCount,
             height: batchSize)
+
+        reset0Invocation = try builder.createInvocation(
+            functionName: "reset_buffer",
+            buffers: [state0Buffer!],
+            values: [],
+            width: stateSize * batchSize)
+        reset1Invocation = try builder.createInvocation(
+            functionName: "reset_buffer",
+            buffers: [state1Buffer!],
+            values: [],
+            width: stateSize * batchSize)
     }
 
     /// Reset the internal LSTM state
-    public func reset() {
-        let pointer0 = UnsafeMutablePointer<Float>(state0Buffer!.metalBuffer!.contents())
-        for i in 0..<state0Buffer!.metalBuffer!.length / sizeof(Float) {
-            pointer0[i] = 0.0
-        }
-        let pointer1 = UnsafeMutablePointer<Float>(state1Buffer!.metalBuffer!.contents())
-        for i in 0..<state1Buffer!.metalBuffer!.length / sizeof(Float) {
-            pointer1[i] = 0.0
-        }
-        currentState = 0
+    public var resetInvocations: [Invocation] {
+        return [reset0Invocation!, reset1Invocation!]
     }
 }

@@ -29,6 +29,26 @@ public class Evaluator: Runner {
         }
     }
 
+    public func call(invocations: [Invocation], completion: (() -> Void)?) {
+        dispatch_sync(queue) {
+            self.callInQueue(invocations, completion: completion)
+        }
+    }
+
+    func callInQueue(invocations: [Invocation], completion: (() -> Void)?) {
+        let buffer = commandQueue.commandBuffer()
+        for invocation in invocations {
+            try! Runner.encode(invocation: invocation, commandBuffer: buffer)
+        }
+
+        buffer.addCompletedHandler() { commandBuffer in
+            dispatch_async(self.queue) {
+                completion?()
+            }
+        }
+        buffer.commit()
+    }
+
     /// Perform a forward pass on the network. Always call this method from the same serial queue.
     ///
     /// - parameter completion: Invoked when the evaluation finishes. It gets passed a snapshot of the network results.
@@ -84,7 +104,7 @@ public class Evaluator: Runner {
                         buffer.metalBuffer = metalBuffer
                     }
                 }
-                try! encode(invocation: invocation, forNode: node, commandBuffer: buffer)
+                try! Runner.encode(invocation: invocation, commandBuffer: buffer)
             }
 
             buffer.addCompletedHandler() { commandBuffer in

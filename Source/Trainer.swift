@@ -78,7 +78,7 @@ public class Trainer: Runner {
             let buffer = commandQueue.commandBuffer()
             for invocation in forwardLayer.forwardInvocations {
                 initializeBuffers(invocation.buffers)
-                try! encode(invocation: invocation, forNode: node, commandBuffer: buffer)
+                try! Runner.encode(invocation: invocation, commandBuffer: buffer)
             }
 
             buffer.addCompletedHandler() { commandBuffer in
@@ -119,7 +119,7 @@ public class Trainer: Runner {
             if let backwardLayer = node.layer as? BackwardLayer {
                 for invocation in backwardLayer.backwardInvocations {
                     initializeBuffers(invocation.buffers)
-                    try! encode(invocation: invocation, forNode: node, commandBuffer: buffer)
+                    try! Runner.encode(invocation: invocation, commandBuffer: buffer)
                 }
             }
 
