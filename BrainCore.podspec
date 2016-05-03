@@ -10,7 +10,7 @@ Pod::Spec.new do |s|
   s.osx.deployment_target = "10.11"
 
   s.source = { git: "https://github.com/aleph7/BrainCore.git", tag: s.version, submodules: true }
-  s.source_files = "Source", "Source/Layers", "Source/Metal/*.metal", "Source/Metal/*.h"
+  s.source_files = "Source/**/*.swift", "Source/Metal/*.metal", "Source/Metal/*.h"
   s.private_header_files = "Source/Metal/*.h"
 
   s.dependency "Upsurge", '~> 0.7'
