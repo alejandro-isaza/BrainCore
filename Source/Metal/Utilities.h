@@ -28,20 +28,28 @@ inline const device float& at(const device Buffer* b, unsigned int inputItem, un
     return b->data[inputItem * b->batchSize * b->sequenceSize + sequenceItem * b->batchSize + batchItem];
 }
 
-inline device float& at(device Buffer* b, unsigned int inputItem) {
-    return b->data[inputItem * b->batchSize * b->sequenceSize];
-}
-
-inline const device float& at(const device Buffer* b, unsigned int inputItem) {
-    return b->data[inputItem * b->batchSize * b->sequenceSize];
-}
-
 inline device float& at(device Buffer* b, metal::uint3 index) {
     return b->data[index[2] * b->batchSize * b->sequenceSize + index[1] * b->batchSize + index[0]];
 }
 
 inline const device float& at(const device Buffer* b, metal::uint3 index) {
     return b->data[index[2] * b->batchSize * b->sequenceSize + index[1] * b->batchSize + index[0]];
+}
+
+inline device float& at(device Buffer* b, metal::uint2 index) {
+    return b->data[index[1] * b->batchSize + index[0]];
+}
+
+inline const device float& at(const device Buffer* b, metal::uint2 index) {
+    return b->data[index[1] * b->batchSize + index[0]];
+}
+
+inline device float& at(device Buffer* b, unsigned int index) {
+    return b->data[index];
+}
+
+inline const device float& at(const device Buffer* b, unsigned int index) {
+    return b->data[index];
 }
 
 inline bool isValid(const device Buffer* b, metal::uint3 index) {
