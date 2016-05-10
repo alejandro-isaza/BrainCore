@@ -10,6 +10,7 @@
 #include "Utilities.h"
 
 using namespace metal;
+using namespace bc;
 
 struct InnerProductDimensions {
     ushort batch_size;
@@ -17,61 +18,67 @@ struct InnerProductDimensions {
     ushort output_size;
 };
 
-kernel void inner_product_forward(const device bc::Buffer* input [[ buffer(0) ]],
-                                  device bc::Buffer* output [[ buffer(1) ]],
-                                  const device bc::Buffer* weights [[ buffer(2) ]],
-                                  const device bc::Buffer* biases [[ buffer(3) ]],
+kernel void inner_product_forward(const device Buffer* input [[ buffer(0) ]],
+                                  device Buffer* output [[ buffer(1) ]],
+                                  const device Buffer* weights [[ buffer(2) ]],
+                                  const device Buffer* biases [[ buffer(3) ]],
                                   constant InnerProductDimensions& dims [[ buffer(4) ]],
-                                  uint2 id [[ thread_position_in_grid ]])
+                                  uint3 id [[ thread_position_in_grid ]])
 {
-    const auto outputElement = id.x;
-    const auto batchElement = id.y;
-
-    if (outputElement >= dims.output_size || batchElement >= dims.batch_size)
+    if (!isValid(output, id))
         return;
-    
-    output[batchElement + outputElement * dims.batch_size] = biases[outputElement];
+
+    const auto outputElement = id[2];
+    const auto sequenceElement = id[1];
+    const auto batchElement = id[0];
+
+    at(output, id) = at(biases, outputElement);
     for (uint i = 0; i < dims.input_size; i += 1) {
-        output[batchElement + outputElement * dims.batch_size] += weights[outputElement + i * dims.output_size] * input[batchElement + i * dims.batch_size];
+        at(output, id) += at(weights, {i, outputElement}) * at(input, {i, sequenceElement, batchElement});
     }
 }
 
-kernel void inner_product_backward_params(const device bc::Buffer* output_deltas [[ buffer(0) ]],
-                                          const device bc::Buffer* input [[ buffer(1) ]],
-                                          device bc::Buffer* weight_deltas [[ buffer(2) ]],
-                                          device bc::Buffer* bias_deltas [[ buffer(3) ]],
+kernel void inner_product_backward_params(const device Buffer* output_deltas [[ buffer(0) ]],
+                                          const device Buffer* input [[ buffer(1) ]],
+                                          device Buffer* weight_deltas [[ buffer(2) ]],
+                                          device Buffer* bias_deltas [[ buffer(3) ]],
                                           constant InnerProductDimensions& dims [[ buffer(4) ]],
-                                          uint outputElement [[ thread_position_in_grid ]])
+                                          uint3 id [[ thread_position_in_grid ]])
 {
-    if (outputElement >= dims.output_size)
+    if (!isValid(weight_deltas, id) || !isValid(weight_deltas, id))
         return;
 
+    const auto outputElement = id[0];
+
     for (uint i = 0; i < dims.input_size; i += 1) {
-        weight_deltas[outputElement +  i * dims.output_size] = 0.0;
+        at(weight_deltas, {i, outputElement}) = 0.0;
     }
-    bias_deltas[outputElement] = 0.0;
-    for (uint i = 0; i < dims.batch_size; i += 1) {
-        for (uint j = 0; j < dims.input_size; j += 1) {
-            weight_deltas[outputElement +  j * dims.output_size] += output_deltas[i + outputElement * dims.batch_size] * input[i + j * dims.batch_size];
+    at(bias_deltas, outputElement) = 0.0;
+    for (uint sequenceElement = 0; sequenceElement < input->sequenceSize; sequenceElement += 1) {
+        for (uint batchElement = 0; batchElement < input->batchSize; batchElement += 1) {
+            for (uint inputElement = 0; inputElement < input->inputSize; inputElement += 1) {
+                at(weight_deltas, {inputElement, outputElement}) += at(output_deltas, {outputElement, sequenceElement, batchElement}) * at(input, {inputElement, sequenceElement, batchElement});
+            }
+            at(bias_deltas, outputElement) += at(output_deltas, {outputElement, sequenceElement, batchElement});
         }
-        bias_deltas[outputElement] += output_deltas[i + outputElement * dims.batch_size];
     }
 }
 
-kernel void inner_product_backward_input(const device bc::Buffer* output_deltas [[ buffer(0) ]],
-                                         device bc::Buffer* input_deltas [[ buffer(1) ]],
-                                         const device bc::Buffer* weights [[ buffer(2) ]],
+kernel void inner_product_backward_input(const device Buffer* output_deltas [[ buffer(0) ]],
+                                         device Buffer* input_deltas [[ buffer(1) ]],
+                                         const device Buffer* weights [[ buffer(2) ]],
                                          constant InnerProductDimensions& dims [[ buffer(3) ]],
-                                         uint2 id [[ thread_position_in_grid ]])
+                                         uint3 id [[ thread_position_in_grid ]])
 {
-    const auto inputElement = id.x;
-    const auto batchElement = id.y;
-    
-    if (inputElement >= dims.input_size || batchElement >= dims.batch_size)
+    if (!isValid(input_deltas, id))
         return;
 
-    input_deltas[batchElement + inputElement * dims.batch_size] = 0.0;
-    for (uint i = 0; i < dims.output_size; i += 1) {
-        input_deltas[batchElement + inputElement * dims.batch_size] += weights[i + inputElement * dims.output_size] * output_deltas[batchElement + i * dims.batch_size];
+    const auto inputElement = id[2];
+    const auto batchElement = id[1];
+    const auto sequenceElement = id[0];
+
+    at(input_deltas, id) = 0.0;
+    for (uint outputElement = 0; outputElement < dims.output_size; outputElement += 1) {
+        at(input_deltas, id) += at(weights, {inputElement, outputElement}) * at(output_deltas, {outputElement, sequenceElement, batchElement});
     }
 }
