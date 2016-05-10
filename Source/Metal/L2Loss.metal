@@ -8,6 +8,8 @@
 #include <metal_stdlib>
 #include <metal_common>
 
+#include "Utilities.h"
+
 using namespace metal;
 
 
@@ -16,8 +18,8 @@ struct L2LossDimensions {
     uint input_size;
 };
 
-kernel void l2_loss_forward(const device float* input [[ buffer(0) ]],
-                            device float* output [[ buffer(1) ]],
+kernel void l2_loss_forward(const device bc::Buffer* input [[ buffer(0) ]],
+                            device bc::Buffer* output [[ buffer(1) ]],
                             constant L2LossDimensions& dims [[ buffer(2) ]],
                             uint batchElement [[ thread_position_in_grid ]])
 {
@@ -35,8 +37,8 @@ kernel void l2_loss_forward(const device float* input [[ buffer(0) ]],
     }
 }
 
-kernel void l2_loss_backward(const device float* input [[ buffer(0) ]],
-                             device float* deltas [[ buffer(1) ]],
+kernel void l2_loss_backward(const device bc::Buffer* input [[ buffer(0) ]],
+                             device bc::Buffer* deltas [[ buffer(1) ]],
                              constant L2LossDimensions& dims [[ buffer(2) ]],
                              uint2 id [[ thread_position_in_grid ]])
 {

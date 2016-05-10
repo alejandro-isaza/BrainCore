@@ -8,6 +8,8 @@
 #include <metal_stdlib>
 #include <metal_common>
 
+#include "Utilities.h"
+
 using namespace metal;
 
 
@@ -16,8 +18,8 @@ struct TransposeDimensions {
     uint input_size;
 };
 
-kernel void transpose(const device float* input [[ buffer(0) ]],
-                      device float* output [[ buffer(1) ]],
+kernel void transpose(const device bc::Buffer* input [[ buffer(0) ]],
+                      device bc::Buffer* output [[ buffer(1) ]],
                       constant TransposeDimensions& dims [[ buffer(2) ]],
                       uint2 id [[ thread_position_in_grid ]])
 {

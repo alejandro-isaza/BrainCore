@@ -18,13 +18,13 @@ struct LSTMParameters {
     float clip_to;
 };
 
-kernel void lstm_forward_temporal(const device float* input [[ buffer(0) ]],
-                         const device float* weights [[ buffer(1) ]],
-                         const device float* biases [[ buffer(2) ]],
-                         device float* output [[ buffer(3) ]],
-                         device float* activations [[ buffer(4) ]],
-                         const device float* previous_state [[ buffer(5) ]],
-                         device float* state [[ buffer(6) ]],
+kernel void lstm_forward_temporal(const device bc::Buffer* input [[ buffer(0) ]],
+                         const device bc::Buffer* weights [[ buffer(1) ]],
+                         const device bc::Buffer* biases [[ buffer(2) ]],
+                         device bc::Buffer* output [[ buffer(3) ]],
+                         device bc::Buffer* activations [[ buffer(4) ]],
+                         const device bc::Buffer* previous_state [[ buffer(5) ]],
+                         device bc::Buffer* state [[ buffer(6) ]],
                          const device uint* time [[ buffer(7) ]],
                          constant LSTMParameters& params [[ buffer(8) ]],
                          uint2 id [[ thread_position_in_grid ]])
@@ -78,12 +78,12 @@ kernel void lstm_forward_temporal(const device float* input [[ buffer(0) ]],
     activations[output_gate_index      + batch_element * 4 * params.unit_count] = output_gate;
 }
 
-kernel void lstm_forward_simple(const device float* input [[ buffer(0) ]],
-                                const device float* weights [[ buffer(1) ]],
-                                const device float* biases [[ buffer(2) ]],
-                                device float* output [[ buffer(3) ]],
-                                const device float* previous_state [[ buffer(4) ]],
-                                device float* state [[ buffer(5) ]],
+kernel void lstm_forward_simple(const device bc::Buffer* input [[ buffer(0) ]],
+                                const device bc::Buffer* weights [[ buffer(1) ]],
+                                const device bc::Buffer* biases [[ buffer(2) ]],
+                                device bc::Buffer* output [[ buffer(3) ]],
+                                const device bc::Buffer* previous_state [[ buffer(4) ]],
+                                device bc::Buffer* state [[ buffer(5) ]],
                                 constant LSTMParameters& params [[ buffer(6) ]],
                                 uint2 id [[ thread_position_in_grid ]])
 {
@@ -131,16 +131,16 @@ kernel void lstm_forward_simple(const device float* input [[ buffer(0) ]],
     state[unit + params.unit_count * (1 + batch_element * 2)] = out;
 }
 
-kernel void lstm_backward_activations(const device float* output_delta [[ buffer(0) ]],
-                                      const device float* weights [[ buffer(1) ]],
-                                      const device float* activations [[ buffer(2) ]],
-                                      const device float* future_activations [[ buffer(3) ]],
-                                      device float* activation_delta [[ buffer(4) ]],
-                                      const device float* future_activation_delta [[ buffer(5) ]],
-                                      const device float* state [[ buffer(6) ]],
-                                      device float* state_delta [[ buffer(7) ]],
-                                      const device float* old_state [[ buffer(8) ]],
-                                      const device float* future_state_delta [[ buffer(9) ]],
+kernel void lstm_backward_activations(const device bc::Buffer* output_delta [[ buffer(0) ]],
+                                      const device bc::Buffer* weights [[ buffer(1) ]],
+                                      const device bc::Buffer* activations [[ buffer(2) ]],
+                                      const device bc::Buffer* future_activations [[ buffer(3) ]],
+                                      device bc::Buffer* activation_delta [[ buffer(4) ]],
+                                      const device bc::Buffer* future_activation_delta [[ buffer(5) ]],
+                                      const device bc::Buffer* state [[ buffer(6) ]],
+                                      device bc::Buffer* state_delta [[ buffer(7) ]],
+                                      const device bc::Buffer* old_state [[ buffer(8) ]],
+                                      const device bc::Buffer* future_state_delta [[ buffer(9) ]],
                                       const device uint* time [[ buffer(10) ]],
                                       constant LSTMParameters& params [[ buffer(11) ]],
                                       uint2 id [[ thread_position_in_grid ]])
@@ -218,12 +218,12 @@ kernel void lstm_backward_activations(const device float* output_delta [[ buffer
     state_delta[unit + params.unit_count + batch_element * 2 * params.unit_count] += weights[output_gate_index + (params.input_size + unit) * 4 * params.unit_count]      * activation_delta[batch_element * 4 * params.unit_count + output_gate_index];
 }
 
-kernel void lstm_backward_weights(const device float* input [[ buffer(0) ]],
-                                  const device float* state [[ buffer(1) ]],
-                                  device float* weights_delta [[ buffer(2) ]],
-                                  device float* bias_delta [[ buffer(3) ]],
-                                  const device float* activation_delta [[ buffer(4) ]],
-                                  const device float* future_activation_delta [[ buffer(5) ]],
+kernel void lstm_backward_weights(const device bc::Buffer* input [[ buffer(0) ]],
+                                  const device bc::Buffer* state [[ buffer(1) ]],
+                                  device bc::Buffer* weights_delta [[ buffer(2) ]],
+                                  device bc::Buffer* bias_delta [[ buffer(3) ]],
+                                  const device bc::Buffer* activation_delta [[ buffer(4) ]],
+                                  const device bc::Buffer* future_activation_delta [[ buffer(5) ]],
                                   const device uint* time [[ buffer(6) ]],
                                   constant LSTMParameters& params [[ buffer(7) ]],
                                   uint unit [[ thread_position_in_grid ]])
@@ -261,9 +261,9 @@ kernel void lstm_backward_weights(const device float* input [[ buffer(0) ]],
     }
 }
 
-kernel void lstm_backward_inputs(device float* input_delta [[ buffer(0) ]],
-                                 const device float* weights [[ buffer(1) ]],
-                                 const device float* activation_delta [[ buffer(2) ]],
+kernel void lstm_backward_inputs(device bc::Buffer* input_delta [[ buffer(0) ]],
+                                 const device bc::Buffer* weights [[ buffer(1) ]],
+                                 const device bc::Buffer* activation_delta [[ buffer(2) ]],
                                  const device uint* time [[ buffer(3) ]],
                                  constant LSTMParameters& params [[ buffer(4) ]],
                                  uint2 id [[ thread_position_in_grid ]])

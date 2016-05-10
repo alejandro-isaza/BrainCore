@@ -7,6 +7,8 @@
 
 #include <metal_stdlib>
 
+#include "Utilities.h"
+
 using namespace metal;
 
 struct InnerProductDimensions {
@@ -15,10 +17,10 @@ struct InnerProductDimensions {
     ushort output_size;
 };
 
-kernel void inner_product_forward(const device float* input [[ buffer(0) ]],
-                                  device float* output [[ buffer(1) ]],
-                                  const device float* weights [[ buffer(2) ]],
-                                  const device float* biases [[ buffer(3) ]],
+kernel void inner_product_forward(const device bc::Buffer* input [[ buffer(0) ]],
+                                  device bc::Buffer* output [[ buffer(1) ]],
+                                  const device bc::Buffer* weights [[ buffer(2) ]],
+                                  const device bc::Buffer* biases [[ buffer(3) ]],
                                   constant InnerProductDimensions& dims [[ buffer(4) ]],
                                   uint2 id [[ thread_position_in_grid ]])
 {
@@ -34,10 +36,10 @@ kernel void inner_product_forward(const device float* input [[ buffer(0) ]],
     }
 }
 
-kernel void inner_product_backward_params(const device float* output_deltas [[ buffer(0) ]],
-                                          const device float* input [[ buffer(1) ]],
-                                          device float* weight_deltas [[ buffer(2) ]],
-                                          device float* bias_deltas [[ buffer(3) ]],
+kernel void inner_product_backward_params(const device bc::Buffer* output_deltas [[ buffer(0) ]],
+                                          const device bc::Buffer* input [[ buffer(1) ]],
+                                          device bc::Buffer* weight_deltas [[ buffer(2) ]],
+                                          device bc::Buffer* bias_deltas [[ buffer(3) ]],
                                           constant InnerProductDimensions& dims [[ buffer(4) ]],
                                           uint outputElement [[ thread_position_in_grid ]])
 {
@@ -56,9 +58,9 @@ kernel void inner_product_backward_params(const device float* output_deltas [[ b
     }
 }
 
-kernel void inner_product_backward_input(const device float* output_deltas [[ buffer(0) ]],
-                                         device float* input_deltas [[ buffer(1) ]],
-                                         const device float* weights [[ buffer(2) ]],
+kernel void inner_product_backward_input(const device bc::Buffer* output_deltas [[ buffer(0) ]],
+                                         device bc::Buffer* input_deltas [[ buffer(1) ]],
+                                         const device bc::Buffer* weights [[ buffer(2) ]],
                                          constant InnerProductDimensions& dims [[ buffer(3) ]],
                                          uint2 id [[ thread_position_in_grid ]])
 {

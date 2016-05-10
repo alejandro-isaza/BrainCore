@@ -20,8 +20,17 @@ public class InvocationBuilder {
     /// Create a buffer initialized with the given elements
     public func createBuffer<T: TensorType where T.Element == Float>(name name: String, elements: T) -> Buffer {
         let size = elements.count * sizeof(Float)
-        let buffer = withPointer(elements) { elementsPointer in
-            return device.newBufferWithBytes(elementsPointer, length: size, options: .CPUCacheModeDefaultCache)
+        let buffer = withPointer(elements) { (elementsPointer: UnsafePointer<Float>) -> MTLBuffer in
+            let length = size + sizeof(GPUBufferHeader)
+            let buffer = device.newBufferWithLength(length, options: .CPUCacheModeDefaultCache)
+
+            let header = GPUBufferHeader(inputSize: size, sequenceSize: 1, batchSize: 1)
+            UnsafeMutablePointer<GPUBufferHeader>(buffer.contents()).memory = header
+
+            let dataPointer = UnsafeMutablePointer<Float>(buffer.contents() + sizeof(GPUBufferHeader))
+            dataPointer.assignFrom(UnsafeMutablePointer(elementsPointer), count: size)
+
+            return buffer
         }
         precondition(buffer.length == size, "Failed to allocate \(size)B")
         buffer.label = name
@@ -31,9 +40,13 @@ public class InvocationBuilder {
 
     /// Create an uninitialized buffer
     public func createBuffer(name name: String, size: Int) -> Buffer {
-        let buffer = device.newBufferWithLength(size, options: .CPUCacheModeDefaultCache)
+        let length = size + sizeof(GPUBufferHeader)
+        let buffer = device.newBufferWithLength(length, options: .CPUCacheModeDefaultCache)
         precondition(buffer.length == size, "Failed to allocate \(size)B")
         buffer.label = name
+
+        let header = GPUBufferHeader(inputSize: size, sequenceSize: 1, batchSize: 1)
+        UnsafeMutablePointer<GPUBufferHeader>(buffer.contents()).memory = header
 
         return Buffer(name: name, size: size, metalBuffer: buffer, offset: 0)
     }

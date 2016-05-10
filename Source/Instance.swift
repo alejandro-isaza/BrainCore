@@ -7,6 +7,19 @@
 
 import Metal
 
+struct GPUBufferHeader {
+    var inputSize: UInt32
+    var sequenceSize: UInt32
+    var batchSize: UInt32
+
+    init(inputSize: Int, sequenceSize: Int, batchSize: Int) {
+        self.inputSize = UInt32(inputSize)
+        self.sequenceSize = UInt32(sequenceSize)
+        self.batchSize = UInt32(batchSize)
+    }
+}
+
+
 /// Keeps track of the state of each node in the network for a particular training batch.
 class Instance {
     let batchSize: Int
@@ -23,9 +36,13 @@ class Instance {
         self.buffers = [NSUUID: MTLBuffer]()
 
         for (id, buffer) in buffers {
-            let mtlForwardBuffer = device.newBufferWithLength(buffer.size * batchSize * sizeof(Float), options: .CPUCacheModeDefaultCache)
-            mtlForwardBuffer.label = "\(buffer.name)Buffer"
-            self.buffers[id] = mtlForwardBuffer
+            let size = sizeof(GPUBufferHeader) + buffer.size * batchSize * sizeof(Float)
+            let metalBuffer = device.newBufferWithLength(size, options: .CPUCacheModeDefaultCache)
+            metalBuffer.label = "\(buffer.name)Buffer"
+            self.buffers[id] = metalBuffer
+
+            let header = GPUBufferHeader(inputSize: buffer.size, sequenceSize: 1, batchSize: batchSize)
+            UnsafeMutablePointer<GPUBufferHeader>(metalBuffer.contents()).memory = header
         }
     }
 

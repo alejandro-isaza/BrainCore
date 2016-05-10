@@ -18,8 +18,8 @@ struct SigmoidDimensions {
     uint size;
 };
 
-kernel void sigmoid_forward(const device float* input [[ buffer(0) ]],
-                            device float* output [[ buffer(1) ]],
+kernel void sigmoid_forward(const device bc::Buffer* input [[ buffer(0) ]],
+                            device bc::Buffer* output [[ buffer(1) ]],
                             constant SigmoidDimensions& dims [[ buffer(2) ]],
                             uint id [[ thread_position_in_grid ]])
 {
@@ -29,9 +29,9 @@ kernel void sigmoid_forward(const device float* input [[ buffer(0) ]],
     output[id] = bc::sigmoid(input[id]);
 }
 
-kernel void sigmoid_backward(const device float* outputDiff [[ buffer(0) ]],
-                             const device float* input [[ buffer(1) ]],
-                             device float* inputDiff [[ buffer(2) ]],
+kernel void sigmoid_backward(const device bc::Buffer* outputDiff [[ buffer(0) ]],
+                             const device bc::Buffer* input [[ buffer(1) ]],
+                             device bc::Buffer* inputDiff [[ buffer(2) ]],
                              constant SigmoidDimensions& dims [[ buffer(3) ]],
                              uint id [[ thread_position_in_grid ]])
 {

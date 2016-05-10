@@ -9,6 +9,45 @@
 
 namespace bc {
 
+struct Buffer {
+    /// Buffer dimensions
+    const unsigned int inputSize;
+    const unsigned int sequenceSize;
+    const unsigned int batchSize;
+
+    /// Buffer data
+    float data[1];
+};
+
+
+inline device float& at(device Buffer* b, unsigned int inputItem, unsigned int sequenceItem, unsigned int batchItem) {
+    return b->data[inputItem * b->batchSize * b->sequenceSize + sequenceItem * b->batchSize + batchItem];
+}
+
+inline const device float& at(const device Buffer* b, unsigned int inputItem, unsigned int sequenceItem, unsigned int batchItem) {
+    return b->data[inputItem * b->batchSize * b->sequenceSize + sequenceItem * b->batchSize + batchItem];
+}
+
+inline device float& at(device Buffer* b, unsigned int inputItem) {
+    return b->data[inputItem * b->batchSize * b->sequenceSize];
+}
+
+inline const device float& at(const device Buffer* b, unsigned int inputItem) {
+    return b->data[inputItem * b->batchSize * b->sequenceSize];
+}
+
+inline device float& at(device Buffer* b, metal::uint3 index) {
+    return b->data[index[2] * b->batchSize * b->sequenceSize + index[1] * b->batchSize + index[0]];
+}
+
+inline const device float& at(const device Buffer* b, metal::uint3 index) {
+    return b->data[index[2] * b->batchSize * b->sequenceSize + index[1] * b->batchSize + index[0]];
+}
+
+inline bool isValid(const device Buffer* b, metal::uint3 index) {
+    return index[0] < b->batchSize && index[1] < b->sequenceSize && index[2] < b->inputSize;
+}
+
 /// The metal standard library `tanh` function causes NaN errors on certain GPUs. This is likely due to a naïve implementation that uses the series expansion of tanh(x). This `tanh` implementation is based on "Accurate Hyperbolic Tangent Computation" by Nelson H. F. Beebe, http://www.math.utah.edu/~beebe/software/ieee/tanh.pdf
 inline float tanh(const float x) {
     static constexpr auto xLarge = 8.66433975699931636772f;

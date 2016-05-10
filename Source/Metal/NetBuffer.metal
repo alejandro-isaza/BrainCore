@@ -8,11 +8,13 @@
 #include <metal_stdlib>
 #include <metal_common>
 
+#include "Utilities.h"
+
 using namespace metal;
 
 
-kernel void reset_buffer(device float* input [[ buffer(0) ]],
-                         uint elementIndex [[ thread_position_in_grid ]])
+kernel void reset_buffer(device bc::Buffer* input [[ buffer(0) ]],
+                         uint3 elementIndex [[ thread_position_in_grid ]])
 {
-    input[elementIndex] = 0.0;
+    at(input, elementIndex) = 0.0;
 }

@@ -8,6 +8,8 @@
 #include <metal_stdlib>
 #include <metal_common>
 
+#include "Utilities.h"
+
 using namespace metal;
 
 
@@ -16,29 +18,29 @@ struct ReluDimensions {
     uint input_size;
 };
 
-kernel void linear_rectify_forward(const device float* input [[ buffer(0) ]],
-                                   device float* output [[ buffer(1) ]],
+kernel void linear_rectify_forward(const device bc::Buffer* input [[ buffer(0) ]],
+                                   device bc::Buffer* output [[ buffer(1) ]],
                                    constant ReluDimensions& dims [[ buffer(2) ]],
-                                   uint id [[ thread_position_in_grid ]])
+                                   uint3 id [[ thread_position_in_grid ]])
 {
-    if (id >= dims.input_size * dims.batch_size)
+    if (!isValid(input, id))
         return;
     
-    output[id] = fmax(0.0, input[id]);
+    at(output, id) = fmax(0.0, at(input, id));
 }
 
-kernel void linear_rectify_backward(const device float* outputDiff [[ buffer(0) ]],
-                                    const device float* input [[ buffer(1) ]],
-                                    device float* inputDiff [[ buffer(2) ]],
+kernel void linear_rectify_backward(const device bc::Buffer* outputDiff [[ buffer(0) ]],
+                                    const device bc::Buffer* input [[ buffer(1) ]],
+                                    device bc::Buffer* inputDiff [[ buffer(2) ]],
                                     constant ReluDimensions& dims [[ buffer(3) ]],
-                                    uint id [[ thread_position_in_grid ]])
+                                    uint3 id [[ thread_position_in_grid ]])
 {
-    if (id >= dims.input_size * dims.batch_size)
+    if (!isValid(input, id))
         return;
 
-    if (input[id] > 0) {
-        inputDiff[id] = outputDiff[id];
+    if (at(input, id) > 0) {
+        at(inputDiff, id) = at(outputDiff, id);
     } else {
-        inputDiff[id] = 0.0;
+        at(inputDiff, id) = 0.0;
     }
 }
