@@ -44,3 +44,10 @@ class NetNode: Hashable {
 func ==(lhs: NetNode, rhs: NetNode) -> Bool {
     return lhs.layer.id == rhs.layer.id
 }
+
+class WeakNetNode {
+    weak var node: NetNode!
+    init(_ node: NetNode) {
+        self.node = node
+    }
+}

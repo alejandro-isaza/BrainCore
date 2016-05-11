@@ -60,7 +60,7 @@ public class Net {
             guard let dataOutputBuffer = dataNode.outputBuffer else {
                 preconditionFailure("Layer '\(dataLayer)'s output buffer not connected.")
             }
-            if dataOutputBuffer.outputNodes.map({ $0.layer is TransposeLayer }) == dataOutputBuffer.outputNodes.map({ _ in true }) {
+            if dataOutputBuffer.outputNodes.map({ $0.node.layer is TransposeLayer }) == dataOutputBuffer.outputNodes.map({ _ in true }) {
                 continue
             }
 
@@ -73,13 +73,13 @@ public class Net {
             transposeNode.outputBuffer = dataNode.outputBuffer
             transposeNode.outputRange = dataNode.outputRange
 
-            let dataNodeIndex = dataOutputBuffer.inputNodes.indexOf(dataNode)!
+            let dataNodeIndex = dataOutputBuffer.inputNodes.lazy.map({ $0.node }).indexOf(dataNode)!
             dataOutputBuffer.inputNodes.removeAtIndex(dataNodeIndex)
 
             connectNode(dataNode, toBuffer: transposeBuffer)
             connectWholeBuffer(transposeBuffer, toNode: transposeNode)
 
-            dataOutputBuffer.inputNodes.append(transposeNode)
+            dataOutputBuffer.inputNodes.append(WeakNetNode(transposeNode))
         }
     }
 
@@ -123,7 +123,7 @@ public class Net {
     func connectNode(node: NetNode, toBuffer buffer: NetBuffer) {
         node.outputBuffer = buffer
         node.outputRange = buffer.inputSize..<buffer.inputSize + node.outputSize
-        buffer.inputNodes.append(node)
+        buffer.inputNodes.append(WeakNetNode(node))
     }
 
     /// Send the split contents of the buffer to a layer
@@ -146,7 +146,7 @@ public class Net {
     func connectSplitBuffer(buffer: NetBuffer, toNode node: NetNode) {
         node.inputBuffer = buffer
         node.inputRange = buffer.outputSize..<buffer.outputSize + node.inputSize
-        buffer.outputNodes.append(node)
+        buffer.outputNodes.append(WeakNetNode(node))
     }
 
     /// Send the whole contents of the buffer to a layer
@@ -169,6 +169,6 @@ public class Net {
     func connectWholeBuffer(buffer: NetBuffer, toNode node: NetNode) {
         node.inputBuffer = buffer
         node.inputRange = 0..<node.inputSize
-        buffer.outputNodes.append(node)
+        buffer.outputNodes.append(WeakNetNode(node))
     }
 }

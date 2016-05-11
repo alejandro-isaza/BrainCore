@@ -23,14 +23,14 @@ class NetBuffer: Hashable {
     let name: String?
 
     var inputSize: Int {
-        return inputNodes.reduce(0, combine: { currentValue, node in
-            return max(currentValue, node.outputRange.endIndex)
+        return inputNodes.reduce(0, combine: { currentValue, weakNode in
+            return max(currentValue, weakNode.node.outputRange.endIndex)
         })
     }
 
     var outputSize: Int {
-        return outputNodes.reduce(0, combine: { currentValue, node in
-            return max(currentValue, node.inputRange.endIndex)
+        return outputNodes.reduce(0, combine: { currentValue, weakNode in
+            return max(currentValue, weakNode.node.inputRange.endIndex)
         })
     }
 
@@ -39,8 +39,8 @@ class NetBuffer: Hashable {
         return inputSize
     }
 
-    var inputNodes = [NetNode]()
-    var outputNodes = [NetNode]()
+    var inputNodes = [WeakNetNode]()
+    var outputNodes = [WeakNetNode]()
     
     init(id: NSUUID, type: Type, name: String? = nil) {
         self.id = id

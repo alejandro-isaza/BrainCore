@@ -52,7 +52,7 @@ class Instance {
             return
         }
 
-        let newOpenNodes = buffer.outputNodes.filter(allInputsClosed)
+        let newOpenNodes = buffer.outputNodes.lazy.map({ $0.node }).filter(allInputsClosed)
         openNodes.appendContentsOf(newOpenNodes)
     }
 
@@ -62,7 +62,7 @@ class Instance {
         }
 
         for n in buffer.inputNodes {
-            if !isClosed(n) {
+            if !isClosed(n.node) {
                 return false
             }
         }
@@ -74,7 +74,7 @@ class Instance {
             return
         }
 
-        let newOpenNodes = buffer.inputNodes.filter(allOutputsClosed)
+        let newOpenNodes = buffer.inputNodes.lazy.map({ $0.node }).filter(allOutputsClosed)
         openNodes.appendContentsOf(newOpenNodes)
     }
 
@@ -84,7 +84,7 @@ class Instance {
         }
 
         for n in buffer.outputNodes {
-            if !isClosed(n) {
+            if !isClosed(n.node) {
                 return false
             }
         }
