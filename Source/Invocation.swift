@@ -8,6 +8,7 @@
 import Metal
 import Upsurge
 
+/// A reference to a GPU buffer used by an `Invocation`.
 public class Buffer {
     /// The name of the buffer
     public let name: String
@@ -34,13 +35,24 @@ public class Buffer {
     }
 }
 
+/// A GPU function invocation.
 public class Invocation {
+    /// The function name.
     public let functionName: String
+
+    /// The array of buffer arguments. Used for data that is reused across executions.
     public var buffers: [Buffer]
+
+    /// The array of non-buffer arguments. Used for data that is not reused across executions.
     public var values: [Any]
 
+    /// The execution grid width.
     public var width = 1
+
+    /// The execution grid height.
     public var height = 1
+
+    /// The execution grid depth.
     public var depth = 1
 
     let pipelineState: MTLComputePipelineState

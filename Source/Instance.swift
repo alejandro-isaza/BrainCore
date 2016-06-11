@@ -7,7 +7,7 @@
 
 import Metal
 
-/// Keeps track of the state of each node in the network for a particular training batch.
+/// Helper class to keep track of the state of each node in the network for a particular run.
 class Instance {
     let batchSize: Int
 

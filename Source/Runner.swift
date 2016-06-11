@@ -8,14 +8,29 @@
 import Foundation
 import Metal
 
+/// A base class that sets up a network definition to be exectued, either feed-forward or backpropagation, on a GPU.
 public class Runner {
+    /// The network definition.
     public let net: Net
+
+    /// The batch size.
     public let batchSize: Int
 
+    /// The Metal GPU device to use.
     let device: MTLDevice
+
+    /// The Metal library with the layers' GPU functions.
     var library: MTLLibrary!
+
+    /// The Metal command queue.
     var commandQueue: MTLCommandQueue
 
+    /// Creates a `Runner` for the given network definition.
+    ///
+    /// - Parameter net:       network definition.
+    /// - Parameter device:    Metal device to use when running.
+    /// - Parameter batchSize: batch size.
+    /// - Parameter backwards: determines if the `Runner` will support running backpropagation.
     public init(net: Net, device: MTLDevice, batchSize: Int, backwards: Bool) throws {
         self.net = net
         self.net.insertTransposeLayers()
@@ -43,6 +58,7 @@ public class Runner {
         }
     }
 
+    /// Initializes a network node for feed-forward execution.
     func initializeForwardNode(node: NetNode, layer: ForwardLayer) throws {
         guard let inputNetBuffer = node.inputBuffer else {
             fatalError("Input buffer for \(layer.name) not found.")
@@ -67,6 +83,7 @@ public class Runner {
         try layer.initializeForward(builder: invocationBuilder, batchSize: batchSize)
     }
 
+    /// Initializes a network node for backpropagation.
     func initializeBackwardNode(node: NetNode, layer: BackwardLayer) throws {
         guard let inputNetBuffer = node.inputBuffer else {
             fatalError("Input buffer for \(layer.name) not found.")
@@ -99,7 +116,7 @@ public class Runner {
         try layer.initializeBackward(builder: invocationBuilder, batchSize: batchSize)
     }
 
-    /// Encode an invocation
+    /// Encodes an invocation into a command buffer.
     public static func encode(invocation invocation: Invocation, commandBuffer: MTLCommandBuffer) throws {
         let encoder = commandBuffer.computeCommandEncoder()
         encoder.setComputePipelineState(invocation.pipelineState)

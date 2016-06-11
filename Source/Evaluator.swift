@@ -8,16 +8,24 @@
 import Foundation
 import Metal
 
-/// Evaluator runs a network forward. It is optimized for running a single pass at a time (batch size of one). It maximizes GPU parallelism by enqueing sequential runs a few at a time.
+/// A `Runner` that performs feed-forward passes on a network.
+///
+/// `Evaluator` is optimized for running a single pass at a time (batch size of one). It maximizes GPU parallelism by enqueing sequential runs a few at a time.
+///
+/// - SeeAlso: `Runner`, `Trainer`
 public class Evaluator: Runner {
 
-    /// Maximum number of instances to enqueue to the GPU at a time
+    /// The maximum number of instances to enqueue to the GPU at a time.
     let instanceCount = 3
     var instances = [Instance]()
     var nextInstanceIndex = 0
     var inflightSemaphore: dispatch_semaphore_t
     var queue: dispatch_queue_t
 
+    /// Creates an `Evaluator` for the given network definition.
+    ///
+    /// - Parameter net:    network definition.
+    /// - Parameter device: Metal device to use when running.
     public init(net: Net, device: MTLDevice) throws {
         queue = dispatch_queue_create("BrainCore.Evaluator", DISPATCH_QUEUE_SERIAL)
         inflightSemaphore = dispatch_semaphore_create(instanceCount)
@@ -29,6 +37,12 @@ public class Evaluator: Runner {
         }
     }
 
+    /// Executes a paticular `Invocation` on the GPU.
+    ///
+    /// This is used to perform operations on the GPU. Usually you would not perfom invocations directly, but this can be used to perform updates to the buffers outside of a feed-forward pass.
+    ///
+    /// - Parameter invocations: array of invocations to execute.
+    /// - Parameter completion:  closure to execute when the invocation completes.
     public func call(invocations: [Invocation], completion: (() -> Void)?) {
         dispatch_sync(queue) {
             self.callInQueue(invocations, completion: completion)
@@ -49,9 +63,11 @@ public class Evaluator: Runner {
         buffer.commit()
     }
 
-    /// Perform a forward pass on the network. Always call this method from the same serial queue.
+    /// Performs a feed-forward pass on the network.
     ///
-    /// - parameter completion: Invoked when the evaluation finishes. It gets passed a snapshot of the network results.
+    /// - Important: Always call this method from the same serial queue.
+    ///
+    /// - Parameter completion: closure to execute when the evaluation finishes. It gets passed a snapshot of the network results.
     public func evaluate(completion: ((Snapshot) -> Void)) {
         dispatch_semaphore_wait(inflightSemaphore, DISPATCH_TIME_FOREVER)
 

@@ -8,15 +8,24 @@
 import Foundation
 import Metal
 
+/// A `Runner` that performs backpropagation passes on a network.
+///
+/// `Trainer` is optimized for running batches of input data.
+///
+/// - SeeAlso: `Runner`, `Evaluator`
 public class Trainer: Runner {
     var forwardInstance: Instance!
     var backwardInstance: Instance!
 
-    /// Maximum number of instances to enqueue to the GPU at a time
+    /// Maximum number of instances to enqueue to the GPU at a time.
     let instanceCount = 3
     var inflightSemaphore: dispatch_semaphore_t
     var queue: dispatch_queue_t
     
+    /// Creates a `Trainer` for the given network definition.
+    ///
+    /// - Parameter net:    network definition.
+    /// - Parameter device: Metal device to use when running.
     public init(net: Net, device: MTLDevice, batchSize: Int) throws {
         queue = dispatch_queue_create("BrainCore.Evaluator", DISPATCH_QUEUE_SERIAL)
         inflightSemaphore = dispatch_semaphore_create(instanceCount)
@@ -27,9 +36,11 @@ public class Trainer: Runner {
         backwardInstance = Instance(buffers: net.buffers, device: device, batchSize: batchSize)
     }
 
-    /// Perform a forward-backward pass on the network. Always call this method from the same serial queue. It may block if there is another run executing.
+    /// Perform a forward-backward pass on the network.
     ///
-    /// - parameter completion: Invoked when the run finishes. It gets passed a snapshot of the network results.
+    /// - Important: Always call this method from the same serial queue. It may block if there is another pass executing.
+    ///
+    /// - parameter completion: closure to execute when the pass finishes. It gets passed a snapshot of the network results.
     public func run(completion: ((Snapshot) -> Void)) {
         dispatch_semaphore_wait(inflightSemaphore, DISPATCH_TIME_FOREVER)
 

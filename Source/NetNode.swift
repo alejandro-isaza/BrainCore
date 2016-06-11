@@ -5,6 +5,7 @@
 // contained in the file LICENSE at the root of the source code distribution
 // tree.
 
+/// A network definition node.
 class NetNode: Hashable {
     let layer: Layer
 

@@ -10,7 +10,9 @@ import Metal
 
 /// A data snapshot of a forward-backward pass.
 public class Snapshot {
+    /// The network definition.
     public let net: Net
+
     var forwardBuffers: [NSUUID: MTLBuffer]
     var backwardBuffers: [NSUUID: MTLBuffer]
 
@@ -36,7 +38,9 @@ public class Snapshot {
         return unsafeBufferPointerFromBuffer(mtlBuffer)
     }
 
-    /// Return a pointer to the forward-pass contents of a network buffer. The pointer is short-lived, you should copy any contents that you want preserve.
+    /// Returns a pointer to the forward-pass contents of a network buffer.
+    ///
+    /// - Note: The pointer is short-lived, you should copy any contents that you want preserve.
     public func contentsOfForwardBuffer(ref: Net.BufferID) -> UnsafeMutableBufferPointer<Float>? {
         guard let buffer = net.buffers[ref] else {
             return nil
@@ -44,7 +48,9 @@ public class Snapshot {
         return contentsOfForwardBuffer(buffer)
     }
 
-    /// Return a pointer to the backward-pass contents of a network buffer. The pointer is short-lived, you should copy any contents that you want preserve.
+    /// Returns a pointer to the backward-pass contents of a network buffer.
+    ///
+    /// - Note: The pointer is short-lived, you should copy any contents that you want preserve.
     public func contentsOfBackwardBuffer(ref: Net.BufferID) -> UnsafeMutableBufferPointer<Float>? {
         guard let buffer = net.buffers[ref] else {
             return nil
@@ -52,7 +58,9 @@ public class Snapshot {
         return contentsOfBackwardBuffer(buffer)
     }
 
-    /// Return a pointer to the forward-pass output of a layer. The pointer is short-lived, you should copy any contents that you want preserve.
+    /// Returns a pointer to the forward-pass output of a layer.
+    ///
+    /// - Note: The pointer is short-lived, you should copy any contents that you want preserve.
     public func outputOfLayer(layer: Layer) -> UnsafeMutableBufferPointer<Float>? {
         guard let node = net.nodeForLayer(layer),
             bufferId = node.outputBuffer?.id,
@@ -64,7 +72,9 @@ public class Snapshot {
         return UnsafeMutableBufferPointer(start: pointer + node.outputRange.startIndex, count: count)
     }
 
-    /// Return a pointer to the forward-pass input of a layer. The pointer is short-lived, you should copy any contents that you want preserve.
+    /// Returns a pointer to the forward-pass input of a layer.
+    ///
+    /// - Note: The pointer is short-lived, you should copy any contents that you want preserve.
     public func inputOfLayer(layer: Layer) -> UnsafeMutableBufferPointer<Float>? {
         guard let node = net.nodeForLayer(layer),
             bufferId = node.inputBuffer?.id,
@@ -76,7 +86,9 @@ public class Snapshot {
         return UnsafeMutableBufferPointer(start: pointer + node.inputRange.startIndex, count: count)
     }
 
-    /// Return a pointer to the backward-pass input deltas of a layer. The pointer is short-lived, you should copy any contents that you want preserve.
+    /// Returns a pointer to the backward-pass input deltas of a layer.
+    ///
+    /// - Note: The pointer is short-lived, you should copy any contents that you want preserve.
     public func inputDeltasOfLayer(layer: Layer) -> UnsafeMutableBufferPointer<Float>? {
         guard let node = net.nodeForLayer(layer),
             bufferId = node.inputBuffer?.id,
@@ -88,7 +100,9 @@ public class Snapshot {
         return UnsafeMutableBufferPointer(start: pointer + node.inputRange.startIndex, count: count)
     }
 
-    /// Return a pointer to the backward-pass output deltas of a layer. The pointer is short-lived, you should copy any contents that you want preserve.
+    /// Returns a pointer to the backward-pass output deltas of a layer.
+    ///
+    /// - Note: The pointer is short-lived, you should copy any contents that you want preserve.
     public func outputDeltasOfLayer(layer: Layer) -> UnsafeMutableBufferPointer<Float>? {
         guard let node = net.nodeForLayer(layer),
             bufferId = node.outputBuffer?.id,

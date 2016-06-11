@@ -8,6 +8,7 @@
 import Metal
 import Upsurge
 
+/// Utility class to create invocations.
 public class InvocationBuilder {
     let device: MTLDevice
     let library: MTLLibrary
@@ -17,7 +18,7 @@ public class InvocationBuilder {
         self.library = library
     }
 
-    /// Create a buffer initialized with the given elements
+    /// Creates a buffer initialized with the given elements.
     public func createBuffer<T: TensorType where T.Element == Float>(name name: String, elements: T) -> Buffer {
         let size = elements.count * sizeof(Float)
         let buffer = withPointer(elements) { elementsPointer in
@@ -29,7 +30,7 @@ public class InvocationBuilder {
         return Buffer(name: name, size: size, metalBuffer: buffer, offset: 0)
     }
 
-    /// Create an uninitialized buffer
+    /// Creates an uninitialized buffer.
     public func createBuffer(name name: String, size: Int) -> Buffer {
         let buffer = device.newBufferWithLength(size, options: .CPUCacheModeDefaultCache)
         precondition(buffer.length == size, "Failed to allocate \(size)B")
@@ -38,7 +39,7 @@ public class InvocationBuilder {
         return Buffer(name: name, size: size, metalBuffer: buffer, offset: 0)
     }
 
-    /// Create an invocation
+    /// Creates an invocation.
     public func createInvocation(functionName functionName: String, buffers: [Buffer], values: [Any], width: Int = 1, height: Int = 1, depth: Int = 1) throws -> Invocation {
         guard let function = library.newFunctionWithName(functionName) else {
             fatalError("Metal function not found '\(functionName)'")
@@ -49,8 +50,12 @@ public class InvocationBuilder {
     }
 }
 
+/// An `InvocationBuilder` for feed-forward invocations.
 public class ForwardInvocationBuilder: InvocationBuilder {
+    /// The `Buffer` containing the layer's input data.
     public internal(set) var inputBuffer: Buffer
+
+    /// The `Buffer` for the layer's output data.
     public internal(set) var outputBuffer: Buffer
 
     init(device: MTLDevice, library: MTLLibrary, inputBuffer: Buffer, outputBuffer: Buffer) {
@@ -60,9 +65,15 @@ public class ForwardInvocationBuilder: InvocationBuilder {
     }
 }
 
+/// An `InvocationBuilder` for backpropagation invocations.
 public class BackwardInvocationBuilder: InvocationBuilder {
+    /// The `Buffer` containing the layer's input data.
     public internal(set) var inputBuffer: Buffer
+
+    /// The `Buffer` containing the layer's output deltas.
     public internal(set) var outputDeltasBuffer: Buffer
+
+    /// The `Buffer` for the layer's input deltas.
     public internal(set) var inputDeltasBuffer: Buffer
 
     init(device: MTLDevice, library: MTLLibrary, inputBuffer: Buffer, outputDeltasBuffer: Buffer, inputDeltasBuffer: Buffer) {

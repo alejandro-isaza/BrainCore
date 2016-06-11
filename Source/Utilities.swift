@@ -8,21 +8,21 @@
 import Metal
 import Upsurge
 
-/// Convert a Metal buffer to an `UnsafeMutableBufferPointer`
+/// Converts a Metal buffer to an `UnsafeMutableBufferPointer`.
 public func unsafeBufferPointerFromBuffer(buffer: MTLBuffer) -> UnsafeMutableBufferPointer<Float> {
     let pointer = UnsafeMutablePointer<Float>(buffer.contents())
     let count = buffer.length / sizeof(Float)
     return UnsafeMutableBufferPointer(start: pointer, count: count)
 }
 
-/// Copy the contents of a Metal buffer to an array
+/// Copies the contents of a Metal buffer to an array.
 public func arrayFromBuffer(buffer: MTLBuffer, start: Int = 0, count: Int? = nil) -> Array<Float> {
     let pointer = UnsafePointer<Float>(buffer.contents()) + start
     let count = count ?? buffer.length / sizeof(Float) - start
     return Array<Float>(UnsafeBufferPointer(start: pointer, count: count))
 }
 
-/// Copy the contents of a Metal buffer to a ValueArray
+/// Copies the contents of a Metal buffer to a ValueArray.
 public func valueArrayFromBuffer(buffer: MTLBuffer, start: Int = 0, count: Int? = nil) -> ValueArray<Float> {
     let pointer = UnsafeMutablePointer<Float>(buffer.contents()) + start
     let count = count ?? buffer.length / sizeof(Float) - start
@@ -31,7 +31,7 @@ public func valueArrayFromBuffer(buffer: MTLBuffer, start: Int = 0, count: Int? 
     return array
 }
 
-/// Copy a collection of values to a Metal buffer
+/// Copies a collection of values to a Metal buffer.
 public func fillBuffer<Collection: CollectionType where Collection.Generator.Element == Float>(buffer: MTLBuffer, start: Int, withElements elements: Collection) {
     let pointer = UnsafeMutablePointer<Float>(buffer.contents()) + start
     for (i, v) in elements.enumerate() {
@@ -39,7 +39,7 @@ public func fillBuffer<Collection: CollectionType where Collection.Generator.Ele
     }
 }
 
-/// Create a Metal buffer from a tensor
+/// Creates a Metal buffer from a tensor.
 public func createBuffer<T: TensorType where T.Element == Float>(inDevice device: MTLDevice, fromTensor tensor: T, withLabel label: String) -> MTLBuffer {
     return withPointer(tensor) { pointer in
         let tempBuffer = device.newBufferWithBytes(pointer, length: tensor.count * sizeof(Float), options: .CPUCacheModeDefaultCache)
@@ -50,7 +50,7 @@ public func createBuffer<T: TensorType where T.Element == Float>(inDevice device
     }
 }
 
-/// Create a Metal buffer from a pointer
+/// Creates a Metal buffer from a pointer.
 public func createBuffer(inDevice device: MTLDevice, fromPointer pointer: UnsafePointer<Void>, ofSize size: Int, withLabel label: String) -> MTLBuffer {
     let buffer = device.newBufferWithBytes(pointer, length: size, options: .CPUCacheModeDefaultCache)
     precondition(buffer.length == size, "Failed to allocate \(size)B")
@@ -59,7 +59,7 @@ public func createBuffer(inDevice device: MTLDevice, fromPointer pointer: Unsafe
     return buffer
 }
 
-/// Create an empty Metal buffer with specific size
+/// Creates an empty Metal buffer with a specific size.
 public func createBuffer(inDevice device: MTLDevice, ofSize size: Int, withLabel label: String) -> MTLBuffer {
     let buffer = device.newBufferWithLength(size, options: .CPUCacheModeDefaultCache)
     precondition(buffer.length == size, "Failed to allocate \(size)B")

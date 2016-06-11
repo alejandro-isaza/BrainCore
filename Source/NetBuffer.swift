@@ -5,7 +5,7 @@
 // contained in the file LICENSE at the root of the source code distribution
 // tree.
 
-
+/// A buffer that is part of a network definition.
 class NetBuffer: Hashable {
     enum Type: Int {
         case Forward
@@ -13,13 +13,13 @@ class NetBuffer: Hashable {
         case Parameters
     }
 
-    /// Buffer unique identifier
+    /// Buffer unique identifier.
     let id: NSUUID
 
-    /// Buffer type
+    /// Buffer type.
     let type: Type
 
-    /// Optional buffer name
+    /// Optional buffer name.
     let name: String?
 
     var inputSize: Int {
