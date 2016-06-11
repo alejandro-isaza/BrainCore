@@ -112,16 +112,25 @@ let net = Net.build {
 And finally execute! You need to provide a Metal device to the runner which is usually just the default device. 
 
 ```swift
-let device = MTLCreateSystemDefaultDevice()!
-let evaluator = try! Evaluator(net: net, device: device)
+guard let device = MTLCreateSystemDefaultDevice() else {
+    fatalError("Failed to create a Metal device.")
+}
+
+let evaluator: Evaluator
+do {
+    evaluator = try Evaluator(net: net, device: device)
+} catch let e {
+    fatalError("Failed to create an Evaluator: \(e)")
+}
+
 evaluator.evaluate { snapshot in
-    // You will get notified here when the network is done the forward pass
+    print("Feed-forward pass complete!")
 }
 ```
 
 The evaluator may fail to build if there is any problem creating the buffers or initializing all the Metal code, that's why there is a `try`.
 
-Calling `evaluate()` will execute a single forward pass, but you can call this as often as you want. In fact you will want to call `evaluate()` multiple times before you get any results back so that you maximise the GPU bandwidth.
+Calling `evaluate()` will execute a single forward pass, but you can call this as often as you want. In fact you will want to call `evaluate()` multiple times before you get any results back so that you maximise the GPU bandwidth. You can also increase the batch size to execute multiple passes in parallel.
 
 Your data layer will most likely want to provide new data every time you call `evaluate()`. So your code may look something like
 
@@ -132,11 +141,8 @@ while !shouldStop {
 }
 ```
 
-Also both the sink layer's `consume()` function and the completion closure will be called from a background thread. Make sure you synchronize access to the data as needed and try not to block on either of those calls for too long.
+**Note:** both the sink layer's `consume()` function and the completion closure will be called from a background thread. Make sure you synchronize access to the data as needed and try not to block on either of those calls for too long.
 
-## Contributing
-
-BrainCore is still under early development. Any contribution is appreciated!
 
 ---
 
