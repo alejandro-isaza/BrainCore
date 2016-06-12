@@ -26,5 +26,5 @@ kernel void sgd_update_parameters(device bc::Buffer* parameter [[ buffer(0) ]],
     if (id >= *output_size)
         return;
     
-    parameter[id] = parameter[id] - solverParams.learningRate * parameterDiff[id];
+    at(parameter, id) = at(parameter, id) - solverParams.learningRate * at(parameterDiff, id);
 }

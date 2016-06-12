@@ -27,13 +27,13 @@ kernel void l2_loss_forward(const device bc::Buffer* input [[ buffer(0) ]],
         return;
     }
 
-    output[batchElement] = 0.0;
+    at(output, batchElement) = 0.0;
     for (auto inputElement = uint(0); inputElement < dims.input_size; inputElement += 1) {
         const auto dataIndex = batchElement + inputElement * dims.batch_size;
         const auto labelIndex = dataIndex + dims.batch_size * dims.input_size;
 
-        const auto diff = input[dataIndex] - input[labelIndex];
-        output[batchElement] += diff * diff / 2;
+        const auto diff = at(input, dataIndex) - at(input, labelIndex);
+        at(output, batchElement) += diff * diff / 2;
     }
 }
 
@@ -53,7 +53,7 @@ kernel void l2_loss_backward(const device bc::Buffer* input [[ buffer(0) ]],
     const auto labelIndex = dataIndex + dims.batch_size * dims.input_size;
 
     const auto alpha = 1.0 / dims.batch_size;
-    const auto diff = input[dataIndex] - input[labelIndex];
-    deltas[dataIndex] = alpha * diff;
-    deltas[labelIndex] = alpha * -diff;
+    const auto diff = at(input, dataIndex) - at(input, labelIndex);
+    at(deltas, dataIndex) = alpha * diff;
+    at(deltas, labelIndex) = alpha * -diff;
 }

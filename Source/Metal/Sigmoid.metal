@@ -26,7 +26,7 @@ kernel void sigmoid_forward(const device bc::Buffer* input [[ buffer(0) ]],
     if (id >= dims.size * dims.batch_size)
         return;
 
-    output[id] = bc::sigmoid(input[id]);
+    at(output, id) = bc::sigmoid(at(input, id));
 }
 
 kernel void sigmoid_backward(const device bc::Buffer* outputDiff [[ buffer(0) ]],
@@ -38,5 +38,5 @@ kernel void sigmoid_backward(const device bc::Buffer* outputDiff [[ buffer(0) ]]
     if (id >= dims.size * dims.batch_size)
         return;
 
-    inputDiff[id] = outputDiff[id] * bc::sigmoid(input[id]) * (1 - bc::sigmoid(input[id]));
+    at(inputDiff, id) = at(outputDiff, id) * bc::sigmoid(at(input, id)) * (1 - bc::sigmoid(at(input, id)));
 }

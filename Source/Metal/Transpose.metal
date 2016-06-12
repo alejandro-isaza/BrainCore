@@ -29,5 +29,5 @@ kernel void transpose(const device bc::Buffer* input [[ buffer(0) ]],
     if (sizeElement >= dims.input_size || batchElement >= dims.batch_size)
         return;
 
-    output[batchElement + sizeElement * dims.batch_size] = input[sizeElement + batchElement * dims.input_size];
+    at(output, batchElement + sizeElement * dims.batch_size) = at(input, sizeElement + batchElement * dims.input_size);
 }

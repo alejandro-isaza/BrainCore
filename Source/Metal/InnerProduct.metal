@@ -30,9 +30,9 @@ kernel void inner_product_forward(const device bc::Buffer* input [[ buffer(0) ]]
     if (outputElement >= dims.output_size || batchElement >= dims.batch_size)
         return;
     
-    output[batchElement + outputElement * dims.batch_size] = biases[outputElement];
+    at(output, batchElement + outputElement * dims.batch_size) = at(biases, outputElement);
     for (uint i = 0; i < dims.input_size; i += 1) {
-        output[batchElement + outputElement * dims.batch_size] += weights[outputElement + i * dims.output_size] * input[batchElement + i * dims.batch_size];
+        at(output, batchElement + outputElement * dims.batch_size) += at(weights, outputElement + i * dims.output_size) * at(input, batchElement + i * dims.batch_size);
     }
 }
 
@@ -47,14 +47,14 @@ kernel void inner_product_backward_params(const device bc::Buffer* output_deltas
         return;
 
     for (uint i = 0; i < dims.input_size; i += 1) {
-        weight_deltas[outputElement +  i * dims.output_size] = 0.0;
+        at(weight_deltas, outputElement +  i * dims.output_size) = 0.0;
     }
-    bias_deltas[outputElement] = 0.0;
+    at(bias_deltas, outputElement) = 0.0;
     for (uint i = 0; i < dims.batch_size; i += 1) {
         for (uint j = 0; j < dims.input_size; j += 1) {
-            weight_deltas[outputElement +  j * dims.output_size] += output_deltas[i + outputElement * dims.batch_size] * input[i + j * dims.batch_size];
+            at(weight_deltas, outputElement +  j * dims.output_size) += at(output_deltas, i + outputElement * dims.batch_size) * at(input, i + j * dims.batch_size);
         }
-        bias_deltas[outputElement] += output_deltas[i + outputElement * dims.batch_size];
+        at(bias_deltas, outputElement) += at(output_deltas, i + outputElement * dims.batch_size);
     }
 }
 
@@ -70,8 +70,8 @@ kernel void inner_product_backward_input(const device bc::Buffer* output_deltas 
     if (inputElement >= dims.input_size || batchElement >= dims.batch_size)
         return;
 
-    input_deltas[batchElement + inputElement * dims.batch_size] = 0.0;
+    at(input_deltas, batchElement + inputElement * dims.batch_size) = 0.0;
     for (uint i = 0; i < dims.output_size; i += 1) {
-        input_deltas[batchElement + inputElement * dims.batch_size] += weights[i + inputElement * dims.output_size] * output_deltas[batchElement + i * dims.batch_size];
+        at(input_deltas, batchElement + inputElement * dims.batch_size) += at(weights, i + inputElement * dims.output_size) * at(output_deltas, batchElement + i * dims.batch_size);
     }
 }
