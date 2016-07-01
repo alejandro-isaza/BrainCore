@@ -65,6 +65,15 @@ public class LSTMLayer: ForwardLayer {
         return [invocation]
     }
 
+    /// Creates an LSTM layer with a weights matrix and a biases array.
+    ///
+    /// - parameter weights:   weight matrix with `4*unitCount` columns and `inputSize + unitCount` rows with the weights for input, input activation, forget, and output in that order and with input weights `W` before recurrent weights `U`.
+    /// - parameter biases:    the array of biases of size `4*unitCount` with the biases for input, input activation, forget, and output in that order.
+    /// - parameter batchSize: the batch size.
+    /// - parameter name:      the layer name.
+    /// - parameter clipTo:    optional value to clip activations to.
+    ///
+    /// - seealso: makeWeightsFromComponents
     public init(weights: Matrix<Float>, biases: ValueArray<Float>, batchSize: Int, name: String? = nil, clipTo: Float? = nil) {
         self.name = name
         self.weights = weights
@@ -73,6 +82,32 @@ public class LSTMLayer: ForwardLayer {
         self.unitCount = biases.count / 4
         self.inputSize = weights.rows - unitCount
         precondition(weights.columns == 4 * unitCount)
+    }
+
+    /// Make an LSTM weight matrix from separate W and U component matrices.
+    public static func makeWeightsFromComponents(Wc: Matrix<Float>, Wf: Matrix<Float>, Wi: Matrix<Float>, Wo: Matrix<Float>, Uc: Matrix<Float>, Uf: Matrix<Float>, Ui: Matrix<Float>, Uo: Matrix<Float>) -> Matrix<Float> {
+        let unitCount = Uc.rows
+        let inputSize = Wc.rows
+
+        let elements = ValueArray<Float>(count: (inputSize + unitCount) * 4 * unitCount)
+
+        for i in 0..<inputSize {
+            let start = i * 4 * unitCount
+            elements[0 * unitCount + start..<0 * unitCount + start + unitCount] = Wi.row(i)
+            elements[1 * unitCount + start..<1 * unitCount + start + unitCount] = Wc.row(i)
+            elements[2 * unitCount + start..<2 * unitCount + start + unitCount] = Wf.row(i)
+            elements[3 * unitCount + start..<3 * unitCount + start + unitCount] = Wo.row(i)
+        }
+
+        for i in 0..<unitCount {
+            let start = (inputSize + i) * 4 * unitCount
+            elements[0 * unitCount + start..<0 * unitCount + start + unitCount] = Ui.row(i)
+            elements[1 * unitCount + start..<1 * unitCount + start + unitCount] = Uc.row(i)
+            elements[2 * unitCount + start..<2 * unitCount + start + unitCount] = Uf.row(i)
+            elements[3 * unitCount + start..<3 * unitCount + start + unitCount] = Uo.row(i)
+        }
+
+        return Matrix<Float>(rows: inputSize + unitCount, columns: 4 * unitCount, elements: elements)
     }
 
     public func initializeForward(builder builder: ForwardInvocationBuilder, batchSize: Int) throws {
