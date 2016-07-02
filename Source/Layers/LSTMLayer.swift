@@ -93,18 +93,18 @@ public class LSTMLayer: ForwardLayer {
 
         for i in 0..<inputSize {
             let start = i * 4 * unitCount
-            elements[0 * unitCount + start..<0 * unitCount + start + unitCount] = Wi.row(i)
-            elements[1 * unitCount + start..<1 * unitCount + start + unitCount] = Wc.row(i)
-            elements[2 * unitCount + start..<2 * unitCount + start + unitCount] = Wf.row(i)
-            elements[3 * unitCount + start..<3 * unitCount + start + unitCount] = Wo.row(i)
+            elements.replaceRange(0 * unitCount + start..<0 * unitCount + start + unitCount, with: Wi.row(i))
+            elements.replaceRange(1 * unitCount + start..<1 * unitCount + start + unitCount, with: Wc.row(i))
+            elements.replaceRange(2 * unitCount + start..<2 * unitCount + start + unitCount, with: Wf.row(i))
+            elements.replaceRange(3 * unitCount + start..<3 * unitCount + start + unitCount, with: Wo.row(i))
         }
-
+        
         for i in 0..<unitCount {
             let start = (inputSize + i) * 4 * unitCount
-            elements[0 * unitCount + start..<0 * unitCount + start + unitCount] = Ui.row(i)
-            elements[1 * unitCount + start..<1 * unitCount + start + unitCount] = Uc.row(i)
-            elements[2 * unitCount + start..<2 * unitCount + start + unitCount] = Uf.row(i)
-            elements[3 * unitCount + start..<3 * unitCount + start + unitCount] = Uo.row(i)
+            elements.replaceRange(0 * unitCount + start..<0 * unitCount + start + unitCount, with: Ui.row(i))
+            elements.replaceRange(1 * unitCount + start..<1 * unitCount + start + unitCount, with: Uc.row(i))
+            elements.replaceRange(2 * unitCount + start..<2 * unitCount + start + unitCount, with: Uf.row(i))
+            elements.replaceRange(3 * unitCount + start..<3 * unitCount + start + unitCount, with: Uo.row(i))
         }
 
         return Matrix<Float>(rows: inputSize + unitCount, columns: 4 * unitCount, elements: elements)
