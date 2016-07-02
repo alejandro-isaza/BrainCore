@@ -85,7 +85,7 @@ public class LSTMLayer: ForwardLayer {
     }
 
     /// Make an LSTM weight matrix from separate W and U component matrices.
-    public static func makeWeightsFromComponents(Wc: Matrix<Float>, Wf: Matrix<Float>, Wi: Matrix<Float>, Wo: Matrix<Float>, Uc: Matrix<Float>, Uf: Matrix<Float>, Ui: Matrix<Float>, Uo: Matrix<Float>) -> Matrix<Float> {
+    public static func makeWeightsFromComponents(Wc Wc: Matrix<Float>, Wf: Matrix<Float>, Wi: Matrix<Float>, Wo: Matrix<Float>, Uc: Matrix<Float>, Uf: Matrix<Float>, Ui: Matrix<Float>, Uo: Matrix<Float>) -> Matrix<Float> {
         let unitCount = Uc.rows
         let inputSize = Wc.rows
 
