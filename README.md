@@ -3,7 +3,7 @@
 [![CocoaPods Compatible](https://img.shields.io/cocoapods/v/BrainCore.svg)](https://img.shields.io/cocoapods/v/BrainCore.svg)
 [![Carthage Compatible](https://img.shields.io/badge/Carthage-compatible-4BC51D.svg?style=flat)](https://github.com/Carthage/Carthage)
 
-BrainCore is a simple but fast neural network framework written in Swift. It uses [Metal](https://developer.apple.com/metal/) which makes it screamin' fast.
+BrainCore is a simple but fast neural network framework written in Swift. It uses [Metal](https://developer.apple.com/metal/) which makes it screamin' fast. If you want to see it in action check out [InfiniteMonkeys](https://github.com/craigomac/InfiniteMonkeys)—an app that uses a recursive neural network to generate poems.
 
 
 ## Features
