@@ -55,10 +55,6 @@
 		615C96281C5C1C6F00A1CFD4 /* ReLU.metal in Sources */ = {isa = PBXBuildFile; fileRef = 615C96251C5BF91500A1CFD4 /* ReLU.metal */; };
 		619F2E801CC1990E0017E90E /* Invocation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 619F2E7F1CC1990E0017E90E /* Invocation.swift */; };
 		619F2E811CC1990E0017E90E /* Invocation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 619F2E7F1CC1990E0017E90E /* Invocation.swift */; };
-		61CE4BCB1BED6F7F000E0D34 /* Upsurge.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 61CE4BC51BED6F7F000E0D34 /* Upsurge.framework */; };
-		61CE4BCE1BED6F90000E0D34 /* Upsurge.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 61CE4BC21BED6F7F000E0D34 /* Upsurge.framework */; };
-		61CE4BCF1BED703B000E0D34 /* Upsurge.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 61CE4BC21BED6F7F000E0D34 /* Upsurge.framework */; };
-		61CE4BD01BED703F000E0D34 /* Upsurge.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 61CE4BC51BED6F7F000E0D34 /* Upsurge.framework */; };
 		8C2A22341CB58E05008291E2 /* TransposeLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C2A22331CB58E05008291E2 /* TransposeLayer.swift */; };
 		8C2A22351CB58E05008291E2 /* TransposeLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C2A22331CB58E05008291E2 /* TransposeLayer.swift */; };
 		8C2A22371CB58E14008291E2 /* Transpose.metal in Sources */ = {isa = PBXBuildFile; fileRef = 8C2A22361CB58E14008291E2 /* Transpose.metal */; };
@@ -113,6 +109,7 @@
 		A98135641CBC30E200D69D0B /* Instance.swift in Sources */ = {isa = PBXBuildFile; fileRef = A981355D1CBC2C1400D69D0B /* Instance.swift */; };
 		A98135651CBC30E800D69D0B /* Snapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = A981355E1CBC2C1400D69D0B /* Snapshot.swift */; };
 		A98135661CBC30EB00D69D0B /* Trainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A981355C1CBC2C1400D69D0B /* Trainer.swift */; };
+		CDF36D601D6055F5007CE327 /* Upsurge.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CDF36D5F1D6055F5007CE327 /* Upsurge.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -159,10 +156,6 @@
 		6159F8A01BD1F5CE0010F83C /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		615C96251C5BF91500A1CFD4 /* ReLU.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = ReLU.metal; sourceTree = "<group>"; };
 		619F2E7F1CC1990E0017E90E /* Invocation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Invocation.swift; sourceTree = "<group>"; };
-		61CE4BC21BED6F7F000E0D34 /* Upsurge.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Upsurge.framework; sourceTree = "<group>"; };
-		61CE4BC31BED6F7F000E0D34 /* Upsurge.framework.dSYM */ = {isa = PBXFileReference; lastKnownFileType = wrapper.dsym; path = Upsurge.framework.dSYM; sourceTree = "<group>"; };
-		61CE4BC51BED6F7F000E0D34 /* Upsurge.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Upsurge.framework; sourceTree = "<group>"; };
-		61CE4BC61BED6F7F000E0D34 /* Upsurge.framework.dSYM */ = {isa = PBXFileReference; lastKnownFileType = wrapper.dsym; path = Upsurge.framework.dSYM; sourceTree = "<group>"; };
 		8C2A22331CB58E05008291E2 /* TransposeLayer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransposeLayer.swift; sourceTree = "<group>"; };
 		8C2A22361CB58E14008291E2 /* Transpose.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = Transpose.metal; sourceTree = "<group>"; };
 		8C2A223B1CB58E22008291E2 /* TransposeLayerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransposeLayerTests.swift; sourceTree = "<group>"; };
@@ -185,6 +178,7 @@
 		A981355C1CBC2C1400D69D0B /* Trainer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Trainer.swift; sourceTree = "<group>"; };
 		A981355D1CBC2C1400D69D0B /* Instance.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Instance.swift; sourceTree = "<group>"; };
 		A981355E1CBC2C1400D69D0B /* Snapshot.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Snapshot.swift; sourceTree = "<group>"; };
+		CDF36D5F1D6055F5007CE327 /* Upsurge.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Upsurge.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -192,7 +186,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				61CE4BCB1BED6F7F000E0D34 /* Upsurge.framework in Frameworks */,
+				CDF36D601D6055F5007CE327 /* Upsurge.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -200,7 +194,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				61CE4BD01BED703F000E0D34 /* Upsurge.framework in Frameworks */,
 				6159F86A1BD1F55D0010F83C /* BrainCore.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -209,7 +202,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				61CE4BCE1BED6F90000E0D34 /* Upsurge.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -217,7 +209,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				61CE4BCF1BED703B000E0D34 /* Upsurge.framework in Frameworks */,
 				6159F8881BD1F59F0010F83C /* BrainCore.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -325,31 +316,10 @@
 			path = Metal;
 			sourceTree = "<group>";
 		};
-		61CE4BBF1BED6F7F000E0D34 /* iOS */ = {
-			isa = PBXGroup;
-			children = (
-				61CE4BC21BED6F7F000E0D34 /* Upsurge.framework */,
-				61CE4BC31BED6F7F000E0D34 /* Upsurge.framework.dSYM */,
-			);
-			name = iOS;
-			path = Carthage/Build/iOS;
-			sourceTree = "<group>";
-		};
-		61CE4BC41BED6F7F000E0D34 /* Mac */ = {
-			isa = PBXGroup;
-			children = (
-				61CE4BC51BED6F7F000E0D34 /* Upsurge.framework */,
-				61CE4BC61BED6F7F000E0D34 /* Upsurge.framework.dSYM */,
-			);
-			name = Mac;
-			path = Carthage/Build/Mac;
-			sourceTree = "<group>";
-		};
 		61CE4BCD1BED6F84000E0D34 /* Dependencies */ = {
 			isa = PBXGroup;
 			children = (
-				61CE4BBF1BED6F7F000E0D34 /* iOS */,
-				61CE4BC41BED6F7F000E0D34 /* Mac */,
+				CDF36D5F1D6055F5007CE327 /* Upsurge.framework */,
 			);
 			name = Dependencies;
 			sourceTree = "<group>";
