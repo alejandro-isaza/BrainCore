@@ -18,7 +18,7 @@ public class LSTMLayer: ForwardLayer {
         let clipTo: Float
     }
 
-    public let id = NSUUID()
+    public let id = UUID()
     public let name: String?
 
     public let weights: Matrix<Float>
@@ -57,7 +57,7 @@ public class LSTMLayer: ForwardLayer {
     }
 
     public var forwardInvocations: [Invocation] {
-        guard let forwardInvocation0 = forwardInvocation0, forwardInvocation1 = forwardInvocation1 else {
+        guard let forwardInvocation0 = forwardInvocation0, let forwardInvocation1 = forwardInvocation1 else {
             fatalError("initializeForward needs to be called first")
         }
         let invocation = currentState == 0 ? forwardInvocation0 : forwardInvocation1
@@ -85,7 +85,7 @@ public class LSTMLayer: ForwardLayer {
     }
 
     /// Make an LSTM weight matrix from separate W and U component matrices.
-    public static func makeWeightsFromComponents(Wc Wc: Matrix<Float>, Wf: Matrix<Float>, Wi: Matrix<Float>, Wo: Matrix<Float>, Uc: Matrix<Float>, Uf: Matrix<Float>, Ui: Matrix<Float>, Uo: Matrix<Float>) -> Matrix<Float> {
+    public static func makeWeightsFromComponents(Wc: Matrix<Float>, Wf: Matrix<Float>, Wi: Matrix<Float>, Wo: Matrix<Float>, Uc: Matrix<Float>, Uf: Matrix<Float>, Ui: Matrix<Float>, Uo: Matrix<Float>) -> Matrix<Float> {
         let unitCount = Uc.rows
         let inputSize = Wc.rows
 
@@ -110,12 +110,12 @@ public class LSTMLayer: ForwardLayer {
         return Matrix<Float>(rows: inputSize + unitCount, columns: 4 * unitCount, elements: elements)
     }
 
-    public func initializeForward(builder builder: ForwardInvocationBuilder, batchSize: Int) throws {
+    public func initializeForward(builder: ForwardInvocationBuilder, batchSize: Int) throws {
         let params = Parameters(batchSize: UInt16(batchSize), unitCount: UInt16(unitCount), inputSize: UInt16(inputSize), clipTo: clipTo)
         weightsBuffer = builder.createBuffer(name: "weights", elements: weights)
         biasesBuffer = builder.createBuffer(name: "biases", elements: biases)
-        state0Buffer = builder.createBuffer(name: "state0", size: batchSize * stateSize * sizeof(Float))
-        state1Buffer = builder.createBuffer(name: "state1", size: batchSize * stateSize * sizeof(Float))
+        state0Buffer = builder.createBuffer(name: "state0", size: batchSize * stateSize * MemoryLayout<Float>.size)
+        state1Buffer = builder.createBuffer(name: "state1", size: batchSize * stateSize * MemoryLayout<Float>.size)
 
         let buffers0 = [
             builder.inputBuffer,

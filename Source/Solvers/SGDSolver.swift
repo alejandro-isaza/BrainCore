@@ -21,38 +21,38 @@ public class SGDSolver {
     public let stepCount: Int
     public var stepAction: ((Snapshot) -> Void)?
 
-    var queue: dispatch_queue_t
+    var queue: DispatchQueue
     let trainer: Trainer
 
     let updateFunctionName = "sgd_update_parameters"
     var updateFunction: MTLComputePipelineState
 
-    public init(net: Net, device: MTLDevice, batchSize: Int, stepCount: Int, initialLearningRate: Double = 0.001, learningRateSchedule: (Double, Int) -> Double) throws {
+    public init(net: Net, device: MTLDevice, batchSize: Int, stepCount: Int, initialLearningRate: Double = 0.001, learningRateSchedule: @escaping (Double, Int) -> Double) throws {
         self.net = net
         self.batchSize = batchSize
         self.learningRateSchedule = learningRateSchedule
         self.initialLearningRate = initialLearningRate
         self.stepCount = stepCount
 
-        queue = dispatch_queue_create("BrainCore.SGDSolver", DISPATCH_QUEUE_SERIAL)
+        queue = DispatchQueue(label: "BrainCore.SGDSolver", attributes: [])
         
         guard let trainer = try? Trainer(net: net, device: device, batchSize: batchSize) else {
             fatalError("Could not create trainer.")
         }
         self.trainer = trainer
 
-        let updateParametersLibraryFunction = trainer.library.newFunctionWithName(updateFunctionName)!
-        updateFunction = try trainer.library.device.newComputePipelineStateWithFunction(updateParametersLibraryFunction)
+        let updateParametersLibraryFunction = trainer.library.makeFunction(name: updateFunctionName)!
+        updateFunction = try trainer.library.device.makeComputePipelineState(function: updateParametersLibraryFunction)
     }
 
-    public func train(completion: () -> Void) {
+    public func train(_ completion: @escaping () -> Void) {
         currentStep = 0
-        dispatch_async(self.queue) {
+        self.queue.async {
             self.step(completion)
         }
     }
 
-    func step(completion: () -> Void) {
+    func step(_ completion: @escaping () -> Void) {
         if currentStep >= stepCount {
             completion()
             return
@@ -61,20 +61,20 @@ public class SGDSolver {
         currentStep += 1
 
         trainer.run({ snapshot in
-            dispatch_async(self.queue) {
+            self.queue.async {
                 self.completeStep(snapshot: snapshot, completion: completion)
             }
         })
     }
 
-    func completeStep(snapshot snapshot: Snapshot, completion: () -> Void) {
+    func completeStep(snapshot: Snapshot, completion: @escaping () -> Void) {
         updateParameters(completion)
         stepAction?(snapshot)
         step(completion)
     }
 
-    func updateParameters(completion: () -> Void) {
-        let commandBuffer = trainer.commandQueue.commandBuffer()
+    func updateParameters(_ completion: () -> Void) {
+        let commandBuffer = trainer.commandQueue.makeCommandBuffer()
         for node in trainer.net.nodes.values {
             guard let trainableLayer = node.layer as? TrainableLayer else {
                 continue
@@ -88,8 +88,8 @@ public class SGDSolver {
     }
 
     /// Performs a parameter update on the GPU.
-    func encodeUpdateInBuffer(buffer: MTLCommandBuffer, values: Buffer, deltas: Buffer) {
-        guard let valuesBuffer = values.metalBuffer, deltasBuffer = deltas.metalBuffer else {
+    func encodeUpdateInBuffer(_ buffer: MTLCommandBuffer, values: Buffer, deltas: Buffer) {
+        guard let valuesBuffer = values.metalBuffer, let deltasBuffer = deltas.metalBuffer else {
             preconditionFailure("Missing values or deltas buffer for parameter update")
         }
 
@@ -97,16 +97,16 @@ public class SGDSolver {
             var learningRate: Float
         }
         var params = Parameters(learningRate: Float(learningRate))
-        let paramsBuffer = trainer.device.newBufferWithBytes(&params, length: sizeof(Parameters), options: .CPUCacheModeWriteCombined)
+        let paramsBuffer = trainer.device.makeBuffer(bytes: &params, length: MemoryLayout<Parameters>.size, options: .cpuCacheModeWriteCombined)
 
-        var parameterLength = UInt32(valuesBuffer.length / sizeof(Float32))
-        let encoder = buffer.computeCommandEncoder()
+        var parameterLength = UInt32(valuesBuffer.length / MemoryLayout<Float32>.size)
+        let encoder = buffer.makeComputeCommandEncoder()
         encoder.label = "UpdateParameter"
         encoder.setComputePipelineState(updateFunction)
-        encoder.setBuffer(valuesBuffer, offset: 0, atIndex: 0)
-        encoder.setBuffer(deltasBuffer, offset: 0, atIndex: 1)
-        encoder.setBuffer(paramsBuffer, offset: 0, atIndex: 2)
-        encoder.setBytes(&parameterLength, length: sizeof(parameterLength.dynamicType), atIndex: 3)
+        encoder.setBuffer(valuesBuffer, offset: 0, at: 0)
+        encoder.setBuffer(deltasBuffer, offset: 0, at: 1)
+        encoder.setBuffer(paramsBuffer, offset: 0, at: 2)
+        encoder.setBytes(&parameterLength, length: MemoryLayout<UInt32>.size, at: 3)
 
         let count = Int(parameterLength)
         let threadsPerGroup = MTLSize(width: updateFunction.threadExecutionWidth, height: 1, depth: 1)

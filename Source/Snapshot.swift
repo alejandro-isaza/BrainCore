@@ -9,29 +9,29 @@ import Foundation
 import Metal
 
 /// A data snapshot of a forward-backward pass.
-public class Snapshot {
+open class Snapshot {
     /// The network definition.
-    public let net: Net
+    open let net: Net
 
-    var forwardBuffers: [NSUUID: MTLBuffer]
-    var backwardBuffers: [NSUUID: MTLBuffer]
+    var forwardBuffers: [UUID: MTLBuffer]
+    var backwardBuffers: [UUID: MTLBuffer]
 
-    init(net: Net, forwardBuffers: [NSUUID: MTLBuffer], backwardBuffers: [NSUUID: MTLBuffer] = [NSUUID: MTLBuffer]()) {
+    init(net: Net, forwardBuffers: [UUID: MTLBuffer], backwardBuffers: [UUID: MTLBuffer] = [UUID: MTLBuffer]()) {
         self.net = net
         self.forwardBuffers = forwardBuffers
         self.backwardBuffers = backwardBuffers
     }
 
-    func contentsOfForwardBuffer(buffer: NetBuffer) -> UnsafeMutableBufferPointer<Float>? {
-        guard let mtlBuffer = forwardBuffers[buffer.id] else {
+    func contentsOfForwardBuffer(_ buffer: NetBuffer) -> UnsafeMutableBufferPointer<Float>? {
+        guard let mtlBuffer = forwardBuffers[buffer.id as UUID] else {
             return nil
         }
 
         return unsafeBufferPointerFromBuffer(mtlBuffer)
     }
 
-    func contentsOfBackwardBuffer(buffer: NetBuffer) -> UnsafeMutableBufferPointer<Float>? {
-        guard let mtlBuffer = backwardBuffers[buffer.id] else {
+    func contentsOfBackwardBuffer(_ buffer: NetBuffer) -> UnsafeMutableBufferPointer<Float>? {
+        guard let mtlBuffer = backwardBuffers[buffer.id as UUID] else {
             return nil
         }
 
@@ -41,7 +41,7 @@ public class Snapshot {
     /// Returns a pointer to the forward-pass contents of a network buffer.
     ///
     /// - Note: The pointer is short-lived, you should copy any contents that you want preserve.
-    public func contentsOfForwardBuffer(ref: Net.BufferID) -> UnsafeMutableBufferPointer<Float>? {
+    open func contentsOfForwardBuffer(_ ref: Net.BufferID) -> UnsafeMutableBufferPointer<Float>? {
         guard let buffer = net.buffers[ref] else {
             return nil
         }
@@ -51,7 +51,7 @@ public class Snapshot {
     /// Returns a pointer to the backward-pass contents of a network buffer.
     ///
     /// - Note: The pointer is short-lived, you should copy any contents that you want preserve.
-    public func contentsOfBackwardBuffer(ref: Net.BufferID) -> UnsafeMutableBufferPointer<Float>? {
+    open func contentsOfBackwardBuffer(_ ref: Net.BufferID) -> UnsafeMutableBufferPointer<Float>? {
         guard let buffer = net.buffers[ref] else {
             return nil
         }
@@ -61,56 +61,56 @@ public class Snapshot {
     /// Returns a pointer to the forward-pass output of a layer.
     ///
     /// - Note: The pointer is short-lived, you should copy any contents that you want preserve.
-    public func outputOfLayer(layer: Layer) -> UnsafeMutableBufferPointer<Float>? {
+    open func outputOfLayer(_ layer: Layer) -> UnsafeMutableBufferPointer<Float>? {
         guard let node = net.nodeForLayer(layer),
-            bufferId = node.outputBuffer?.id,
-            buffer = forwardBuffers[bufferId] else {
+            let bufferId = node.outputBuffer?.id,
+            let buffer = forwardBuffers[bufferId] else {
                 return nil
         }
-        let pointer = UnsafeMutablePointer<Float>(buffer.contents())
-        let count = buffer.length / sizeof(Float) - node.outputRange.startIndex
-        return UnsafeMutableBufferPointer(start: pointer + node.outputRange.startIndex, count: count)
+        let pointer = buffer.contents().bindMemory(to: Float.self, capacity: buffer.length / MemoryLayout<Float>.size)
+        let count = buffer.length / MemoryLayout<Float>.size - node.outputRange.lowerBound
+        return UnsafeMutableBufferPointer(start: pointer + node.outputRange.lowerBound, count: count)
     }
 
     /// Returns a pointer to the forward-pass input of a layer.
     ///
     /// - Note: The pointer is short-lived, you should copy any contents that you want preserve.
-    public func inputOfLayer(layer: Layer) -> UnsafeMutableBufferPointer<Float>? {
+    open func inputOfLayer(_ layer: Layer) -> UnsafeMutableBufferPointer<Float>? {
         guard let node = net.nodeForLayer(layer),
-            bufferId = node.inputBuffer?.id,
-            buffer = forwardBuffers[bufferId] else {
+            let bufferId = node.inputBuffer?.id,
+            let buffer = forwardBuffers[bufferId] else {
                 return nil
         }
-        let pointer = UnsafeMutablePointer<Float>(buffer.contents())
-        let count = buffer.length / sizeof(Float) - node.inputRange.startIndex
-        return UnsafeMutableBufferPointer(start: pointer + node.inputRange.startIndex, count: count)
+        let pointer = buffer.contents().bindMemory(to: Float.self, capacity: buffer.length / MemoryLayout<Float>.size)
+        let count = buffer.length / MemoryLayout<Float>.size - node.inputRange.lowerBound
+        return UnsafeMutableBufferPointer(start: pointer + node.inputRange.lowerBound, count: count)
     }
 
     /// Returns a pointer to the backward-pass input deltas of a layer.
     ///
     /// - Note: The pointer is short-lived, you should copy any contents that you want preserve.
-    public func inputDeltasOfLayer(layer: Layer) -> UnsafeMutableBufferPointer<Float>? {
+    open func inputDeltasOfLayer(_ layer: Layer) -> UnsafeMutableBufferPointer<Float>? {
         guard let node = net.nodeForLayer(layer),
-            bufferId = node.inputBuffer?.id,
-            buffer = backwardBuffers[bufferId] else {
+            let bufferId = node.inputBuffer?.id,
+            let buffer = backwardBuffers[bufferId] else {
                 return nil
         }
-        let pointer = UnsafeMutablePointer<Float>(buffer.contents())
-        let count = buffer.length / sizeof(Float) - node.inputRange.startIndex
-        return UnsafeMutableBufferPointer(start: pointer + node.inputRange.startIndex, count: count)
+        let pointer = buffer.contents().bindMemory(to: Float.self, capacity: buffer.length / MemoryLayout<Float>.size)
+        let count = buffer.length / MemoryLayout<Float>.size - node.inputRange.lowerBound
+        return UnsafeMutableBufferPointer(start: pointer + node.inputRange.lowerBound, count: count)
     }
 
     /// Returns a pointer to the backward-pass output deltas of a layer.
     ///
     /// - Note: The pointer is short-lived, you should copy any contents that you want preserve.
-    public func outputDeltasOfLayer(layer: Layer) -> UnsafeMutableBufferPointer<Float>? {
+    open func outputDeltasOfLayer(_ layer: Layer) -> UnsafeMutableBufferPointer<Float>? {
         guard let node = net.nodeForLayer(layer),
-            bufferId = node.outputBuffer?.id,
-            buffer = backwardBuffers[bufferId] else {
+            let bufferId = node.outputBuffer?.id,
+            let buffer = backwardBuffers[bufferId] else {
                 return nil
         }
-        let pointer = UnsafeMutablePointer<Float>(buffer.contents())
-        let count = buffer.length / sizeof(Float) - node.outputRange.startIndex
-        return UnsafeMutableBufferPointer(start: pointer + node.outputRange.startIndex, count: count)
+        let pointer = buffer.contents().bindMemory(to: Float.self, capacity: buffer.length / MemoryLayout<Float>.size)
+        let count = buffer.length / MemoryLayout<Float>.size - node.outputRange.lowerBound
+        return UnsafeMutableBufferPointer(start: pointer + node.outputRange.lowerBound, count: count)
     }
 }

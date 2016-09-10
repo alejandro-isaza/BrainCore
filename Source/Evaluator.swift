@@ -13,22 +13,22 @@ import Metal
 /// `Evaluator` is optimized for running a single pass at a time (batch size of one). It maximizes GPU parallelism by enqueing sequential runs a few at a time.
 ///
 /// - SeeAlso: `Runner`, `Trainer`
-public class Evaluator: Runner {
+open class Evaluator: Runner {
 
     /// The maximum number of instances to enqueue to the GPU at a time.
     let instanceCount = 3
     var instances = [Instance]()
     var nextInstanceIndex = 0
-    var inflightSemaphore: dispatch_semaphore_t
-    var queue: dispatch_queue_t
+    var inflightSemaphore: DispatchSemaphore
+    var queue: DispatchQueue
 
     /// Creates an `Evaluator` for the given network definition.
     ///
     /// - Parameter net:    network definition.
     /// - Parameter device: Metal device to use when running.
     public init(net: Net, device: MTLDevice) throws {
-        queue = dispatch_queue_create("BrainCore.Evaluator", DISPATCH_QUEUE_SERIAL)
-        inflightSemaphore = dispatch_semaphore_create(instanceCount)
+        queue = DispatchQueue(label: "BrainCore.Evaluator", attributes: [])
+        inflightSemaphore = DispatchSemaphore(value: instanceCount)
         try super.init(net: net, device: device, batchSize: 1, backwards: false)
 
         for _ in 0..<instanceCount {
@@ -43,20 +43,20 @@ public class Evaluator: Runner {
     ///
     /// - Parameter invocations: array of invocations to execute.
     /// - Parameter completion:  closure to execute when the invocation completes.
-    public func call(invocations: [Invocation], completion: (() -> Void)?) {
-        dispatch_sync(queue) {
+    open func call(_ invocations: [Invocation], completion: (() -> Void)?) {
+        queue.sync {
             self.callInQueue(invocations, completion: completion)
         }
     }
 
-    func callInQueue(invocations: [Invocation], completion: (() -> Void)?) {
-        let buffer = commandQueue.commandBuffer()
+    func callInQueue(_ invocations: [Invocation], completion: (() -> Void)?) {
+        let buffer = commandQueue.makeCommandBuffer()
         for invocation in invocations {
             try! Runner.encode(invocation: invocation, commandBuffer: buffer)
         }
 
         buffer.addCompletedHandler() { commandBuffer in
-            dispatch_async(self.queue) {
+            self.queue.async {
                 completion?()
             }
         }
@@ -68,8 +68,8 @@ public class Evaluator: Runner {
     /// - Important: Always call this method from the same serial queue.
     ///
     /// - Parameter completion: closure to execute when the evaluation finishes. It gets passed a snapshot of the network results.
-    public func evaluate(completion: ((Snapshot) -> Void)) {
-        dispatch_semaphore_wait(inflightSemaphore, DISPATCH_TIME_FOREVER)
+    open func evaluate(_ completion: @escaping ((Snapshot) -> Void)) {
+        inflightSemaphore.wait(timeout: DispatchTime.distantFuture)
 
         let instance = instances[nextInstanceIndex]
         instance.reset()
@@ -85,19 +85,19 @@ public class Evaluator: Runner {
                 guard let buffer = instance.buffers[netBuffer.id] else {
                     fatalError("Output buffer for \(dataLayer.name) not found.")
                 }
-                fillBuffer(buffer, start: n.outputRange.startIndex, withElements: dataLayer.nextBatch(1))
+                fillBuffer(buffer, start: n.outputRange.lowerBound, withElements: dataLayer.nextBatch(1))
             }
             instance.closeNode(n)
             instance.openOutputsOf(n)
             instance.finishNode(n)
         }
 
-        dispatch_sync(queue) {
+        queue.sync {
             self.processNodesOfInstance(instance, completion: completion)
         }
     }
 
-    func processNodesOfInstance(instance: Instance, completion: ((Snapshot) -> Void)) {
+    func processNodesOfInstance(_ instance: Instance, completion: @escaping ((Snapshot) -> Void)) {
         while !instance.openNodes.isEmpty {
             let node = instance.openNodes.popLast()!
             if instance.isClosed(node) {
@@ -108,11 +108,11 @@ public class Evaluator: Runner {
                 continue
             }
 
-            guard let _ = node.inputBuffer, _ = node.outputBuffer else {
+            guard let _ = node.inputBuffer, let _ = node.outputBuffer else {
                 preconditionFailure("Layer '\(node.layer.name)' is missing a buffer")
             }
 
-            let buffer = commandQueue.commandBuffer()
+            let buffer = commandQueue.makeCommandBuffer()
             for invocation in forwardLayer.forwardInvocations {
                 for buffer in invocation.buffers {
                     guard let netBuffer = buffer.netBuffer else { continue }
@@ -124,7 +124,7 @@ public class Evaluator: Runner {
             }
 
             buffer.addCompletedHandler() { commandBuffer in
-                dispatch_async(self.queue) {
+                self.queue.async {
                     instance.finishNode(node)
                     if instance.isFinished() {
                         self.finishInstance(instance, completion: completion)
@@ -137,7 +137,7 @@ public class Evaluator: Runner {
         }
     }
 
-    func finishInstance(instance: Instance, completion: ((Snapshot) -> Void)) {
+    func finishInstance(_ instance: Instance, completion: ((Snapshot) -> Void)) {
         for n in net.sinkNodes.values {
             let sinkLayer = n.layer as! SinkLayer
             if let netBuffer = n.inputBuffer {
@@ -145,11 +145,11 @@ public class Evaluator: Runner {
                     fatalError("Layer '\(n.layer.name)'s input buffer was not found.")
                 }
 
-                sinkLayer.consume(valueArrayFromBuffer(buffer, start: n.inputRange.startIndex))
+                sinkLayer.consume(valueArrayFromBuffer(buffer, start: n.inputRange.lowerBound))
             }
         }
 
         completion(Snapshot(net: self.net, forwardBuffers: instance.buffers))
-        dispatch_semaphore_signal(self.inflightSemaphore)
+        self.inflightSemaphore.signal()
     }
 }

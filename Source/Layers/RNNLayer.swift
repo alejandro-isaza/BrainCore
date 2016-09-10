@@ -9,7 +9,7 @@ import Upsurge
 import Metal
 
 public class RNNLayer: TrainableLayer, BackwardLayer {
-    public let id = NSUUID()
+    public let id = UUID()
     public let name: String?
 
     /// The cell copies for each timestep
@@ -28,7 +28,7 @@ public class RNNLayer: TrainableLayer, BackwardLayer {
     }
 
     public var backwardInvocations: [Invocation] {
-        return cells.reverse().flatMap({ $0.backwardInvocations })
+        return cells.reversed().flatMap({ $0.backwardInvocations })
     }
 
 
@@ -37,25 +37,25 @@ public class RNNLayer: TrainableLayer, BackwardLayer {
 
         self.cells = (0..<sequenceLength).map({ LSTMNodeLayer(weights: weights, biases: biases, time: $0, name: "\(name) T\($0)", clipTo: clipTo) })
 
-        for (t, cell) in cells.enumerate() {
+        for (t, cell) in cells.enumerated() {
             cell.previousNode = t-1 >= 0 ? cells[t-1] : nil
             cell.nextNode = t+1 < cells.count ? cells[t+1] : nil
         }
     }
 
-    public func initializeForward(builder builder: ForwardInvocationBuilder, batchSize: Int) throws {
+    public func initializeForward(builder: ForwardInvocationBuilder, batchSize: Int) throws {
         for cell in cells {
             try cell.initializeForward(builder: builder, batchSize: batchSize)
         }
     }
 
-    public func initializeBackward(builder builder: BackwardInvocationBuilder, batchSize: Int) throws {
+    public func initializeBackward(builder: BackwardInvocationBuilder, batchSize: Int) throws {
         for cell in cells {
             try cell.initializeBackward(builder: builder, batchSize: batchSize)
         }
     }
 
-    public func encodeParametersUpdate(encodeAction: (values: Buffer, deltas: Buffer) -> Void) {
+    public func encodeParametersUpdate(_ encodeAction: (_ values: Buffer, _ deltas: Buffer) -> Void) {
         for cell in cells {
             cell.encodeParametersUpdate(encodeAction)
         }

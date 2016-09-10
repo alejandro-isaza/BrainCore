@@ -16,7 +16,7 @@ public class L2LossLayer: LossLayer {
 
     public let size: Int
     public let name: String?
-    public let id = NSUUID()
+    public let id = UUID()
 
     public var outputSize: Int {
         return 1
@@ -47,7 +47,7 @@ public class L2LossLayer: LossLayer {
         self.size = size
     }
 
-    public func initializeForward(builder builder: ForwardInvocationBuilder, batchSize: Int) throws {
+    public func initializeForward(builder: ForwardInvocationBuilder, batchSize: Int) throws {
         let buffers = [
             builder.inputBuffer,
             builder.outputBuffer
@@ -61,7 +61,7 @@ public class L2LossLayer: LossLayer {
             width: batchSize)
     }
 
-    public func initializeBackward(builder builder: BackwardInvocationBuilder, batchSize: Int) throws {
+    public func initializeBackward(builder: BackwardInvocationBuilder, batchSize: Int) throws {
         let params = Parameters(batchSize: UInt32(batchSize), inputSize: UInt32(size))
 
         let buffers = [

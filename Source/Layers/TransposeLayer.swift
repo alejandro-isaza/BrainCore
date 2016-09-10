@@ -15,7 +15,7 @@ internal class TransposeLayer: ForwardLayer {
         let inputSize: UInt32
     }
 
-    let id = NSUUID()
+    let id = UUID()
     let name: String?
 
     /// The size of each batch element
@@ -43,7 +43,7 @@ internal class TransposeLayer: ForwardLayer {
         self.size = size
     }
 
-    func initializeForward(builder builder: ForwardInvocationBuilder, batchSize: Int) throws {
+    func initializeForward(builder: ForwardInvocationBuilder, batchSize: Int) throws {
         let buffers = [
             builder.inputBuffer,
             builder.outputBuffer

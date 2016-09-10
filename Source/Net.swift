@@ -8,9 +8,9 @@
 import Metal
 
 /// Neural network definition.
-public class Net {
-    public typealias BufferID = NSUUID
-    typealias LayerID = NSUUID
+open class Net {
+    public typealias BufferID = UUID
+    typealias LayerID = UUID
 
     var buffers = [BufferID: NetBuffer]()
     var dataNodes = [LayerID: NetNode]()
@@ -21,7 +21,7 @@ public class Net {
     static var buildStack = [Net]()
 
     /// Creates a network definition with a simplified syntax using overloaded operators.
-    static public func build(definition: () -> Void) -> Net {
+    static public func build(_ definition: () -> Void) -> Net {
         buildStack.append(Net())
         definition()
         return buildStack.popLast()!
@@ -34,29 +34,29 @@ public class Net {
     /// Creates a buffer and adds it to `self`.
     ///
     /// - Returns: The newly created buffer's identifier.
-    public func addBuffer(name name: String? = nil) -> BufferID {
-        let buffer = NetBuffer(type: .Forward, name: name)
+    open func addBuffer(name: String? = nil) -> BufferID {
+        let buffer = NetBuffer(type: .forward, name: name)
         buffers[buffer.id] = buffer
         return buffer.id
     }
 
     /// Adds a layer to `self`.
-    public func addLayer(layer: Layer) {
-        if nodes[layer.id] != nil {
+    open func addLayer(_ layer: Layer) {
+        if nodes[layer.id as Net.LayerID] != nil {
             return
         }
 
         validateLayer(layer)
 
         let node = NetNode(layer: layer)
-        nodes[layer.id] = node
+        nodes[layer.id as Net.LayerID] = node
 
         if layer is DataLayer {
-            dataNodes[layer.id] = node
+            dataNodes[layer.id as Net.LayerID] = node
         } else if layer is LossLayer {
-            lossNodes[layer.id] = node
+            lossNodes[layer.id as Net.LayerID] = node
         } else if layer is SinkLayer {
-            sinkNodes[layer.id] = node
+            sinkNodes[layer.id as Net.LayerID] = node
         }
     }
 
@@ -77,12 +77,12 @@ public class Net {
 
             let transposeLayer = TransposeLayer(size: dataLayer.outputSize, name: "Transpose \(dataLayer)")
             addLayer(transposeLayer)
-            let transposeNode = nodes[transposeLayer.id]!
+            let transposeNode = nodes[transposeLayer.id as Net.LayerID]!
             transposeNode.outputBuffer = dataNode.outputBuffer
             transposeNode.outputRange = dataNode.outputRange
 
-            let dataNodeIndex = dataOutputBuffer.inputNodes.lazy.map({ $0.node }).indexOf(dataNode)!
-            dataOutputBuffer.inputNodes.removeAtIndex(dataNodeIndex)
+            let dataNodeIndex = dataOutputBuffer.inputNodes.lazy.map({ $0.node }).index(of: dataNode)!
+            dataOutputBuffer.inputNodes.remove(at: dataNodeIndex)
 
             connectNode(dataNode, toBuffer: transposeBuffer)
             connectWholeBuffer(transposeBuffer, toNode: transposeNode)
@@ -92,7 +92,7 @@ public class Net {
     }
 
     /// Validates that a layer is one of the supported types and doesn't try to act as more than one type.
-    private func validateLayer(layer: Layer) {
+    fileprivate func validateLayer(_ layer: Layer) {
         let dataLayer = layer is DataLayer
         let forwardLayer = layer is ForwardLayer
         let sinkLayer = layer is SinkLayer
@@ -102,11 +102,11 @@ public class Net {
         precondition(!dataLayer || !sinkLayer, "Layer can't be both a data layer and a sink layer")
     }
 
-    func nodeForLayer(layer: Layer) -> NetNode? {
-        return nodes[layer.id]
+    func nodeForLayer(_ layer: Layer) -> NetNode? {
+        return nodes[layer.id as Net.LayerID]
     }
 
-    func bufferWithID(id: BufferID) -> NetBuffer? {
+    func bufferWithID(_ id: BufferID) -> NetBuffer? {
         return buffers[id]
     }
 
@@ -114,13 +114,13 @@ public class Net {
     // MARK: - Net construction
 
     /// Sends the output of a layer to a buffer.
-    public func connectLayer(layer: Layer, toBuffer bufferID: BufferID) {
+    open func connectLayer(_ layer: Layer, toBuffer bufferID: BufferID) {
         let node: NetNode
-        if let existingNode = nodes[layer.id] {
+        if let existingNode = nodes[layer.id as Net.LayerID] {
             node = existingNode
         } else {
             addLayer(layer)
-            node = nodes[layer.id]!
+            node = nodes[layer.id as Net.LayerID]!
         }
 
         guard let buffer = buffers[bufferID] else {
@@ -129,7 +129,7 @@ public class Net {
         connectNode(node, toBuffer: buffer)
     }
 
-    func connectNode(node: NetNode, toBuffer buffer: NetBuffer) {
+    func connectNode(_ node: NetNode, toBuffer buffer: NetBuffer) {
         node.outputBuffer = buffer
         node.outputRange = buffer.inputSize..<buffer.inputSize + node.outputSize
         buffer.inputNodes.append(WeakNetNode(node))
@@ -140,23 +140,23 @@ public class Net {
     /// If the buffer already has outgoing connections taking `N` elements this new connection will start with element `N+1`.
     ///
     /// - SeeAlso: `connectWholeBuffer(bufferID:toLayer:)`
-    public func connectSplitBuffer(bufferID: BufferID, toLayer layer: Layer) {
+    open func connectSplitBuffer(_ bufferID: BufferID, toLayer layer: Layer) {
         guard let buffer = buffers[bufferID] else {
             preconditionFailure("Could not find buffer with id: \(bufferID)")
         }
 
         let node: NetNode
-        if let existingNode = nodes[layer.id] {
+        if let existingNode = nodes[layer.id as Net.LayerID] {
             node = existingNode
         } else {
             addLayer(layer)
-            node = nodes[layer.id]!
+            node = nodes[layer.id as Net.LayerID]!
         }
 
         connectSplitBuffer(buffer, toNode: node)
     }
 
-    func connectSplitBuffer(buffer: NetBuffer, toNode node: NetNode) {
+    func connectSplitBuffer(_ buffer: NetBuffer, toNode node: NetNode) {
         node.inputBuffer = buffer
         node.inputRange = buffer.outputSize..<buffer.outputSize + node.inputSize
         buffer.outputNodes.append(WeakNetNode(node))
@@ -167,23 +167,23 @@ public class Net {
     /// Whether or not the buffer already has outgoing connections this new connection will start with element `0`.
     ///
     /// - SeeAlso: `connectSplitBuffer(bufferID:toLayer:)`
-    public func connectWholeBuffer(bufferID: BufferID, toLayer layer: Layer) {
+    open func connectWholeBuffer(_ bufferID: BufferID, toLayer layer: Layer) {
         guard let buffer = buffers[bufferID] else {
             preconditionFailure("Could not find buffer with id: \(bufferID)")
         }
 
         let node: NetNode
-        if let existingNode = nodes[layer.id] {
+        if let existingNode = nodes[layer.id as Net.LayerID] {
             node = existingNode
         } else {
             addLayer(layer)
-            node = nodes[layer.id]!
+            node = nodes[layer.id as Net.LayerID]!
         }
 
         connectWholeBuffer(buffer, toNode: node)
     }
 
-    func connectWholeBuffer(buffer: NetBuffer, toNode node: NetNode) {
+    func connectWholeBuffer(_ buffer: NetBuffer, toNode node: NetNode) {
         node.inputBuffer = buffer
         node.inputRange = 0..<node.inputSize
         buffer.outputNodes.append(WeakNetNode(node))

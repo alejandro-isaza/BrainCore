@@ -7,14 +7,14 @@
 
 /// A buffer that is part of a network definition.
 class NetBuffer: Hashable {
-    enum Type: Int {
-        case Forward
-        case Deltas
-        case Parameters
+    enum `Type`: Int {
+        case forward
+        case deltas
+        case parameters
     }
 
     /// Buffer unique identifier.
-    let id: NSUUID
+    let id: UUID
 
     /// Buffer type.
     let type: Type
@@ -23,14 +23,14 @@ class NetBuffer: Hashable {
     let name: String?
 
     var inputSize: Int {
-        return inputNodes.reduce(0, combine: { currentValue, weakNode in
-            return max(currentValue, weakNode.node.outputRange.endIndex)
+        return inputNodes.reduce(0, { currentValue, weakNode in
+            return max(currentValue, weakNode.node.outputRange.upperBound)
         })
     }
 
     var outputSize: Int {
-        return outputNodes.reduce(0, combine: { currentValue, weakNode in
-            return max(currentValue, weakNode.node.inputRange.endIndex)
+        return outputNodes.reduce(0, { currentValue, weakNode in
+            return max(currentValue, weakNode.node.inputRange.upperBound)
         })
     }
 
@@ -42,14 +42,14 @@ class NetBuffer: Hashable {
     var inputNodes = [WeakNetNode]()
     var outputNodes = [WeakNetNode]()
     
-    init(id: NSUUID, type: Type, name: String? = nil) {
+    init(id: UUID, type: Type, name: String? = nil) {
         self.id = id
         self.type = type
         self.name = name
     }
 
     init(type: Type, name: String? = nil) {
-        id = NSUUID()
+        id = UUID()
         self.type = type
         self.name = name
     }

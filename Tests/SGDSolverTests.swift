@@ -42,7 +42,7 @@ class SGDSolverTests: MetalTestCase {
         })
 
         let solver = try! SGDSolver(net: net, device: device, batchSize: batchSize, stepCount: 1, initialLearningRate: 0.5, learningRateSchedule: { $0.0 })
-        let expecation = self.expectationWithDescription("Net forward pass 1")
+        let expecation = self.expectation(description: "Net forward pass 1")
         solver.stepAction = { snapshot in
             let sinkData = [Float](snapshot.inputOfLayer(sink)!)
             sink.consume(Blob(sinkData))
@@ -71,7 +71,7 @@ class SGDSolverTests: MetalTestCase {
         }
         solver.train({ })
 
-        self.waitForExpectationsWithTimeout(2) { error in
+        self.waitForExpectations(timeout: 2) { error in
             if let error = error {
                 XCTFail("Net.forward() failed: \(error)")
             }
@@ -125,7 +125,7 @@ class SGDSolverTests: MetalTestCase {
             [ip2, label] => loss => sink
         })
 
-        let expectation = self.expectationWithDescription("Net train")
+        let expectation = self.expectation(description: "Net train")
         let learningRateSchedule: (Double, Int) -> Double = { lr, step in
             return lr / Double(10 * (1 + step / 500))
         }
@@ -144,7 +144,7 @@ class SGDSolverTests: MetalTestCase {
         solver.train({ expectation.fulfill() })
 
 
-        self.waitForExpectationsWithTimeout(20) { error in
+        self.waitForExpectations(timeout: 20) { error in
             XCTAssertLessThan(output[0], output[4])
             XCTAssertGreaterThan(output[1], output[5])
             XCTAssertLessThan(output[2], output[6])

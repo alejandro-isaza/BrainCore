@@ -11,7 +11,7 @@ import Metal
 import Upsurge
 
 
-func sigmoid(x: Float) -> Float {
+func sigmoid(_ x: Float) -> Float {
     return 1.0 / (1.0 + exp(-x))
 }
 
@@ -34,13 +34,13 @@ class SigmoidLayerTests: MetalTestCase {
             dataLayer => layer => sinkLayer
         }
 
-        let expecation = expectationWithDescription("Net forward pass")
+        let expecation = expectation(description: "Net forward pass")
         let evaluator = try! Evaluator(net: net, device: device)
         evaluator.evaluate() { snapshot in
             expecation.fulfill()
         }
 
-        waitForExpectationsWithTimeout(5) { error in
+        waitForExpectations(timeout: 5) { error in
             let result = sinkLayer.data
             for i in 0..<dataSize {
                 XCTAssertEqualWithAccuracy(result[i], sigmoid(data[i]), accuracy: 0.001)
@@ -72,7 +72,7 @@ class SigmoidLayerTests: MetalTestCase {
             [layer, labelLayer] => lossLayer => sinkLayer
         }
 
-        let expecation = expectationWithDescription("Net backward pass")
+        let expecation = expectation(description: "Net backward pass")
         let trainer = try! Trainer(net: net, device: device, batchSize: batchSize)
         var inputDeltas = [Float]()
         var outputDeltas = [Float]()
@@ -82,7 +82,7 @@ class SigmoidLayerTests: MetalTestCase {
             expecation.fulfill()
         }
 
-        waitForExpectationsWithTimeout(5) { error in
+        waitForExpectations(timeout: 5) { error in
             for i in 0..<dataSize {
                 XCTAssertEqualWithAccuracy(inputDeltas[i], outputDeltas[i] * sigmoid(input[i]) * (1 - sigmoid(input[i])), accuracy: 0.001)
             }
@@ -108,7 +108,7 @@ class SigmoidLayerTests: MetalTestCase {
             dataLayer => layer => sinkLayer
         }
 
-        let expecation = expectationWithDescription("Net forward pass")
+        let expecation = expectation(description: "Net forward pass")
 
         var result = [Float]()
         let trainer = try! Trainer(net: net, device: device, batchSize: batchSize)
@@ -117,7 +117,7 @@ class SigmoidLayerTests: MetalTestCase {
             expecation.fulfill()
         }
 
-        waitForExpectationsWithTimeout(5) { error in
+        waitForExpectations(timeout: 5) { error in
             for i in 0..<dataSize {
                 for j in 0..<batchSize {
                     XCTAssertEqualWithAccuracy(result[j + i * batchSize], sigmoid(data[j, i]), accuracy: 0.001)

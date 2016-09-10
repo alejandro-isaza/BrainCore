@@ -18,7 +18,7 @@ public class LSTMNodeLayer: TrainableLayer, BackwardLayer {
         let clipTo: Float
     }
 
-    public let id = NSUUID()
+    public let id = UUID()
     public let name: String?
 
     public let weights: Matrix<Float>
@@ -66,7 +66,7 @@ public class LSTMNodeLayer: TrainableLayer, BackwardLayer {
     var backwardInputsInvocation: Invocation?
 
     public var backwardInvocations: [Invocation] {
-        guard let backwardActivationsInvocation = backwardActivationsInvocation, backwardWeightsInvocation = backwardWeightsInvocation, backwardInputsInvocation = backwardInputsInvocation else {
+        guard let backwardActivationsInvocation = backwardActivationsInvocation, let backwardWeightsInvocation = backwardWeightsInvocation, let backwardInputsInvocation = backwardInputsInvocation else {
             fatalError("initializeBackward needs to be called first")
         }
         return [backwardActivationsInvocation, backwardWeightsInvocation, backwardInputsInvocation]
@@ -85,13 +85,13 @@ public class LSTMNodeLayer: TrainableLayer, BackwardLayer {
         precondition(weights.columns == 4 * unitCount)
     }
 
-    public func initializeForward(builder builder: ForwardInvocationBuilder, batchSize: Int) throws {
+    public func initializeForward(builder: ForwardInvocationBuilder, batchSize: Int) throws {
         let params = Parameters(batchSize: UInt16(batchSize), unitCount: UInt16(unitCount), inputSize: UInt16(inputSize), clipTo: clipTo)
 
-        if let previousWeightBuffer = previousNode?.weightsBuffer, previousBiasBuffer = previousNode?.biasesBuffer {
+        if let previousWeightBuffer = previousNode?.weightsBuffer, let previousBiasBuffer = previousNode?.biasesBuffer {
             weightsBuffer = previousWeightBuffer
             biasesBuffer = previousBiasBuffer
-        } else if let nextWeightBuffer = nextNode?.weightsBuffer, nextBiasBuffer = nextNode?.biasesBuffer {
+        } else if let nextWeightBuffer = nextNode?.weightsBuffer, let nextBiasBuffer = nextNode?.biasesBuffer {
             weightsBuffer = nextWeightBuffer
             biasesBuffer = nextBiasBuffer
         } else {
@@ -99,14 +99,14 @@ public class LSTMNodeLayer: TrainableLayer, BackwardLayer {
             biasesBuffer = builder.createBuffer(name: "biases", elements: biases)
         }
 
-        stateBuffer = builder.createBuffer(name: "state", size: batchSize * stateSize * sizeof(Float))
-        activationBuffer = builder.createBuffer(name: "activation", size: batchSize * 4 * unitCount * sizeof(Float))
+        stateBuffer = builder.createBuffer(name: "state", size: batchSize * stateSize * MemoryLayout<Float>.size)
+        activationBuffer = builder.createBuffer(name: "activation", size: batchSize * 4 * unitCount * MemoryLayout<Float>.size)
 
         let previousStateBuffer: Buffer
         if let stateBuffer = previousNode?.stateBuffer {
             previousStateBuffer = stateBuffer
         } else {
-            previousStateBuffer = builder.createBuffer(name: "empty state", size: batchSize * stateSize * sizeof(Float))
+            previousStateBuffer = builder.createBuffer(name: "empty state", size: batchSize * stateSize * MemoryLayout<Float>.size)
         }
 
         let buffers = [
@@ -127,15 +127,15 @@ public class LSTMNodeLayer: TrainableLayer, BackwardLayer {
         )
     }
 
-    public func initializeBackward(builder builder: BackwardInvocationBuilder, batchSize: Int) throws {
-        guard let weightsBuffer = weightsBuffer, stateBuffer = stateBuffer, activationBuffer = activationBuffer else {
+    public func initializeBackward(builder: BackwardInvocationBuilder, batchSize: Int) throws {
+        guard let weightsBuffer = weightsBuffer, let stateBuffer = stateBuffer, let activationBuffer = activationBuffer else {
             preconditionFailure("initializeForward must be called BEFORE initializeBackward.")
         }
 
-        let nextActivationBuffer = nextNode?.activationBuffer ?? builder.createBuffer(name: "activation", size: batchSize * 4 * unitCount * sizeof(Float))
-        let nextActivationDeltasBuffer = nextNode?.activationDeltasBuffer ?? builder.createBuffer(name: "activation deltas", size: batchSize * 4 * unitCount * sizeof(Float))
-        let nextStateDeltasBuffer = nextNode?.stateDeltasBuffer ?? builder.createBuffer(name: "state deltas", size: batchSize * stateSize * sizeof(Float))
-        let previousStateBuffer = previousNode?.stateBuffer ?? builder.createBuffer(name: "state", size: batchSize * stateSize * sizeof(Float))
+        let nextActivationBuffer = nextNode?.activationBuffer ?? builder.createBuffer(name: "activation", size: batchSize * 4 * unitCount * MemoryLayout<Float>.size)
+        let nextActivationDeltasBuffer = nextNode?.activationDeltasBuffer ?? builder.createBuffer(name: "activation deltas", size: batchSize * 4 * unitCount * MemoryLayout<Float>.size)
+        let nextStateDeltasBuffer = nextNode?.stateDeltasBuffer ?? builder.createBuffer(name: "state deltas", size: batchSize * stateSize * MemoryLayout<Float>.size)
+        let previousStateBuffer = previousNode?.stateBuffer ?? builder.createBuffer(name: "state", size: batchSize * stateSize * MemoryLayout<Float>.size)
 
         if let nextNode = nextNode {
             nextNode.activationBuffer = nextActivationBuffer
@@ -148,13 +148,13 @@ public class LSTMNodeLayer: TrainableLayer, BackwardLayer {
 
         let params = Parameters(batchSize: UInt16(batchSize), unitCount: UInt16(unitCount), inputSize: UInt16(inputSize), clipTo: clipTo)
 
-        weightsDeltasBuffer = builder.createBuffer(name: "weights deltas", size: 4 * unitCount * (inputSize + unitCount) * sizeof(Float))
-        biasesDeltasBuffer = builder.createBuffer(name: "biases deltas", size: 4 * unitCount * sizeof(Float))
+        weightsDeltasBuffer = builder.createBuffer(name: "weights deltas", size: 4 * unitCount * (inputSize + unitCount) * MemoryLayout<Float>.size)
+        biasesDeltasBuffer = builder.createBuffer(name: "biases deltas", size: 4 * unitCount * MemoryLayout<Float>.size)
         if stateDeltasBuffer == nil {
-            stateDeltasBuffer = builder.createBuffer(name: "state deltas", size: batchSize * stateSize * sizeof(Float))
+            stateDeltasBuffer = builder.createBuffer(name: "state deltas", size: batchSize * stateSize * MemoryLayout<Float>.size)
         }
         if activationDeltasBuffer == nil {
-            activationDeltasBuffer = builder.createBuffer(name: "activation deltas", size: batchSize * 4 * unitCount * sizeof(Float))
+            activationDeltasBuffer = builder.createBuffer(name: "activation deltas", size: batchSize * 4 * unitCount * MemoryLayout<Float>.size)
         }
 
         let activationsBuffers = [
@@ -206,15 +206,15 @@ public class LSTMNodeLayer: TrainableLayer, BackwardLayer {
         )
     }
 
-    public func encodeParametersUpdate(encodeAction: (values: Buffer, deltas: Buffer) -> Void) {
-        guard let weightsDeltasBuffer = weightsDeltasBuffer, weightsBuffer = weightsBuffer else {
+    public func encodeParametersUpdate(_ encodeAction: (_ values: Buffer, _ deltas: Buffer) -> Void) {
+        guard let weightsDeltasBuffer = weightsDeltasBuffer, let weightsBuffer = weightsBuffer else {
             fatalError("LSTM weights were not initialized")
         }
-        guard let biasesDeltasBuffer = biasesDeltasBuffer, biasesBuffer = biasesBuffer else {
+        guard let biasesDeltasBuffer = biasesDeltasBuffer, let biasesBuffer = biasesBuffer else {
             fatalError("LSTM biases were not initialized")
         }
 
-        encodeAction(values: weightsBuffer, deltas: weightsDeltasBuffer)
-        encodeAction(values: biasesBuffer, deltas: biasesDeltasBuffer)
+        encodeAction(weightsBuffer, weightsDeltasBuffer)
+        encodeAction(biasesBuffer, biasesDeltasBuffer)
     }
 }

@@ -26,32 +26,32 @@ class TransposeLayerTests: MetalTestCase {
         }
 
         let inputMetalBuffer = data.withUnsafeBufferPointer { pointer in
-            return device.newBufferWithBytes(pointer.baseAddress, length: data.count * sizeof(Float), options: .CPUCacheModeDefaultCache)
+            return device.makeBuffer(bytes: pointer.baseAddress!, length: data.count * MemoryLayout<Float>.size, options: [])
         }
-        let inputBuffer = Buffer(name: "input", size: data.count * sizeof(Float), metalBuffer: inputMetalBuffer, offset: 0)
+        let inputBuffer = Buffer(name: "input", size: data.count * MemoryLayout<Float>.size, metalBuffer: inputMetalBuffer, offset: 0)
 
-        let outputMetalBuffer = device.newBufferWithLength(data.count * sizeof(Float), options: .CPUCacheModeDefaultCache)
-        let outputBuffer = Buffer(name: "output", size: data.count * sizeof(Float), metalBuffer: outputMetalBuffer, offset: 0)
+        let outputMetalBuffer = device.makeBuffer(length: data.count * MemoryLayout<Float>.size, options: [])
+        let outputBuffer = Buffer(name: "output", size: data.count * MemoryLayout<Float>.size, metalBuffer: outputMetalBuffer, offset: 0)
 
         let builder = ForwardInvocationBuilder(device: self.device, library: self.library, inputBuffer: inputBuffer, outputBuffer: outputBuffer)
         let layer = TransposeLayer(size: dataSize, name: "Transpose")
         try! layer.initializeForward(builder: builder, batchSize: batchSize)
 
-        let queue = device.newCommandQueue()
+        let queue = device.makeCommandQueue()
         let invocation = layer.forwardInvocation!
 
-        measureBlock {
-            let commandBuffer = queue.commandBuffer()
-            let encoder = commandBuffer.computeCommandEncoder()
+        measure {
+            let commandBuffer = queue.makeCommandBuffer()
+            let encoder = commandBuffer.makeComputeCommandEncoder()
             encoder.setComputePipelineState(invocation.pipelineState)
 
-            for (index, buffer) in invocation.buffers.enumerate() {
-                encoder.setBuffer(buffer.metalBuffer!, offset: buffer.metalBufferOffset * batchSize, atIndex: index)
+            for (index, buffer) in invocation.buffers.enumerated() {
+                encoder.setBuffer(buffer.metalBuffer!, offset: buffer.metalBufferOffset * batchSize, at: index)
             }
 
-            for (index, value) in invocation.values.enumerate() {
+            for (index, value) in invocation.values.enumerated() {
                 var mutableValue = value
-                encoder.setBytes(&mutableValue, length: sizeofValue(value), atIndex: index + invocation.buffers.count)
+                encoder.setBytes(&mutableValue, length: MemoryLayout.size(ofValue: value), at: index + invocation.buffers.count)
             }
 
             let threadWidth = invocation.pipelineState.threadExecutionWidth
@@ -65,7 +65,7 @@ class TransposeLayerTests: MetalTestCase {
             commandBuffer.waitUntilCompleted()
         }
 
-        let result = UnsafePointer<Float>(outputMetalBuffer.contents())
+        let result = outputMetalBuffer.contents().bindMemory(to: Float.self, capacity: outputMetalBuffer.length / MemoryLayout<Float>.size)
         let expected = transpose(data)
         for i in 0..<batchSize * dataSize {
             XCTAssertEqualWithAccuracy(result[i], expected.elements[i], accuracy: 0.001)

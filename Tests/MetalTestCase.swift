@@ -12,7 +12,7 @@ import XCTest
 class MetalTestCase: XCTestCase {
     class Source: DataLayer {
         let name: String?
-        let id = NSUUID()
+        let id = UUID()
         var data: Blob
         var batchSize: Int
 
@@ -26,14 +26,14 @@ class MetalTestCase: XCTestCase {
             self.batchSize = batchSize
         }
 
-        func nextBatch(batchSize: Int) -> Blob {
+        func nextBatch(_ batchSize: Int) -> Blob {
             return data
         }
     }
 
     class Sink: SinkLayer {
         let name: String?
-        let id = NSUUID()
+        let id = UUID()
         var inputSize: Int
         var batchSize: Int
 
@@ -45,7 +45,7 @@ class MetalTestCase: XCTestCase {
             self.batchSize = batchSize
         }
 
-        func consume(input: Blob) {
+        func consume(_ input: Blob) {
             self.data = input
         }
     }
@@ -60,9 +60,9 @@ class MetalTestCase: XCTestCase {
     }
 
     var library: MTLLibrary {
-        guard let path = NSBundle(forClass: self.dynamicType).pathForResource("default", ofType: "metallib") else {
+        guard let path = Bundle(for: type(of: self)).path(forResource: "default", ofType: "metallib") else {
             fatalError("Metal library not found")
         }
-        return try! device.newLibraryWithFile(path)
+        return try! device.makeLibrary(filepath: path)
     }
 }

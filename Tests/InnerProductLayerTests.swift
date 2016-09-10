@@ -40,7 +40,7 @@ class InnerProductLayerTests: MetalTestCase {
             dataLayer => layer => sinkLayer
         }
 
-        let expecation = expectationWithDescription("Net forward pass")
+        let expecation = expectation(description: "Net forward pass")
         let evaluator = try! Evaluator(net: net, device: device)
         var result = [Float]()
         evaluator.evaluate() { snapshot in
@@ -48,8 +48,8 @@ class InnerProductLayerTests: MetalTestCase {
             expecation.fulfill()
         }
 
-        waitForExpectationsWithTimeout(5) { error in
-            let expectedResult0 = transpose(input)[Interval(integerLiteral: 0), Interval.All] * weights + biases.toRowMatrix()
+        waitForExpectations(timeout: 5) { error in
+            let expectedResult0 = transpose(input)[Interval(integerLiteral: 0), Interval.all] * weights + biases.toRowMatrix()
             for i in 0..<outputSize {
                 XCTAssertEqualWithAccuracy(result[0 + i * batchSize], expectedResult0[0, i], accuracy: 0.0001)
             }

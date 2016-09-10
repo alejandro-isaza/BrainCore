@@ -11,29 +11,29 @@ import Metal
 class Instance {
     let batchSize: Int
 
-    var buffers: [NSUUID: MTLBuffer]
+    var buffers: [UUID: MTLBuffer]
 
     var openNodes = [NetNode]()
     var closedNodes = Set<NetNode>()
     var finishedNodes = Set<NetNode>()
 
-    init(buffers: [NSUUID: NetBuffer], device: MTLDevice, batchSize: Int) {
+    init(buffers: [UUID: NetBuffer], device: MTLDevice, batchSize: Int) {
         self.batchSize = batchSize
 
-        self.buffers = [NSUUID: MTLBuffer]()
+        self.buffers = [UUID: MTLBuffer]()
 
         for (id, buffer) in buffers {
-            let mtlForwardBuffer = device.newBufferWithLength(buffer.size * batchSize * sizeof(Float), options: .CPUCacheModeDefaultCache)
+            let mtlForwardBuffer = device.makeBuffer(length: buffer.size * batchSize * MemoryLayout<Float>.size, options: MTLResourceOptions())
             mtlForwardBuffer.label = "\(buffer.name)Buffer"
             self.buffers[id] = mtlForwardBuffer
         }
     }
 
-    func isOpen(node: NetNode) -> Bool {
+    func isOpen(_ node: NetNode) -> Bool {
         return openNodes.contains(node)
     }
 
-    func isClosed(node: NetNode) -> Bool {
+    func isClosed(_ node: NetNode) -> Bool {
         return closedNodes.contains(node)
     }
 
@@ -42,21 +42,21 @@ class Instance {
     }
 
     func reset() {
-        openNodes.removeAll(keepCapacity: true)
-        closedNodes.removeAll(keepCapacity: true)
-        finishedNodes.removeAll(keepCapacity: true)
+        openNodes.removeAll(keepingCapacity: true)
+        closedNodes.removeAll(keepingCapacity: true)
+        finishedNodes.removeAll(keepingCapacity: true)
     }
 
-    func openOutputsOf(node: NetNode) {
+    func openOutputsOf(_ node: NetNode) {
         guard let buffer = node.outputBuffer else {
             return
         }
 
         let newOpenNodes = buffer.outputNodes.lazy.map({ $0.node }).filter(allInputsClosed)
-        openNodes.appendContentsOf(newOpenNodes)
+        openNodes.append(contentsOf: newOpenNodes)
     }
 
-    func allInputsClosed(node: NetNode) -> Bool {
+    func allInputsClosed(_ node: NetNode) -> Bool {
         guard let buffer = node.inputBuffer else {
             return true
         }
@@ -69,16 +69,16 @@ class Instance {
         return true
     }
 
-    func openInputsOf(node: NetNode) {
+    func openInputsOf(_ node: NetNode) {
         guard let buffer = node.inputBuffer else {
             return
         }
 
         let newOpenNodes = buffer.inputNodes.lazy.map({ $0.node }).filter(allOutputsClosed)
-        openNodes.appendContentsOf(newOpenNodes)
+        openNodes.append(contentsOf: newOpenNodes)
     }
 
-    func allOutputsClosed(node: NetNode) -> Bool {
+    func allOutputsClosed(_ node: NetNode) -> Bool {
         guard let buffer = node.outputBuffer else {
             return true
         }
@@ -91,11 +91,11 @@ class Instance {
         return true
     }
 
-    func closeNode(node: NetNode) {
+    func closeNode(_ node: NetNode) {
         closedNodes.insert(node)
     }
 
-    func finishNode(node: NetNode) {
+    func finishNode(_ node: NetNode) {
         finishedNodes.insert(node)
     }
 }

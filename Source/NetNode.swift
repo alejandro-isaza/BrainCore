@@ -10,10 +10,10 @@ class NetNode: Hashable {
     let layer: Layer
 
     weak var inputBuffer: NetBuffer?
-    var inputRange = 0...0
+    var inputRange: Range<Int> = 0..<0
 
     weak var outputBuffer: NetBuffer?
-    var outputRange = 0...0
+    var outputRange: Range<Int> = 0..<0
 
     var inputSize: Int {
         if let forwardLayer = layer as? ForwardLayer {

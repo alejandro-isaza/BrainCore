@@ -9,12 +9,12 @@ import Foundation
 import Metal
 
 /// A base class that sets up a network definition to be exectued, either feed-forward or backpropagation, on a GPU.
-public class Runner {
+open class Runner {
     /// The network definition.
-    public let net: Net
+    open let net: Net
 
     /// The batch size.
-    public let batchSize: Int
+    open let batchSize: Int
 
     /// The Metal GPU device to use.
     let device: MTLDevice
@@ -38,13 +38,13 @@ public class Runner {
 
         self.device = device
 
-        commandQueue = device.newCommandQueue()
+        commandQueue = device.makeCommandQueue()
         commandQueue.label = "BrainCore.Runner"
 
-        guard let path = NSBundle(forClass: self.dynamicType).pathForResource("default", ofType: "metallib") else {
+        guard let path = Bundle(for: type(of: self)).path(forResource: "default", ofType: "metallib") else {
             fatalError("Metal library not found")
         }
-        library = try device.newLibraryWithFile(path)
+        library = try device.makeLibrary(filepath: path)
 
         for node in net.nodes.values {
             if let forwardLayer = node.layer as? ForwardLayer {
@@ -59,7 +59,7 @@ public class Runner {
     }
 
     /// Initializes a network node for feed-forward execution.
-    func initializeForwardNode(node: NetNode, layer: ForwardLayer) throws {
+    func initializeForwardNode(_ node: NetNode, layer: ForwardLayer) throws {
         guard let inputNetBuffer = node.inputBuffer else {
             fatalError("Input buffer for \(layer.name) not found.")
         }
@@ -68,7 +68,7 @@ public class Runner {
             name: inputNetBuffer.name ?? "input",
             size: inputNetBuffer.size,
             netBuffer: inputNetBuffer,
-            offset: batchSize * node.inputRange.startIndex * sizeof(Float))
+            offset: batchSize * node.inputRange.lowerBound * MemoryLayout<Float>.size)
 
         guard let outputNetBuffer = node.outputBuffer else {
             fatalError("Output buffer for \(layer.name) not found.")
@@ -77,14 +77,14 @@ public class Runner {
             name: outputNetBuffer.name ?? "output",
             size: outputNetBuffer.size,
             netBuffer: outputNetBuffer,
-            offset: batchSize * node.outputRange.startIndex * sizeof(Float))
+            offset: batchSize * node.outputRange.lowerBound * MemoryLayout<Float>.size)
 
         let invocationBuilder = ForwardInvocationBuilder(device: device, library: library, inputBuffer: inputBuffer, outputBuffer: outputBuffer)
         try layer.initializeForward(builder: invocationBuilder, batchSize: batchSize)
     }
 
     /// Initializes a network node for backpropagation.
-    func initializeBackwardNode(node: NetNode, layer: BackwardLayer) throws {
+    func initializeBackwardNode(_ node: NetNode, layer: BackwardLayer) throws {
         guard let inputNetBuffer = node.inputBuffer else {
             fatalError("Input buffer for \(layer.name) not found.")
         }
@@ -93,41 +93,41 @@ public class Runner {
             name: inputNetBuffer.name ?? "input",
             size: inputNetBuffer.size,
             netBuffer: inputNetBuffer,
-            offset: batchSize * node.inputRange.startIndex * sizeof(Float))
+            offset: batchSize * node.inputRange.lowerBound * MemoryLayout<Float>.size)
 
-        let inputDeltasNetBuffer = NetBuffer(id: inputNetBuffer.id, type: .Deltas, name: inputNetBuffer.name)
+        let inputDeltasNetBuffer = NetBuffer(id: inputNetBuffer.id, type: .deltas, name: inputNetBuffer.name)
         let inputDeltasBuffer = Buffer(
             name: inputDeltasNetBuffer.name ?? "input deltas",
             size: inputDeltasNetBuffer.size,
             netBuffer: inputDeltasNetBuffer,
-            offset: batchSize * node.inputRange.startIndex * sizeof(Float))
+            offset: batchSize * node.inputRange.lowerBound * MemoryLayout<Float>.size)
 
         guard let outputNetBuffer = node.outputBuffer else {
             fatalError("Output buffer for \(layer.name) not found.")
         }
-        let outputDeltasNetBuffer = NetBuffer(id: outputNetBuffer.id, type: .Deltas, name: outputNetBuffer.name)
+        let outputDeltasNetBuffer = NetBuffer(id: outputNetBuffer.id, type: .deltas, name: outputNetBuffer.name)
         let outputDeltasBuffer = Buffer(
             name: outputDeltasNetBuffer.name ?? "output deltas",
             size: outputDeltasNetBuffer.size,
             netBuffer: outputDeltasNetBuffer,
-            offset: batchSize * node.outputRange.startIndex * sizeof(Float))
+            offset: batchSize * node.outputRange.lowerBound * MemoryLayout<Float>.size)
 
         let invocationBuilder = BackwardInvocationBuilder(device: device, library: library, inputBuffer: inputBuffer, outputDeltasBuffer: outputDeltasBuffer, inputDeltasBuffer: inputDeltasBuffer)
         try layer.initializeBackward(builder: invocationBuilder, batchSize: batchSize)
     }
 
     /// Encodes an invocation into a command buffer.
-    public static func encode(invocation invocation: Invocation, commandBuffer: MTLCommandBuffer) throws {
-        let encoder = commandBuffer.computeCommandEncoder()
+    open static func encode(invocation: Invocation, commandBuffer: MTLCommandBuffer) throws {
+        let encoder = commandBuffer.makeComputeCommandEncoder()
         encoder.setComputePipelineState(invocation.pipelineState)
 
-        for (index, buffer) in invocation.buffers.enumerate() {
-            encoder.setBuffer(buffer.metalBuffer!, offset: buffer.metalBufferOffset, atIndex: index)
+        for (index, buffer) in invocation.buffers.enumerated() {
+            encoder.setBuffer(buffer.metalBuffer!, offset: buffer.metalBufferOffset, at: index)
         }
 
-        for (index, value) in invocation.values.enumerate() {
+        for (index, value) in invocation.values.enumerated() {
             var mutableValue = value
-            encoder.setBytes(&mutableValue, length: sizeofValue(value), atIndex: index + invocation.buffers.count)
+            encoder.setBytes(&mutableValue, length: MemoryLayout.size(ofValue: value), at: index + invocation.buffers.count)
         }
 
         let threadWidth = invocation.pipelineState.threadExecutionWidth

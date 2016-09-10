@@ -17,7 +17,7 @@ public class InnerProductLayer: BackwardLayer, TrainableLayer {
     }
 
     public let name: String?
-    public let id = NSUUID()
+    public let id = UUID()
 
     public let weights: Matrix<Float>
     public let biases: ValueArray<Float>
@@ -48,7 +48,7 @@ public class InnerProductLayer: BackwardLayer, TrainableLayer {
 
     public var backwardInvocations: [Invocation] {
         guard let backwardParameterUpdateInvocation = backwardParameterUpdateInvocation,
-            backwardInputUpdateInvocation = backwardInputUpdateInvocation else {
+            let backwardInputUpdateInvocation = backwardInputUpdateInvocation else {
                 fatalError("initializeBackward needs to be called first")
         }
         return [
@@ -64,7 +64,7 @@ public class InnerProductLayer: BackwardLayer, TrainableLayer {
         precondition(biases.count == outputSize)
     }
 
-    public func initializeForward(builder builder: ForwardInvocationBuilder, batchSize: Int) throws {
+    public func initializeForward(builder: ForwardInvocationBuilder, batchSize: Int) throws {
         if weightsBuffer == nil {
             weightsBuffer = builder.createBuffer(name: "weights", elements: weights)
         }
@@ -83,16 +83,16 @@ public class InnerProductLayer: BackwardLayer, TrainableLayer {
         forwardInvocation = try builder.createInvocation(functionName: "inner_product_forward", buffers: buffers, values: [params], width: outputSize, height: batchSize)
     }
 
-    public func initializeBackward(builder builder: BackwardInvocationBuilder, batchSize: Int) throws {
+    public func initializeBackward(builder: BackwardInvocationBuilder, batchSize: Int) throws {
         let params = Parameters(batchSize: UInt16(batchSize), inputSize: UInt16(inputSize), outputSize: UInt16(outputSize))
         if weightsBuffer == nil {
             weightsBuffer = builder.createBuffer(name: "weights", elements: weights)
         }
         if weightDeltasBuffer == nil {
-            weightDeltasBuffer = builder.createBuffer(name: "weightDeltas", size: weights.count * sizeof(Float))
+            weightDeltasBuffer = builder.createBuffer(name: "weightDeltas", size: weights.count * MemoryLayout<Float>.size)
         }
         if biasDeltasBuffer == nil {
-            biasDeltasBuffer = builder.createBuffer(name: "biasDeltas", size: biases.count * sizeof(Float))
+            biasDeltasBuffer = builder.createBuffer(name: "biasDeltas", size: biases.count * MemoryLayout<Float>.size)
         }
 
         let paramUpdateBuffers = [
@@ -111,7 +111,7 @@ public class InnerProductLayer: BackwardLayer, TrainableLayer {
         backwardInputUpdateInvocation = try builder.createInvocation(functionName: "inner_product_backward_input", buffers: inputUpdateBuffers, values: [params], width: inputSize, height: batchSize)
     }
 
-    public func encodeParametersUpdate(encodeAction: (values: Buffer, deltas: Buffer) -> Void) {
+    public func encodeParametersUpdate(_ encodeAction: (_ values: Buffer, _ deltas: Buffer) -> Void) {
         guard let weightDeltasBuffer = weightDeltasBuffer else {
             fatalError("Inner Product weights were not initialized")
         }
@@ -119,7 +119,7 @@ public class InnerProductLayer: BackwardLayer, TrainableLayer {
             fatalError("Inner Product biases were not initialized")
         }
 
-        encodeAction(values: weightsBuffer!, deltas: weightDeltasBuffer)
-        encodeAction(values: biasesBuffer!, deltas: biasDeltasBuffer)
+        encodeAction(weightsBuffer!, weightDeltasBuffer)
+        encodeAction(biasesBuffer!, biasDeltasBuffer)
     }
 }

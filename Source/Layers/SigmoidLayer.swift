@@ -14,7 +14,7 @@ public class SigmoidLayer: ForwardLayer, BackwardLayer {
         let size: UInt32
     }
     
-    public let id = NSUUID()
+    public let id = UUID()
     public let name: String?
 
     /// The size of each batch element
@@ -51,7 +51,7 @@ public class SigmoidLayer: ForwardLayer, BackwardLayer {
         self.size = size
     }
 
-    public func initializeForward(builder builder: ForwardInvocationBuilder, batchSize: Int) throws {
+    public func initializeForward(builder: ForwardInvocationBuilder, batchSize: Int) throws {
         let buffers = [
             builder.inputBuffer,
             builder.outputBuffer
@@ -65,7 +65,7 @@ public class SigmoidLayer: ForwardLayer, BackwardLayer {
             width: size * batchSize)
     }
 
-    public func initializeBackward(builder builder: BackwardInvocationBuilder, batchSize: Int) throws {
+    public func initializeBackward(builder: BackwardInvocationBuilder, batchSize: Int) throws {
         let params = Parameters(batchSize: UInt32(batchSize), size: UInt32(size))
 
         let buffers = [

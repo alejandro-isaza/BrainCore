@@ -25,7 +25,7 @@ class TrainerTests: MetalTestCase {
             [ip, labels] => loss => sink
         })
 
-        let expecation = expectationWithDescription("Net forward/backward pass")
+        let expecation = expectation(description: "Net forward/backward pass")
         var ipInputDiff = [Float]()
         var ipWeightsDiff = [Float]()
         var ipBiasDiff = [Float]()
@@ -39,7 +39,7 @@ class TrainerTests: MetalTestCase {
             expecation.fulfill()
         }
 
-        waitForExpectationsWithTimeout(5) { error in
+        waitForExpectations(timeout: 5) { error in
             if let error = error {
                 XCTFail("trainer.run() failed: \(error)")
             }

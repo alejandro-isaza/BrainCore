@@ -29,13 +29,13 @@ class ReLULayerTests: MetalTestCase {
             dataLayer => layer => sinkLayer
         }
 
-        let expecation = expectationWithDescription("Net forward pass")
+        let expecation = expectation(description: "Net forward pass")
         let evaluator = try! Evaluator(net: net, device: device)
         evaluator.evaluate() { snapshot in
             expecation.fulfill()
         }
 
-        waitForExpectationsWithTimeout(5) { error in
+        waitForExpectations(timeout: 5) { error in
             let result = sinkLayer.data
             for i in 0..<dataSize {
                 if data[i] >= 0 {
@@ -71,7 +71,7 @@ class ReLULayerTests: MetalTestCase {
             [layer, labelLayer] => lossLayer => sinkLayer
         }
 
-        let expecation = expectationWithDescription("Net backward pass")
+        let expecation = expectation(description: "Net backward pass")
         let trainer = try! Trainer(net: net, device: device, batchSize: batchSize)
         var inputDeltas = [Float]()
         var outputDeltas = [Float]()
@@ -81,7 +81,7 @@ class ReLULayerTests: MetalTestCase {
             expecation.fulfill()
         }
 
-        waitForExpectationsWithTimeout(5) { error in
+        waitForExpectations(timeout: 5) { error in
             for i in 0..<dataSize {
                 if input[i] >= 0 {
                     XCTAssertEqualWithAccuracy(inputDeltas[i], outputDeltas[i], accuracy: 0.001)
@@ -120,7 +120,7 @@ class ReLULayerTests: MetalTestCase {
             [layer, labelLayer] => lossLayer => sinkLayer
         }
 
-        let expecation = expectationWithDescription("Net forward pass")
+        let expecation = expectation(description: "Net forward pass")
         let trainer = try! Trainer(net: net, device: device, batchSize: batchSize)
 
         var result = [Float]()
@@ -129,7 +129,7 @@ class ReLULayerTests: MetalTestCase {
             expecation.fulfill()
         }
 
-        waitForExpectationsWithTimeout(5) { error in
+        waitForExpectations(timeout: 5) { error in
             for i in 0..<dataSize {
                 for j in 0..<batchSize {
                     if data[j, i] >= 0 {

@@ -27,14 +27,14 @@ class EvaluatorTests: MetalTestCase {
             [source1, source2] => ip => [sink1, sink2]
         })
 
-        let expecation = expectationWithDescription("Net forward pass")
+        let expecation = expectation(description: "Net forward pass")
         let evaluator = try! Evaluator(net: net, device: device)
         evaluator.evaluate() { snapshot in
             expecation.fulfill()
         }
 
         let expected = data * weights + biases.toRowMatrix()
-        waitForExpectationsWithTimeout(5) { error in
+        waitForExpectations(timeout: 5) { error in
             if let error = error {
                 XCTFail("Net.forward() failed: \(error)")
             }
@@ -59,13 +59,13 @@ class EvaluatorTests: MetalTestCase {
             source => ip => sink
         })
 
-        let expecation = expectationWithDescription("Net forward pass")
+        let expecation = expectation(description: "Net forward pass")
         let evaluator = try! Evaluator(net: net, device: device)
         evaluator.evaluate() { _ in
             expecation.fulfill()
         }
 
-        waitForExpectationsWithTimeout(2) { error in
+        waitForExpectations(timeout: 2) { error in
             if let error = error {
                 XCTFail("Net.forward() failed: \(error)")
             }
@@ -86,13 +86,13 @@ class EvaluatorTests: MetalTestCase {
             source => ip => relu => sink
         })
 
-        let expecation = expectationWithDescription("Net forward pass")
+        let expecation = expectation(description: "Net forward pass")
         let evaluator = try! Evaluator(net: net, device: device)
         evaluator.evaluate() { _ in
             expecation.fulfill()
         }
         
-        waitForExpectationsWithTimeout(2) { error in
+        waitForExpectations(timeout: 2) { error in
             if let error = error {
                 XCTFail("Net.forward() failed: \(error)")
             }
