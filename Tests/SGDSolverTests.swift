@@ -42,7 +42,7 @@ class SGDSolverTests: MetalTestCase {
         })
 
         let solver = try! SGDSolver(net: net, device: device, batchSize: batchSize, stepCount: 1, initialLearningRate: 0.5, learningRateSchedule: { $0.0 })
-        let expecation = self.expectation(description: "Net forward pass 1")
+        let expectation = self.expectation(description: "Net forward pass 1")
         solver.stepAction = { snapshot in
             let sinkData = [Float](snapshot.inputOfLayer(sink)!)
             sink.consume(Blob(sinkData))
@@ -67,7 +67,7 @@ class SGDSolverTests: MetalTestCase {
                 XCTAssertEqualWithAccuracy(ip1ExpectedWeights[i], ip1ActualWeights[i], accuracy: 0.0001)
                 XCTAssertEqualWithAccuracy(ip2ExpectedWeights[i], ip2ActualWeights[i], accuracy: 0.0001)
             }
-            expecation.fulfill()
+            expectation.fulfill()
         }
         solver.train({ })
 

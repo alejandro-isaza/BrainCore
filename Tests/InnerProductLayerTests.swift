@@ -40,12 +40,12 @@ class InnerProductLayerTests: MetalTestCase {
             dataLayer => layer => sinkLayer
         }
 
-        let expecation = expectation(description: "Net forward pass")
+        let expectation = self.expectation(description: "Net forward pass")
         let evaluator = try! Evaluator(net: net, device: device)
         var result = [Float]()
         evaluator.evaluate() { snapshot in
             result = [Float](snapshot.outputOfLayer(layer)!)
-            expecation.fulfill()
+            expectation.fulfill()
         }
 
         waitForExpectations(timeout: 5) { error in

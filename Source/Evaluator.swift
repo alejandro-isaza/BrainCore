@@ -10,7 +10,7 @@ import Metal
 
 /// A `Runner` that performs feed-forward passes on a network.
 ///
-/// `Evaluator` is optimized for running a single pass at a time (batch size of one). It maximizes GPU parallelism by enqueing sequential runs a few at a time.
+/// `Evaluator` is optimized for running a single pass at a time (batch size of one). It maximizes GPU parallelism by enqueuing sequential runs a few at a time.
 ///
 /// - SeeAlso: `Runner`, `Trainer`
 open class Evaluator: Runner {
@@ -37,9 +37,9 @@ open class Evaluator: Runner {
         }
     }
 
-    /// Executes a paticular `Invocation` on the GPU.
+    /// Executes a particular `Invocation` on the GPU.
     ///
-    /// This is used to perform operations on the GPU. Usually you would not perfom invocations directly, but this can be used to perform updates to the buffers outside of a feed-forward pass.
+    /// This is used to perform operations on the GPU. Usually you would not perform invocations directly, but this can be used to perform updates to the buffers outside of a feed-forward pass.
     ///
     /// - Parameter invocations: array of invocations to execute.
     /// - Parameter completion:  closure to execute when the invocation completes.
@@ -69,7 +69,7 @@ open class Evaluator: Runner {
     ///
     /// - Parameter completion: closure to execute when the evaluation finishes. It gets passed a snapshot of the network results.
     open func evaluate(_ completion: @escaping ((Snapshot) -> Void)) {
-        inflightSemaphore.wait(timeout: DispatchTime.distantFuture)
+        _ = inflightSemaphore.wait(timeout: DispatchTime.distantFuture)
 
         let instance = instances[nextInstanceIndex]
         instance.reset()

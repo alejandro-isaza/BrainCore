@@ -25,7 +25,7 @@ class TrainerTests: MetalTestCase {
             [ip, labels] => loss => sink
         })
 
-        let expecation = expectation(description: "Net forward/backward pass")
+        let expectation = self.expectation(description: "Net forward/backward pass")
         var ipInputDiff = [Float]()
         var ipWeightsDiff = [Float]()
         var ipBiasDiff = [Float]()
@@ -36,7 +36,7 @@ class TrainerTests: MetalTestCase {
             ipWeightsDiff = arrayFromBuffer(ip.weightDeltasBuffer!.metalBuffer!)
             ipBiasDiff = arrayFromBuffer(ip.biasDeltasBuffer!.metalBuffer!)
 
-            expecation.fulfill()
+            expectation.fulfill()
         }
 
         waitForExpectations(timeout: 5) { error in
