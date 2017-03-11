@@ -38,13 +38,13 @@ class L2LossLayerTests: MetalTestCase {
             [dataLayer, labelLayer] => lossLayer => sinkLayer
         }
 
-        let expecation = expectation(description: "Net forward pass")
+        let expectation = self.expectation(description: "Net forward pass")
         let trainer = try! Trainer(net: net, device: device, batchSize: batchSize)
 
         var result = [Float]()
         trainer.run() { snapshot in
             result = [Float](snapshot.outputOfLayer(lossLayer)!)
-            expecation.fulfill()
+            expectation.fulfill()
         }
 
         waitForExpectations(timeout: 5) { error in
@@ -88,12 +88,12 @@ class L2LossLayerTests: MetalTestCase {
             labelLayer => lossLayer
         }
 
-        let expecation = expectation(description: "Net backward pass")
+        let expectation = self.expectation(description: "Net backward pass")
         let trainer = try! Trainer(net: net, device: device, batchSize: batchSize)
         var inputDeltas = [Float]()
         trainer.run() { snapshot in
             inputDeltas = [Float](snapshot.inputDeltasOfLayer(lossLayer)!)
-            expecation.fulfill()
+            expectation.fulfill()
         }
 
         waitForExpectations(timeout: 5) { error in

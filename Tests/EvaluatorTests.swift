@@ -27,10 +27,10 @@ class EvaluatorTests: MetalTestCase {
             [source1, source2] => ip => [sink1, sink2]
         })
 
-        let expecation = expectation(description: "Net forward pass")
+        let expectation = self.expectation(description: "Net forward pass")
         let evaluator = try! Evaluator(net: net, device: device)
         evaluator.evaluate() { snapshot in
-            expecation.fulfill()
+            expectation.fulfill()
         }
 
         let expected = data * weights + biases.toRowMatrix()
@@ -59,10 +59,10 @@ class EvaluatorTests: MetalTestCase {
             source => ip => sink
         })
 
-        let expecation = expectation(description: "Net forward pass")
+        let expectation = self.expectation(description: "Net forward pass")
         let evaluator = try! Evaluator(net: net, device: device)
         evaluator.evaluate() { _ in
-            expecation.fulfill()
+            expectation.fulfill()
         }
 
         waitForExpectations(timeout: 2) { error in
@@ -86,10 +86,10 @@ class EvaluatorTests: MetalTestCase {
             source => ip => relu => sink
         })
 
-        let expecation = expectation(description: "Net forward pass")
+        let expectation = self.expectation(description: "Net forward pass")
         let evaluator = try! Evaluator(net: net, device: device)
         evaluator.evaluate() { _ in
-            expecation.fulfill()
+            expectation.fulfill()
         }
         
         waitForExpectations(timeout: 2) { error in

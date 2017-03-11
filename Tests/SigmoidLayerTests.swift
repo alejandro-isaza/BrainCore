@@ -34,10 +34,10 @@ class SigmoidLayerTests: MetalTestCase {
             dataLayer => layer => sinkLayer
         }
 
-        let expecation = expectation(description: "Net forward pass")
+        let expectation = self.expectation(description: "Net forward pass")
         let evaluator = try! Evaluator(net: net, device: device)
         evaluator.evaluate() { snapshot in
-            expecation.fulfill()
+            expectation.fulfill()
         }
 
         waitForExpectations(timeout: 5) { error in
@@ -72,14 +72,14 @@ class SigmoidLayerTests: MetalTestCase {
             [layer, labelLayer] => lossLayer => sinkLayer
         }
 
-        let expecation = expectation(description: "Net backward pass")
+        let expectation = self.expectation(description: "Net backward pass")
         let trainer = try! Trainer(net: net, device: device, batchSize: batchSize)
         var inputDeltas = [Float]()
         var outputDeltas = [Float]()
         trainer.run() { snapshot in
             inputDeltas = [Float](snapshot.inputDeltasOfLayer(layer)!)
             outputDeltas = [Float](snapshot.outputDeltasOfLayer(layer)!)
-            expecation.fulfill()
+            expectation.fulfill()
         }
 
         waitForExpectations(timeout: 5) { error in
@@ -108,13 +108,13 @@ class SigmoidLayerTests: MetalTestCase {
             dataLayer => layer => sinkLayer
         }
 
-        let expecation = expectation(description: "Net forward pass")
+        let expectation = self.expectation(description: "Net forward pass")
 
         var result = [Float]()
         let trainer = try! Trainer(net: net, device: device, batchSize: batchSize)
         trainer.run() { snapshot in
             result = [Float](snapshot.outputOfLayer(layer)!)
-            expecation.fulfill()
+            expectation.fulfill()
         }
 
         waitForExpectations(timeout: 5) { error in

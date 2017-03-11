@@ -41,10 +41,10 @@ class LSTMLayerTests: MetalTestCase {
             dataLayer => layer => sinkLayer
         }
 
-        let expecation = expectation(description: "Net forward pass")
+        let expectation = self.expectation(description: "Net forward pass")
         let evaluator = try! Evaluator(net: net, device: device)
         evaluator.evaluate() { snapshot in
-            expecation.fulfill()
+            expectation.fulfill()
         }
 
         waitForExpectations(timeout: 5) { error in
@@ -90,14 +90,14 @@ class LSTMLayerTests: MetalTestCase {
             dataLayer => layer => sinkLayer
         }
 
-        let expecation = expectation(description: "Net forward pass")
+        let expectation = self.expectation(description: "Net forward pass")
         let trainer = try! Trainer(net: net, device: device, batchSize: batchSize)
 
         var result = [Float]()
         trainer.run() { snapshot in
             result = [Float](snapshot.outputOfLayer(layer)!)
             XCTAssertEqual(result.count, batchSize * unitCount)
-            expecation.fulfill()
+            expectation.fulfill()
         }
 
         waitForExpectations(timeout: 5) { error in
@@ -142,7 +142,7 @@ class LSTMLayerTests: MetalTestCase {
             [layer, labelLayer] => lossLayer => sinkLayer
         }
 
-        let expecation = expectation(description: "Net forward pass")
+        let expectation = self.expectation(description: "Net forward pass")
         let solver = try! SGDSolver(net: net, device: device, batchSize: batchSize, stepCount: 1, initialLearningRate: 0.1, learningRateSchedule: { $0.0 })
         solver.stepAction = { snapshot in
             // Forward Buffers
@@ -214,7 +214,7 @@ class LSTMLayerTests: MetalTestCase {
                 XCTAssertEqualWithAccuracy(biasesBuffer[i], expectedBiasesBuffer[i], accuracy: 0.0001)
             }
 
-            expecation.fulfill()
+            expectation.fulfill()
         }
 
         solver.train({})

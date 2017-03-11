@@ -19,7 +19,7 @@ public protocol Layer {
 }
 
 public extension Layer {
-    public var descritpion: String {
+    public var description: String {
         return name ?? id.uuidString
     }
 

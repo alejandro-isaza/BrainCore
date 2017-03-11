@@ -42,7 +42,7 @@ open class Trainer: Runner {
     ///
     /// - parameter completion: closure to execute when the pass finishes. It gets passed a snapshot of the network results.
     open func run(_ completion: @escaping ((Snapshot) -> Void)) {
-        inflightSemaphore.wait(timeout: DispatchTime.distantFuture)
+        _ = inflightSemaphore.wait(timeout: DispatchTime.distantFuture)
 
         forwardInstance.reset()
         backwardInstance.reset()
